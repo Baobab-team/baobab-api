@@ -1,0 +1,9 @@
+docopt
+flask-sqlalchemy
+flask-migrate
+flask-login
+python-dotenv
+sqlalchemy-json
+pytest
+coverage
+gunicorn
