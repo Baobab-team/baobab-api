@@ -2,6 +2,7 @@ docopt
 flask-sqlalchemy
 flask-migrate
 flask-login
+marshmallow-sqlalchemy
 python-dotenv
 sqlalchemy-json
 pytest
