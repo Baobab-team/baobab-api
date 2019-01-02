@@ -2,8 +2,8 @@ docopt
 flask
 flask-sqlalchemy
 flask-migrate
-flask_restful
-flask_login
+flask-restful
+flask-login
 Flask-Script
 flask-admin
 marshmallow-sqlalchemy
