@@ -3,6 +3,7 @@ flask
 flask-sqlalchemy
 flask-migrate
 flask_restful
+flask_login
 Flask-Script
 flask-admin
 marshmallow-sqlalchemy
