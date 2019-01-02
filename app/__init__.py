@@ -1,34 +1,50 @@
 import os
 
+from dotenv import load_dotenv
 from flask import Flask
-from flask_migrate import Migrate
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
+from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
-from flask_restful import Api, Resource
 
+load_dotenv()
+login_manager = LoginManager()
+
+# def create_app(test_config=None):
 app = Flask(__name__)
 
-app.config.from_object(os.environ['APP_SETTINGS'])
+app.config.from_object(os.getenv('APP_SETTINGS'))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-migrate = Migrate(app, db)
-api = Api(app,"/api")
 
 @app.route("/")
 def index():
     return "Hello world"
 
 
-from app.models import *
-db.create_all()
-from app.resources import BusinessResource
+# Initialize API
+from app.routes.resources import api
 
-api.add_resource(BusinessResource,"/business/","/business/id")
+api.init_app(app)
 
-# from app import models,resources
-if __name__ == '__main__':
-    app.run()
+# Initialize token
+from app.routes.api import token
+from app.routes.admin import bp as admin_bp
 
+app.register_blueprint(token)
+app.register_blueprint(admin_bp)
 
+from app.models.users import User,OwnerUser,EndUser
 
+login_manager.init_app(app)
+
+from app.admin import UserView, LogoutMenuLink, LoginMenuLink
+
+admin = Admin(app, name='admin')
+admin.add_menu_item(LogoutMenuLink)
+
+@app.shell_context_processor
+def make_shell_context():
+    return {'db': db, 'User': User,"OwnerUser":OwnerUser}
