@@ -15,21 +15,8 @@ business_parser.add_argument("phone", required=True, help="The phone required")
 business_parser.add_argument("category_id", required=True, help="The category id is required")
 
 category_parser = reqparse.RequestParser()
-category_parser.add_argument("name",required=True,help="The name is cateogru")
+category_parser.add_argument("name",required=True,help="The name is category")
 
-business_fields = {
-    'id': fields.Integer,
-    'name': fields.String,
-    'email': fields.String,
-    'phone': fields.String,
-
-}
-rating_fields = {
-    'business_id': fields.Integer,
-    'user_id': fields.Integer,
-    'comment': fields.String,
-    'rate': fields.Integer,
-}
 
 rating_parser = reqparse.RequestParser()
 rating_parser.add_argument("user_id", required=True, help="The user id")
@@ -42,8 +29,14 @@ favorite_parser.add_argument("user_id", required=True, help="The user id")
 favorite_parser.add_argument("business_id", required=True, help="The business id")
 favorite_parser.add_argument("favorite")
 
+
+class BaseResource(Resource):
+    __abstract__ = True
+    method_decorators = [jwt_required]
+
+
 @api.resource("/categories/<int:id>")
-class CategoryResource(Resource):
+class CategoryResource(BaseResource):
     """
     SHow a single category and lets you update it
     """
@@ -57,7 +50,7 @@ class CategoryResource(Resource):
 
 
 @api.resource("/categories")
-class CategoryResourceList(Resource):
+class CategoryResourceList(BaseResource):
     """
     SHow a list of categories and lets you update it
     """
@@ -84,7 +77,7 @@ class CategoryResourceList(Resource):
 
 
 @api.resource("/businesses/<int:id>")
-class BusinessResource(Resource):
+class BusinessResource(BaseResource):
     """
     SHow a single business and lets you update it
     """
@@ -116,7 +109,7 @@ class BusinessResource(Resource):
 
 
 @api.resource("/businesses")
-class BusinessResourceList(Resource):
+class BusinessResourceList(BaseResource):
     """
     SHow a list of businesses and lets you add it
     """
@@ -156,7 +149,7 @@ class BusinessResourceList(Resource):
             return jsonify({"msg": "An error occured. Couldnt add the business"})
 
 
-class FavoriteResourceList(Resource):
+class FavoriteResourceList(BaseResource):
     """
     Show a list of favorite businesses or lets you add one
     """
@@ -190,7 +183,7 @@ class FavoriteResourceList(Resource):
         return data, 200
 
 
-class FavoriteResource(Resource):
+class FavoriteResource(BaseResource):
     """
     Show a single favorite business and lets you delete, or update
     """
@@ -232,7 +225,7 @@ class FavoriteResource(Resource):
 
 
 @api.resource("/businesses/<int:id>/ratings")
-class RatingResourceList(Resource):
+class RatingResourceList(BaseResource):
     """
     Show list of ratings for a business or lets you add a rating
     """
@@ -267,7 +260,7 @@ class RatingResourceList(Resource):
 
 
 @api.resource("/businesses/<int:business_id>/ratings/<int:user_id>")
-class RatingResource(Resource):
+class RatingResource(BaseResource):
     """
     Show a single rating item and lets you delete it
     """

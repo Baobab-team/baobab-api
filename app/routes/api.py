@@ -41,6 +41,8 @@ def login():
 
     if not user or not user.check_password(password):
         return jsonify({"message": "Email and password don't match"}), 401
+    if not user or not user.active:
+            return jsonify({"message": "User is not active"}), 401
 
     # Use create_access_token() and create_refresh_token() to create our
     # access and refresh tokens
