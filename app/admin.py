@@ -62,7 +62,7 @@ class CategoryView(BaseModelView):
     pass
 
 
-admin = Admin(app, name='baobab admin', template_mode='bootstrap3')
+admin = Admin(app, name='Baobab admin', template_mode='bootstrap3')
 # admin.add_view(UserView(User, db.session))
 admin.add_view(BusinessView(Business, db.session, category="Business"))
 admin.add_view(ModelView(Address, db.session, category="Business"))
