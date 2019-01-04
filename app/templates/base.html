@@ -1,0 +1,13 @@
+<html>
+    <head>
+      {% if title %}
+      <title>{{ title }} - Baobab</title>
+      {% else %}
+      <title>Welcome to Baobab</title>
+      {% endif %}
+    </head>
+    <body>
+
+        {% block content %}{% endblock %}
+    </body>
+</html>
