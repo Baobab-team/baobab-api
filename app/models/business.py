@@ -1,8 +1,6 @@
 # Define a base model for other database tables to inherit
-from enum import Enum
 from datetime import datetime
-
-from sqlalchemy_utils import ChoiceType
+from enum import Enum
 
 from app import db
 from app.models.base import Base, TimestampMixin
@@ -115,8 +113,8 @@ class BusinessHour(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     day = db.Column(db.String(2))
-    closing_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
-    opening_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
+    closing_time = db.Column(db.Time, nullable=False, default=datetime.utcnow())
+    opening_time = db.Column(db.Time, nullable=False, default=datetime.utcnow())
     business_id = db.Column(db.Integer, db.ForeignKey("business.id"))
 
     def __repr__(self):

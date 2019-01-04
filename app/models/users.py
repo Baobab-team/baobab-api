@@ -1,14 +1,13 @@
 # Define User data-model
-from flask_login import UserMixin
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.hybrid import hybrid_property
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from app import db, login_manager
+from app import db
 from app.models.base import Base
 
 
-class User(UserMixin,Base):
+class User(Base):
     __tablename__ = 'user'
 
     # User Authentication fields
@@ -59,10 +58,3 @@ class OwnerUser(User):
 
 class DataClerkUser(User):
     pass
-
-# @login_manager.user_loader
-# def load_user(userid):
-#     return User.query.filter(User.id == userid).first()
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))

@@ -3,7 +3,6 @@ flask
 flask-sqlalchemy
 flask-migrate
 flask-restful
-flask-login
 Flask-Script
 Flask-WTF
 flask-admin
