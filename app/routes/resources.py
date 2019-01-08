@@ -30,13 +30,13 @@ favorite_parser.add_argument("business_id", required=True, help="The business id
 favorite_parser.add_argument("favorite")
 
 
-class BaseResource(Resource):
+class ProtectedResource(Resource):
     __abstract__ = True
     method_decorators = [jwt_required]
 
 
 @api.resource("/categories/<int:id>")
-class CategoryResource(BaseResource):
+class CategoryResource(ProtectedResource):
     """
     SHow a single category and lets you update it
     """
@@ -50,7 +50,7 @@ class CategoryResource(BaseResource):
 
 
 @api.resource("/categories")
-class CategoryResourceList(BaseResource):
+class CategoryResourceList(ProtectedResource):
     """
     SHow a list of categories and lets you update it
     """
@@ -77,7 +77,7 @@ class CategoryResourceList(BaseResource):
 
 
 @api.resource("/businesses/<int:id>")
-class BusinessResource(BaseResource):
+class BusinessResource(Resource):
     """
     SHow a single business and lets you update it
     """
@@ -109,7 +109,7 @@ class BusinessResource(BaseResource):
 
 
 @api.resource("/businesses")
-class BusinessResourceList(BaseResource):
+class BusinessResourceList(Resource):
     """
     SHow a list of businesses and lets you add it
     """
@@ -149,7 +149,7 @@ class BusinessResourceList(BaseResource):
             return jsonify({"msg": "An error occured. Couldnt add the business"})
 
 
-class FavoriteResourceList(BaseResource):
+class FavoriteResourceList(ProtectedResource):
     """
     Show a list of favorite businesses or lets you add one
     """
@@ -183,7 +183,7 @@ class FavoriteResourceList(BaseResource):
         return data, 200
 
 
-class FavoriteResource(BaseResource):
+class FavoriteResource(ProtectedResource):
     """
     Show a single favorite business and lets you delete, or update
     """
@@ -225,7 +225,7 @@ class FavoriteResource(BaseResource):
 
 
 @api.resource("/businesses/<int:id>/ratings")
-class RatingResourceList(BaseResource):
+class RatingResourceList(ProtectedResource):
     """
     Show list of ratings for a business or lets you add a rating
     """
@@ -260,7 +260,7 @@ class RatingResourceList(BaseResource):
 
 
 @api.resource("/businesses/<int:business_id>/ratings/<int:user_id>")
-class RatingResource(BaseResource):
+class RatingResource(ProtectedResource):
     """
     Show a single rating item and lets you delete it
     """
