@@ -4,7 +4,7 @@ from flask_admin.contrib.sqla import ModelView
 from werkzeug.utils import redirect
 
 from app import app, db
-from app.models.business import BusinessHour, Business, Address
+from app.models.business import BusinessHour, Business, Address, Category
 
 
 class BaseModelView(ModelView):
@@ -34,9 +34,9 @@ class BaseModelView(ModelView):
     }
 
 
-
 class UserView(BaseModelView):
     pass
+
 
 class OwnerUserView(BaseModelView):
     pass
@@ -67,4 +67,4 @@ admin = Admin(app, name='Baobab admin', template_mode='bootstrap3')
 admin.add_view(BusinessView(Business, db.session, category="Business"))
 admin.add_view(ModelView(Address, db.session, category="Business"))
 admin.add_view(ModelView(BusinessHour, db.session, category="Business"))
-# admin.add_view(UserView(User, db.session))
+admin.add_view(CategoryView(Category, db.session, category="Category"))

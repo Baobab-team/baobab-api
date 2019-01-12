@@ -36,7 +36,6 @@ class Business(TimestampMixin, Base):
     phone = db.Column(db.String())
     description = db.Column(db.String())
     website = db.Column(db.String(), nullable=True)
-    telephone = db.Column(db.String(), nullable=True)
     email = db.Column(db.String(), nullable=True)
     accepted = db.Column(db.Boolean, default=False)
     notes = db.Column(db.String(), nullable=True)
