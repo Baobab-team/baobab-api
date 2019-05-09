@@ -4,9 +4,6 @@ flask-sqlalchemy
 flask-migrate
 flask-restful
 Flask-Script
-Flask-WTF
-flask-admin
-marshmallow-sqlalchemy
 python-dotenv
 sqlalchemy-json
 gunicorn

@@ -1,9 +1,8 @@
-# Define a base model for other database tables to inherit
 from datetime import datetime
 from enum import Enum
 
 from app import db
-from app.models.base import Base, TimestampMixin
+from app.common.base import TimestampMixin, Base
 
 
 class Category(Base):
@@ -17,13 +16,6 @@ class Category(Base):
 
     def __repr__(self):
         return '<Category {}>'.format(self.name)
-
-
-class StreetTypeEnum(Enum):
-    st = "ST"
-    ave = "AVE"
-    blvd = "BLVD"
-    ch = "CH"
 
 
 class Business(TimestampMixin, Base):
@@ -49,6 +41,22 @@ class Business(TimestampMixin, Base):
 
     def __repr__(self):
         return '<Business {}>'.format(self.name)
+
+
+class Rating(TimestampMixin, Base):
+    """
+    Rating for business
+    """
+    __tablename__ = 'rating'
+
+    business_id = db.Column(db.Integer, db.ForeignKey("business.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+
+    comment = db.Column(db.String(), nullable=True)
+    rate = db.Column(db.Integer)
+
+    def __repr__(self):
+        return '<Rating {} {}>'.format(self.rate, self.comment)
 
 
 class Address(db.Model):
@@ -82,7 +90,7 @@ class Address(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     street_number = db.Column(db.String())
-    street_type = db.Column( db.String(5))
+    street_type = db.Column(db.String(5))
     street_name = db.Column(db.String())
     direction = db.Column(db.String(2))
     city = db.Column(db.String(), default="Montreal")
@@ -130,19 +138,3 @@ class FavoriteBusiness(Base):
 
     def __repr__(self):
         return '<FavoriteBusiness business={}, user={}>'.format(self.business_id, self.user_id)
-
-
-class Rating(TimestampMixin, Base):
-    """
-    Rating for business
-    """
-    __tablename__ = 'rating'
-
-    business_id = db.Column(db.Integer, db.ForeignKey("business.id"))
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-
-    comment = db.Column(db.String(), nullable=True)
-    rate = db.Column(db.Integer)
-
-    def __repr__(self):
-        return '<Rating {} {}>'.format(self.rate, self.comment)

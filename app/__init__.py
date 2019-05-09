@@ -3,59 +3,61 @@ import os
 from logging.handlers import RotatingFileHandler
 
 from dotenv import load_dotenv
-from flask import Flask, render_template
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+
+from app.common.errors import page_not_found, page_error
 
 load_dotenv()
 
-# def create_app(test_config=None):
-app = Flask(__name__)
-
-app.config.from_object(os.getenv('APP_SETTINGS'))
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db = SQLAlchemy(app)
-
-@app.route("/")
-def index():
-    return render_template('index.html', title='Home')
+db = SQLAlchemy()
 
 
-# Initialize API
-from app.routes.resources import api
-
-api.init_app(app)
-
-# Initialize token
-from app.routes.api import token
-
-app.register_blueprint(token)
-
-if app.debug == False:
-    # Initliaze errors page
-    from app.routes import errors
-
-    if not os.path.exists('logs'):
-        os.mkdir('logs')
-    file_handler = RotatingFileHandler('logs/baobab.log', maxBytes=10240,
-                                       backupCount=10)
-    file_handler.setFormatter(logging.Formatter(
-        '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
-    file_handler.setLevel(logging.INFO)
-    app.logger.addHandler(file_handler)
-
-    app.logger.setLevel(logging.INFO)
-    app.logger.info('Baobab startup')
+# api_v1 = Api(prefix="/api")
 
 
-from app.models.users import User,OwnerUser,EndUser
-from app.models.business import Business,Address,BusinessHour
+def create_app(config=None):
+    app = Flask(__name__)
 
-from app.admin import admin
+    if config is None:
+        config = os.getenv('APP_SETTINGS')  # config_name = "development"
 
+    app.config.from_object(config)
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+    db.init_app(app)
 
+    # Initialize API
+    from app.businesses.blueprints import blueprint as business_blueprint
 
-@app.shell_context_processor
-def make_shell_context():
-    return {'db': db, 'User': User,"OwnerUser":OwnerUser}
+    app.register_blueprint(business_blueprint)
+
+    # Initialize token
+    from app.routes.api import token
+    app.register_blueprint(token)
+
+    if app.debug == False:
+        # Initliaze errors page
+
+        if not os.path.exists('logs'):
+            os.mkdir('logs')
+        file_handler = RotatingFileHandler('logs/baobab.log', maxBytes=10240,
+                                           backupCount=10)
+        file_handler.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
+        file_handler.setLevel(logging.INFO)
+        app.logger.addHandler(file_handler)
+
+        app.logger.setLevel(logging.INFO)
+        app.logger.info('Baobab startup')
+
+        app.register_error_handler(500, page_error)
+        app.register_error_handler(404, page_not_found)
+
+    from app.common.users import User, OwnerUser, EndUser
+
+    @app.route("/")
+    def index():
+        return "Hello World!"
+
+    return app

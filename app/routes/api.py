@@ -6,7 +6,7 @@ from flask_jwt_extended import (
 )
 from sqlalchemy.exc import IntegrityError
 
-from app.models.users import User
+from app.common.users import User
 
 token = Blueprint('token', __name__, url_prefix='/token')
 
