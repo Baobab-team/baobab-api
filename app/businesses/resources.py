@@ -1,14 +1,14 @@
 from flask_restful import Resource, abort
 
 from app.utils.decorators import parse_with, marshal_with
-from .models import Business
 from .repositories import BusinessRepository, CategoryRepository
-from .schemas import BusinessCreateSchema, CategorySchema, CategoryCreateSchema, CategoryUpdateSchema
+from .schemas import BusinessCreateSchema, CategorySchema, CategoryCreateSchema, CategoryUpdateSchema, BusinessSchema, \
+    BusinessUpdateSchema
 
 
 class BaseResource(Resource):
 
-    def __init__(self):
+    def __init__(self, ):
         super(BaseResource, self).__init__()
 
 
@@ -18,20 +18,20 @@ class BusinessCollection(Resource):
     """
 
     def __init__(self, repository_factory=BusinessRepository):
-        super(BusinessCollection, self).__init__(api=None)
+        super(BusinessCollection, self).__init__()
         self.repository = repository_factory()
 
+    @marshal_with(BusinessSchema, many=True, success_code=200)
     def get(self):
-        list = Business.query.all()
-        business_schema = BusinessCreateSchema(many=True)
-        data = business_schema.dump(list).data
-        return data, 200
+        return self.repository.query.all()
 
     @parse_with(BusinessCreateSchema(strict=True), arg_name="entity")
+    @marshal_with(BusinessSchema, success_code=201)
     def post(self, entity, **kwargs):
-        business = self.repository.save(entity)
-        return {"message": "business created"}, 201
+        if self.repository.exist(entity.name):
+            abort(400, message="Business already exist")
 
+        return self.repository.save(entity)
 
 class BusinessScalar(Resource):
 
@@ -39,13 +39,18 @@ class BusinessScalar(Resource):
         super(BusinessScalar, self).__init__()
         self.repository = repository_factory()
 
-    @parse_with(BusinessCreateSchema(strict=True), arg_name="entity")
+    @parse_with(BusinessUpdateSchema(strict=True), arg_name="entity")
+    @marshal_with(BusinessSchema)
     def put(self, id, entity):
         return self.repository.update(id, **entity)
 
-    def delete(self, id_):
+    @marshal_with(BusinessSchema)
+    def get(self, id):
+        return self.repository.query.filter_by(id=id).first_or_404(description='Business doesnt exist')
+
+    def delete(self, id):
         # return proper status code
-        self.repository.delete(id_)
+        self.repository.delete(id)
         return None, 204
 
 
@@ -61,16 +66,12 @@ class CategoryScalar(Resource):
         return self.repository.update(id, **entity)
 
     def delete(self, id):
-        """
 
-        :param id:
-        :return response:
-        """
         # return proper status code
         if self.repository.delete(id):
             return None, 204
         else:
-            return {"message": "Category doesnt exist or os related to to businesses"}, 404
+            return {"message": "Category doesnt exist"}, 404
 
     @marshal_with(CategorySchema)
     def get(self, id):

@@ -13,9 +13,6 @@ load_dotenv()
 db = SQLAlchemy()
 
 
-# api_v1 = Api(prefix="/api")
-
-
 def create_app(config=None):
     app = Flask(__name__)
 
@@ -55,9 +52,5 @@ def create_app(config=None):
         app.register_error_handler(404, page_not_found)
 
     from app.common.users import User, OwnerUser, EndUser
-
-    @app.route("/")
-    def index():
-        return "Hello World!"
 
     return app

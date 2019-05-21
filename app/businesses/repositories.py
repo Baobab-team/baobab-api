@@ -14,6 +14,12 @@ class BusinessRepository(BaseRepository):
 
         return query
 
+    def exist(self, name):
+        entity = self.filter(name=name).first()
+        if entity:
+            return True
+        return False
+
 
 class CategoryRepository(BaseRepository):
     model = Category
@@ -37,7 +43,7 @@ class CategoryRepository(BaseRepository):
 
         category = self.get(id_)
 
-        if len(category.businesses) > 0:
+        if category is None or len(category.businesses) > 0:
             return False
 
         return self.delete(id_)

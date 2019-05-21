@@ -2,7 +2,7 @@ docopt
 flask
 flask-sqlalchemy
 flask-migrate
-flask-restful
+Flask-RESTful
 Flask-Script
 python-dotenv
 sqlalchemy-json
@@ -13,3 +13,5 @@ sqlalchemy-utils
 babel
 psycopg2-binary
 geopy
+connexion[swagger-ui]
+pytest
