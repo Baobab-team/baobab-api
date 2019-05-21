@@ -26,6 +26,28 @@ class CategorySchema(Schema):
 
 
 class BusinessCreateSchema(Schema):
+    category_id = fields.Integer(required=True)
+    owner_id = fields.Integer(required=True)
+    name = fields.String(required=True)
+    description = fields.String(required=True)
+    website = fields.String()
+    email = fields.Email()
+
+    @post_load
+    def make_object(self, data):
+        return Business(**data)
+
+
+class BusinessUpdateSchema(Schema):
+    category_id = fields.Integer(required=True)
+    owner_id = fields.Integer(required=True)
+    name = fields.String(required=True)
+    description = fields.String(required=True)
+    website = fields.String()
+    email = fields.Email()
+
+
+class BusinessSchema(Schema):
     id = fields.String(required=True)
     category_id = fields.String(required=True)
     owner_id = fields.String(required=True)
