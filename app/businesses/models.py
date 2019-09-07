@@ -1,16 +1,21 @@
 from datetime import datetime
 from enum import Enum
 
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.hybrid import hybrid_property
+from werkzeug.security import generate_password_hash, check_password_hash
+
 from app import db
-from app.common.base import TimestampMixin, Base
+from app.common.base import TimestampMixin
 
 
-class Category(Base):
+class Category(db.Model):
     """
     Category model
     """
     __tablename__ = 'category'
 
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=True)
     businesses = db.relationship("Business", backref="category", lazy=True)
 
@@ -18,12 +23,13 @@ class Category(Base):
         return '<Category {}>'.format(self.name)
 
 
-class Business(TimestampMixin, Base):
+class Business(db.Model, TimestampMixin):
     """
     Business model
     """
     __tablename__ = 'business'
 
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=True, nullable=False)
     phone = db.Column(db.String())
     description = db.Column(db.String())
@@ -36,21 +42,22 @@ class Business(TimestampMixin, Base):
     business_hours = db.relationship('BusinessHour', backref='business', lazy=True)
     address = db.relationship('Address', backref='business', lazy=True, uselist=False)
 
-    owner_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
+    owner_id = db.Column(db.Integer, db.ForeignKey("owner.id"), nullable=True)
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)
 
     def __repr__(self):
         return '<Business {}>'.format(self.name)
 
 
-class Rating(TimestampMixin, Base):
+class Rating(db.Model, TimestampMixin):
     """
     Rating for business
     """
     __tablename__ = 'rating'
 
+    id = db.Column(db.Integer, primary_key=True)
     business_id = db.Column(db.Integer, db.ForeignKey("business.id"))
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("customer.id"))
 
     comment = db.Column(db.String(), nullable=True)
     rate = db.Column(db.Integer)
@@ -99,7 +106,10 @@ class Address(db.Model):
                             nullable=False)
 
     def __repr__(self):
-        return '<Address {} {} {},{},{}>'.format(self.street_number, self.street_name, self.street_type, self.city,
+        return '<Address {} {} {},{},{}>'.format(self.street_number,
+                                                 self.street_name,
+                                                 self.street_type,
+                                                 self.city,
                                                  self.province)
 
 
@@ -128,13 +138,100 @@ class BusinessHour(db.Model):
         return '<BusinessHour {}: {} to {}>'.format(self.day, self.opening_time, self.closing_time)
 
 
-class FavoriteBusiness(Base):
+class Favorite(db.Model):
     """
     User's favorite business
     """
-    business_id = db.Column(db.Integer, db.ForeignKey("business.id"), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
     favorite = db.Column(db.Boolean, default=True)
 
     def __repr__(self):
-        return '<FavoriteBusiness business={}, user={}>'.format(self.business_id, self.user_id)
+        return '<FavoriteBusiness business={}, customer={}>'.format(self.business_id, self.customer_id)
+
+
+favorites = db.Table('favorites',
+                     db.Column('favorite_id', db.Integer, db.ForeignKey('favorite.id'), primary_key=True),
+                     db.Column('customer_id', db.Integer, db.ForeignKey('customer.id'), primary_key=True)
+                     )
+
+
+class User(db.Model):
+    """
+    User model
+    """
+    __tablename__ = 'user'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    # User Authentication fields
+    email = db.Column(db.String(255), nullable=False, unique=True)
+    _password = db.Column(db.String(255), nullable=False)
+
+    # User fields
+    name = db.Column(db.String(), nullable=True)
+
+    active = db.Column(db.Boolean, default=True)
+    super = db.Column(db.Boolean, default=False)
+    staff = db.Column(db.Boolean, default=False)
+    type = db.Column(db.String(50))
+
+    def __repr__(self):
+        return '<User {}>'.format(self.email)
+
+    @hybrid_property
+    def password(self):
+        return self._password
+
+    @password.setter
+    def password(self, pw):
+        self._password = generate_password_hash(pw)
+
+    def check_password(self, pw):
+        return check_password_hash(self._password, pw)
+
+    @staticmethod
+    def create_superuser(email, password):
+        user = User(email=email)
+        user.password = password
+        user.super = True
+
+        try:
+            user.save()  # TODO change this
+            return user
+
+        except IntegrityError:
+            raise ValueError("User with email already exist")
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'user',
+        'polymorphic_on': type
+    }
+
+
+class Customer(User):
+    """
+    Customer model
+    """
+    __tablename__ = 'customer'
+
+    id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    favorites = db.relationship('Favorite', secondary=favorites, lazy='subquery',
+                           backref=db.backref('customer', lazy=True))
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'customer',
+    }
+
+
+class Owner(User):
+    """
+    Owner model
+    """
+    __tablename__ = 'owner'
+
+    id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    business = db.relationship('Business', backref='owner', lazy=True)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'owner',
+    }

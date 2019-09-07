@@ -55,16 +55,10 @@ def parse_with(schema, arg_name='entity', **kwargs):
                 entity, errors = schema.load(json, **kwargs)
                 fkwargs.update({arg_name: entity})
 
-            except ValidationError as e:
+            except (ValidationError,ValueError, Exception) as e:
                 logger.error("parse_with: {}".format(str(e)))
                 abort(400)
                 logger.error("parse_with: {}".format(str(e)))
-            except ValueError as e:
-                logger.error("parse_with: {}".format(str(e)))
-                abort(400)
-            except Exception as e:
-                logger.error("parse_with: {}".format(str(e)))
-                abort(400)
 
             return f(*fargs, **fkwargs)
 

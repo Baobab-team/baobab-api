@@ -47,7 +47,7 @@ class BaseRepository(object):
         for key, value in kwargs.items():
             setattr(db_entity, key, value)
 
-    def delete(self, id_):
+    def _delete(self, id_):
         db_entity = self.get(id_)
         if not db_entity:
             raise KeyError("DB Object not found.")

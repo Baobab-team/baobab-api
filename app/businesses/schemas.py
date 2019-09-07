@@ -1,7 +1,6 @@
 from marshmallow import Schema, fields, post_load
 
-# from app.common.business import Address, BusinessHour, Rating, FavoriteBusiness, Business, Category
-from .models import Category, Business
+from .models import Category, Business, User
 
 
 class CategoryCreateSchema(Schema):
@@ -17,8 +16,8 @@ class CategoryUpdateSchema(Schema):
 
 
 class CategorySchema(Schema):
-    id = fields.String(required=True)
-    name = fields.String(required=False)
+    id = fields.String(required=False)
+    name = fields.String(required=True)
 
     @post_load
     def make_object(self, data):
@@ -27,11 +26,12 @@ class CategorySchema(Schema):
 
 class BusinessCreateSchema(Schema):
     category_id = fields.Integer(required=True)
-    owner_id = fields.Integer(required=True)
+    owner_id = fields.Integer(required=False)
     name = fields.String(required=True)
     description = fields.String(required=True)
-    website = fields.String()
-    email = fields.Email()
+    website = fields.String(required=False)
+    notes = fields.String(required=False)
+    email = fields.Email(required=False)
 
     @post_load
     def make_object(self, data):
@@ -39,10 +39,10 @@ class BusinessCreateSchema(Schema):
 
 
 class BusinessUpdateSchema(Schema):
-    category_id = fields.Integer(required=True)
-    owner_id = fields.Integer(required=True)
-    name = fields.String(required=True)
-    description = fields.String(required=True)
+    category_id = fields.Integer()
+    owner_id = fields.Integer()
+    name = fields.String()
+    description = fields.String()
     website = fields.String()
     email = fields.Email()
 
@@ -50,7 +50,7 @@ class BusinessUpdateSchema(Schema):
 class BusinessSchema(Schema):
     id = fields.String(required=True)
     category_id = fields.String(required=True)
-    owner_id = fields.String(required=True)
+    owner_id = fields.String(required=False)
     name = fields.String(required=True)
     description = fields.String(required=True)
     website = fields.String()
@@ -60,22 +60,28 @@ class BusinessSchema(Schema):
     def make_object(self, data):
         return Business(**data)
 
-#
-# class AddressSchema(ModelSchema):
-#     class Meta:
-#         model = Address
-#
-#
-# class BusinessHourSchema(ModelSchema):
-#     class Meta:
-#         model = BusinessHour
-#
-#
-# class RatingSchema(ModelSchema):
-#     class Meta:
-#         model = Rating
-#
-#
-# class FavoriteSchema(ModelSchema):
-#     class Meta:
-#         model = FavoriteBusiness
+
+class UserCreateSchema(Schema):
+    email = fields.Email(required=True)
+    password = fields.String(required=True)
+    name = fields.String(required=False)
+
+    @post_load
+    def make_object(self, data):
+        return User(**data)
+
+
+class UserSchema(Schema):
+    email = fields.Email(required=True)
+    password = fields.String(required=True)
+    name = fields.String(required=False)
+
+    @post_load
+    def make_object(self, data):
+        return User(**data)
+
+
+class UserUpdateSchema(Schema):
+    password = fields.String(required=True)
+    name = fields.String(required=False)
+

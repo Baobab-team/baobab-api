@@ -1,10 +1,10 @@
 import os
 
-from app import create_app
+from app import create_app, db
 
 config = os.getenv('APP_SETTINGS')  # config_name = config.DevelopmentConfig
 app = create_app(config)
-app.app_context().push()
+# app.app_context().push()
 
 if __name__ == '__main__':
     app.run()

@@ -51,6 +51,5 @@ def create_app(config=None):
         app.register_error_handler(500, page_error)
         app.register_error_handler(404, page_not_found)
 
-    from app.common.users import User, OwnerUser, EndUser
 
     return app

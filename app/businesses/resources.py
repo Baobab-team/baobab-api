@@ -1,15 +1,9 @@
 from flask_restful import Resource, abort
 
 from app.utils.decorators import parse_with, marshal_with
-from .repositories import BusinessRepository, CategoryRepository
+from .repositories import BusinessRepository, CategoryRepository, UserRepository
 from .schemas import BusinessCreateSchema, CategorySchema, CategoryCreateSchema, CategoryUpdateSchema, BusinessSchema, \
-    BusinessUpdateSchema
-
-
-class BaseResource(Resource):
-
-    def __init__(self, ):
-        super(BaseResource, self).__init__()
+    BusinessUpdateSchema, UserUpdateSchema, UserSchema, UserCreateSchema
 
 
 class BusinessCollection(Resource):
@@ -32,6 +26,7 @@ class BusinessCollection(Resource):
             abort(400, message="Business already exist")
 
         return self.repository.save(entity)
+
 
 class BusinessScalar(Resource):
 
@@ -84,7 +79,7 @@ class CategoriesCollection(Resource):
         super(CategoriesCollection, self).__init__()
         self.repository = repository_factory()
 
-    @marshal_with(CategorySchema, many=True, success_code=201)
+    @marshal_with(CategorySchema, many=True, success_code=200)
     def get(self):
         return self.repository.query.all()
 
@@ -95,3 +90,50 @@ class CategoriesCollection(Resource):
             abort(400, message="Category already exist")
 
         return self.repository.save(entity)
+
+
+class UserScalar(Resource):
+    """
+    Show user and lets you remove/add/update it
+    """
+    def __init__(self, repository_factory=UserRepository):
+        super(UserScalar, self).__init__()
+        self.repository = repository_factory()
+
+    @parse_with(UserUpdateSchema(strict=True), arg_name="entity")
+    @marshal_with(UserSchema)
+    def put(self, id, entity):
+        return self.repository.update(id, **entity)
+
+    @marshal_with(UserSchema)
+    def get(self, id):
+        return self.repository.query.filter_by(id=id).first_or_404(description='User doesnt exist')
+
+    def delete(self, id):
+        # return proper status code
+        self.repository.delete(id)
+        return None, 204
+
+
+class UserCollection(Resource):
+
+    def __init__(self, repository_factory=UserRepository):
+        super(UserCollection, self).__init__()
+        self.repository = repository_factory()
+
+    @marshal_with(UserSchema, many=True, success_code=200)
+    def get(self):
+        return self.repository.query.all()
+
+    @parse_with(UserCreateSchema(strict=True), arg_name="entity")
+    @marshal_with(UserSchema, success_code=201)
+    def post(self, entity, **kwargs):
+        if self.repository.exist(entity.name):
+            abort(400, message="User already exist")
+
+        return self.repository.save(entity)
+
+    def delete(self, id):
+        # return proper status code
+        self.repository.delete(id) # TODO Change for deactivate
+        return None, 204
