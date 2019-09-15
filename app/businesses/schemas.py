@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, post_load
 
-from .models import Category, Business, User
+from .models import Category, Business
 
 
 class CategoryCreateSchema(Schema):
@@ -59,29 +59,4 @@ class BusinessSchema(Schema):
     @post_load
     def make_object(self, data):
         return Business(**data)
-
-
-class UserCreateSchema(Schema):
-    email = fields.Email(required=True)
-    password = fields.String(required=True)
-    name = fields.String(required=False)
-
-    @post_load
-    def make_object(self, data):
-        return User(**data)
-
-
-class UserSchema(Schema):
-    email = fields.Email(required=True)
-    password = fields.String(required=True)
-    name = fields.String(required=False)
-
-    @post_load
-    def make_object(self, data):
-        return User(**data)
-
-
-class UserUpdateSchema(Schema):
-    password = fields.String(required=True)
-    name = fields.String(required=False)
 
