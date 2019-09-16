@@ -9,8 +9,8 @@ class UserRepository(BaseRepository):
         super(UserRepository, self).save(entity)
         return entity
 
-    def exist(self, name):
-        entity = self.filter(name=name).first()
+    def exist(self, email):
+        entity = self.filter(email=email).first()
         if entity:
             return True
         return False

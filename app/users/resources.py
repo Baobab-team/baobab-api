@@ -1,6 +1,9 @@
 from flask import jsonify
+from flask_jwt_extended import jwt_required, get_raw_jwt, jwt_refresh_token_required, get_jwt_identity, \
+    create_access_token
 from flask_restful import Resource, abort, request
 
+from app.users.models import RevokedTokenModel
 from app.users.repositories import UserRepository
 from app.users.schemas import UserCreateSchema, UserSchema, UserUpdateSchema
 from app.utils.decorators import parse_with, marshal_with
@@ -53,19 +56,15 @@ class UserRegistration(Resource):
 
     @parse_with(UserCreateSchema(strict=True), arg_name="entity")
     def post(self, entity, **kwargs):
-        try:
+        if self.repository.exist(entity.email):
+            abort(400, message="User already exist")
 
-            if self.repository.exist(entity.name):
-                abort(400, message="User already exist")
-
-            user = self.repository.save(entity)
-            return {
-                'message': 'User {} was created'.format(user.email),
-                'access_token': user.access_token,
-                'refresh_token': user.refresh_token
-            }
-        except:
-            return {"message": "ass"}
+        user = self.repository.save(entity)
+        return {
+            'message': 'User {} was created'.format(user.email),
+            'access_token': user.access_token,
+            'refresh_token': user.refresh_token
+        }
 
 
 class UserLogin(Resource):
@@ -93,15 +92,40 @@ class UserLogin(Resource):
 
 
 class UserLogoutAccess(Resource):
+    @jwt_required
     def post(self):
-        return {'message': 'User logout'}
+        jti = get_raw_jwt()['jti']
+        try:
+            revoked_token = RevokedTokenModel(jti=jti)
+            revoked_token.add()
+            return {'message': 'Access token has been revoked'}
+        except:
+            return {'message': 'Something went wrong'}, 500
 
 
 class UserLogoutRefresh(Resource):
+    @jwt_refresh_token_required
     def post(self):
-        return {'message': 'User logout'}
+        jti = get_raw_jwt()['jti']
+        try:
+            revoked_token = RevokedTokenModel(jti=jti)
+            revoked_token.add()
+            return {'message': 'Refresh token has been revoked'}
+        except Exception as err:
+            return {'message': 'Something went wrong'}, 500
 
 
 class TokenRefresh(Resource):
+    @jwt_refresh_token_required
     def post(self):
-        return {'message': 'Token refresh'}
+        current_user = get_jwt_identity()
+        access_token = create_access_token(identity=current_user)
+        return {'access_token': access_token}
+
+
+class SecretResource(Resource):
+    @jwt_required
+    def get(self):
+        return {
+            'answer': 42
+        }

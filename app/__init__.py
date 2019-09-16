@@ -23,12 +23,14 @@ def create_app(config=None):
     app.config.from_object(config)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['JWT_SECRET_KEY'] = os.getenv('SECRET_KEY')
+    app.config['JWT_BLACKLIST_ENABLED'] = True
+    app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
 
     db.init_app(app)
     jwt.init_app(app)
 
     # Initialize models
-    from app.users.models import User,Customer,Owner
+    from app.users.models import User,Customer,Owner, RevokedTokenModel
     from app.businesses.models import Business,BusinessHour,Category,Rating, Address
 
 
@@ -57,5 +59,10 @@ def create_app(config=None):
         app.register_error_handler(500, page_error)
         app.register_error_handler(404, page_not_found)
 
+
+    @jwt.token_in_blacklist_loader
+    def check_if_token_in_blacklist(decrypted_token):
+        jti = decrypted_token['jti']
+        return RevokedTokenModel.is_jti_blacklisted(jti)
 
     return app
