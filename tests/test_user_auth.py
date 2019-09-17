@@ -18,6 +18,7 @@ class UserAuthTestCase(unittest.TestCase):
             'name': 'John Doe',
             'email': 'john.doe@mail.com',
             'password': 'password',
+            'type': 'customer',
 
         }
         self.user2 = {

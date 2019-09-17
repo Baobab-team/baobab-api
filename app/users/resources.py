@@ -122,10 +122,3 @@ class TokenRefresh(Resource):
         access_token = create_access_token(identity=current_user)
         return {'access_token': access_token}
 
-
-class SecretResource(Resource):
-    @jwt_required
-    def get(self):
-        return {
-            'answer': 42
-        }
