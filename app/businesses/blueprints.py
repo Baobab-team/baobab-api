@@ -13,5 +13,3 @@ api.add_resource(res.BusinessScalar, "/businesses/<int:id>")
 api.add_resource(res.CategoriesCollection, "/categories")
 api.add_resource(res.CategoryScalar, "/categories/<int:id>")
 
-api.add_resource(res.UserCollection, "/users")
-api.add_resource(res.UserScalar, "/users/<int:id>")

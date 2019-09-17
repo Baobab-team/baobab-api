@@ -4,6 +4,7 @@ from logging.handlers import RotatingFileHandler
 
 from dotenv import load_dotenv
 from flask import Flask
+from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
 
 from app.common.errors import page_not_found, page_error
@@ -11,7 +12,7 @@ from app.common.errors import page_not_found, page_error
 load_dotenv()
 
 db = SQLAlchemy()
-
+jwt = JWTManager()
 
 def create_app(config=None):
     app = Flask(__name__)
@@ -21,17 +22,24 @@ def create_app(config=None):
 
     app.config.from_object(config)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['JWT_SECRET_KEY'] = os.getenv('SECRET_KEY')
+    app.config['JWT_BLACKLIST_ENABLED'] = True
+    app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
 
     db.init_app(app)
+    jwt.init_app(app)
+
+    # Initialize models
+    from app.users.models import User,Customer,Owner, RevokedTokenModel
+    from app.businesses.models import Business,BusinessHour,Category,Rating, Address
+
 
     # Initialize API
     from app.businesses.blueprints import blueprint as business_blueprint
-
     app.register_blueprint(business_blueprint)
+    from app.users.blueprints import blueprint as user_bp
+    app.register_blueprint(user_bp)
 
-    # Initialize token
-    from app.routes.api import token
-    app.register_blueprint(token)
 
     if app.debug == False:
         # Initliaze errors page
@@ -51,5 +59,10 @@ def create_app(config=None):
         app.register_error_handler(500, page_error)
         app.register_error_handler(404, page_not_found)
 
+
+    @jwt.token_in_blacklist_loader
+    def check_if_token_in_blacklist(decrypted_token):
+        jti = decrypted_token['jti']
+        return RevokedTokenModel.is_jti_blacklisted(jti)
 
     return app
