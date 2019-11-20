@@ -4,6 +4,7 @@ from logging.handlers import RotatingFileHandler
 
 from dotenv import load_dotenv
 from flask import Flask
+from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
 
@@ -64,5 +65,8 @@ def create_app(config=None):
     def check_if_token_in_blacklist(decrypted_token):
         jti = decrypted_token['jti']
         return RevokedTokenModel.is_jti_blacklisted(jti)
+
+    # enable CORS
+    CORS(app, resources={r'/*': {'origins': '*'}})
 
     return app

@@ -4,6 +4,7 @@ flask-sqlalchemy
 flask-migrate
 Flask-RESTful
 Flask-Script
+Flask-Cors
 python-dotenv
 sqlalchemy-json
 gunicorn
