@@ -34,3 +34,8 @@ SECRET_KEY= <<< DEMANDE LA CLE >>>
  DATABASE_URL="postgresql://localhost/DB_NAME" >> .env  
  ```
 
+
+### Run the app
+```
+python run.py
+```
