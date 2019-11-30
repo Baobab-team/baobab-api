@@ -4,6 +4,7 @@ import logging
 from flask import request, jsonify
 from flask_restful import reqparse, abort
 from marshmallow import ValidationError
+from werkzeug.exceptions import BadRequest
 
 logger = logging.getLogger(__name__)
 
@@ -94,3 +95,4 @@ def marshal_with(schema, many=False, success_code=200, **kwargs):
 #         # Do something after
 #         return value
 #     return wrapper_decorator
+

@@ -10,7 +10,16 @@ class BusinessRepository(BaseRepository):
         return entity
 
     def filter(self, *args, **kwargs):
-        query = super(BusinessRepository, self).filter(**kwargs)
+        query = self.query
+        if "name" in kwargs:
+            query.filter_by(name=kwargs.get("name"))
+
+        if "description" in kwargs:
+            description = '%{}%'.format(kwargs.get("description"))
+            query.filter(Business.description.like(description))
+
+        if "accepted" in kwargs:
+            query.filter_by(accepted=kwargs.get("accepted"))
 
         return query
 
@@ -47,4 +56,3 @@ class CategoryRepository(BaseRepository):
             return False
 
         return self._delete(id_)
-

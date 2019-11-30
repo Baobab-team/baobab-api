@@ -1,6 +1,7 @@
 from flask_restful import Resource, abort
+from flask_restful.reqparse import Argument
 
-from app.utils.decorators import parse_with, marshal_with
+from app.utils.decorators import parse_with, marshal_with, parse_request
 from .repositories import BusinessRepository, CategoryRepository
 from .schemas import BusinessCreateSchema, CategorySchema, CategoryCreateSchema, CategoryUpdateSchema, BusinessSchema, \
     BusinessUpdateSchema
@@ -15,9 +16,15 @@ class BusinessCollection(Resource):
         super(BusinessCollection, self).__init__()
         self.repository = repository_factory()
 
+    @parse_request(
+        Argument("name", type=str, store_missing=False),
+        Argument("description", type=str, store_missing=False),
+        Argument("accepted", type=bool, store_missing=False),
+    )
     @marshal_with(BusinessSchema, many=True, success_code=200)
-    def get(self):
-        return self.repository.query.all()
+    def get(self, *args, **kwargs):
+        businesesses = self.repository.filter(*args, **kwargs).all()
+        return businesesses
 
     @parse_with(BusinessCreateSchema(strict=True), arg_name="entity")
     @marshal_with(BusinessSchema, success_code=201)
