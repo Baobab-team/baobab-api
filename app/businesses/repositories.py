@@ -1,6 +1,8 @@
 from app.businesses.models import Business, Category
 from app.common.repositories import BaseRepository
 
+CONTAINS = '%{}%'
+
 
 class BusinessRepository(BaseRepository):
     model = Business
@@ -12,14 +14,15 @@ class BusinessRepository(BaseRepository):
     def filter(self, *args, **kwargs):
         query = self.query
         if "name" in kwargs:
-            query.filter_by(name=kwargs.get("name"))
+            name = CONTAINS.format(kwargs.get("name"))
+            query = query.filter(Business.name.like(name))
 
         if "description" in kwargs:
-            description = '%{}%'.format(kwargs.get("description"))
-            query.filter(Business.description.like(description))
+            description = CONTAINS.format(kwargs.get("description"))
+            query = query.filter(Business.description.like(description))
 
         if "accepted" in kwargs:
-            query.filter_by(accepted=kwargs.get("accepted"))
+            query = query.filter(Business.accepted == kwargs.get("accepted"))
 
         return query
 
