@@ -18,7 +18,7 @@ class UserScalar(Resource):
         super(UserScalar, self).__init__()
         self.repository = repository_factory()
 
-    @parse_with(UserUpdateSchema(strict=True), arg_name="entity")
+    @parse_with(UserUpdateSchema(), arg_name="entity")
     @marshal_with(UserSchema)
     def put(self, id, entity):
         return self.repository.update(id, **entity)
@@ -54,7 +54,7 @@ class UserRegistration(Resource):
         super(UserRegistration, self).__init__()
         self.repository = repository_factory()
 
-    @parse_with(UserCreateSchema(strict=True), arg_name="entity")
+    @parse_with(UserCreateSchema(), arg_name="entity")
     def post(self, entity, **kwargs):
         if self.repository.exist(entity.email):
             abort(400, message="User already exist")

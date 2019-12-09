@@ -26,7 +26,7 @@ class BusinessCollection(Resource):
         businesesses = self.repository.filter(*args, **kwargs).all()
         return businesesses
 
-    @parse_with(BusinessCreateSchema(strict=True), arg_name="entity")
+    @parse_with(BusinessCreateSchema(), arg_name="entity")
     @marshal_with(BusinessSchema, success_code=201)
     def post(self, entity, **kwargs):
         if self.repository.exist(entity.name):
@@ -41,7 +41,7 @@ class BusinessScalar(Resource):
         super(BusinessScalar, self).__init__()
         self.repository = repository_factory()
 
-    @parse_with(BusinessUpdateSchema(strict=True), arg_name="entity")
+    @parse_with(BusinessUpdateSchema(), arg_name="entity")
     @marshal_with(BusinessSchema)
     def put(self, id, entity):
         return self.repository.update(id, **entity)
@@ -62,7 +62,7 @@ class CategoryScalar(Resource):
         super(CategoryScalar, self).__init__()
         self.repository = repository_factory()
 
-    @parse_with(CategoryUpdateSchema(strict=True), arg_name="entity")
+    @parse_with(CategoryUpdateSchema(), arg_name="entity")
     @marshal_with(CategorySchema)
     def put(self, id, entity, **kwargs):
         return self.repository.update(id, **entity)
@@ -90,7 +90,7 @@ class CategoriesCollection(Resource):
     def get(self):
         return self.repository.query.all()
 
-    @parse_with(CategoryCreateSchema(strict=True), arg_name="entity")
+    @parse_with(CategoryCreateSchema(), arg_name="entity")
     @marshal_with(CategorySchema, success_code=201)
     def post(self, entity, **kwargs):
         if self.repository.exist(entity.name):
