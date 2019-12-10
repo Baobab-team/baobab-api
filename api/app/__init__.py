@@ -8,7 +8,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
 
-from app.common.errors import page_not_found, page_error
+from .common.errors import page_not_found, page_error
 
 load_dotenv()
 
@@ -21,7 +21,7 @@ def create_app(config=None):
     if config is None:
         config = os.getenv('APP_SETTINGS')  # config_name = "development"
 
-    app.config.from_object(config)
+    app.config.from_object("app.config.DevelopmentConfig")
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['JWT_SECRET_KEY'] = os.getenv('SECRET_KEY')
     app.config['JWT_BLACKLIST_ENABLED'] = True
@@ -31,14 +31,14 @@ def create_app(config=None):
     jwt.init_app(app)
 
     # Initialize models
-    from app.users.models import User,Customer,Owner, RevokedTokenModel
-    from app.businesses.models import Business,BusinessHour,Category,Rating, Address
+    from .users.models import User,Customer,Owner, RevokedTokenModel
+    from .businesses.models import Business,BusinessHour,Category,Rating, Address
 
 
     # Initialize API
-    from app.businesses.blueprints import blueprint as business_blueprint
+    from .businesses.blueprints import blueprint as business_blueprint
     app.register_blueprint(business_blueprint)
-    from app.users.blueprints import blueprint as user_bp
+    from .users.blueprints import blueprint as user_bp
     app.register_blueprint(user_bp)
 
 
