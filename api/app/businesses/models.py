@@ -4,13 +4,13 @@ from enum import Enum
 from app import db
 from app.common.base import TimestampMixin
 
-
+# TODO Change table to plurials
 class Category(db.Model):
     """
     Category model
     """
     __tablename__ = 'category'
-
+    # TODO remove id and use name as primary key
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=True)
     businesses = db.relationship("Business", backref="category", lazy=True)

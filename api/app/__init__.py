@@ -18,6 +18,10 @@ jwt = JWTManager()
 def create_app(config=None):
     app = Flask(__name__)
 
+    @app.route("/")
+    def hello_world():
+        return "If you arent seing this, it means the setup went well !"
+
     if config is None:
         config = os.getenv('APP_SETTINGS')  # config_name = "development"
 
