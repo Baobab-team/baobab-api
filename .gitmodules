@@ -1,0 +1,4 @@
+[submodule "baobab-client"]
+	path = baobab-client
+	url = https://github.com/Baobab-team/baobab-client.git
+	branch = master

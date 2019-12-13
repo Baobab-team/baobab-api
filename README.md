@@ -1,53 +1,31 @@
 # Baobab
 
 
-``cd baobab``
+### Preriquisites
+* [PostgreSQL](https://www.postgresql.org)
+* [Docker](https://www.docker.com) 
 
-#### Create virtual environment 
-```
 
-virtualenv env #or another tool
-source env/bin/active
 
-```
-
-#### Install the dependencies
-```
-pip install -r requirements
+### Setup 
 
 ```
+# Setup environment variables
+mv .env.sample .env 
 
-#### Setup .env
-```
-touch .env
-APP_SETTINGS="config.DevelopmentConfig" >> .env
-FLASK_ENV=development >> .env
-SECRET_KEY= <<< DEMANDE LA CLE >>>
-```
+# Build the image
+docker-compose up -d --build
 
+# Create the database
+docker-compose exec web python manage.py create_db
 
-#### Postgres DB
-1. [Install PostgreSQL](https://www.postgresql.org)
-2. Create a local database 
-3. Add the url to .env
+# Seed database
+docker-compose exec web python manage.py seed_db 
 
- DATABASE_URL="postgresql://localhost/DB_NAME" >> .env  
-
-###  Database setup
-
-```
-#Initialize db (usually only once)
-python manage.py db init
-
-# Run migrations (as much as needed)
-python manage.py db migrate
-
-# Appply the upgrades (as much as needed)`
-python manage.py db upgrade
+# Remove volumes and containers(if need be)
+docker-compose down -v 
 
 ```
 
-### Run the app
-```
-python run.py
-```
+
+Once done, head to http://localhost:5000/

@@ -2,7 +2,7 @@ import unittest
 
 from requests.auth import _basic_auth_str
 
-from config import TestingConfig
+from api.app.config import TestingConfig
 from run import create_app, db
 
 
