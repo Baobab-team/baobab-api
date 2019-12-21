@@ -1,7 +1,7 @@
 from flask import Blueprint
 from flask_restful import Api
 
-from app.users import resources
+from api.app.users import resources
 
 blueprint = Blueprint("auth", __name__, url_prefix="/auth")
 

@@ -1,6 +1,6 @@
 from flask import current_app
 
-from app import db
+from api.app import db
 
 
 class BaseRepository(object):

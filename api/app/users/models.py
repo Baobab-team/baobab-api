@@ -1,11 +1,11 @@
 from flask_jwt_extended import create_access_token, create_refresh_token
 from sqlalchemy.exc import IntegrityError
 
-from  app.businesses.models import favorites
+from  api.app.businesses.models import favorites
 from sqlalchemy.ext.hybrid import hybrid_property
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from app import db
+from api.app import db
 
 
 class User(db.Model):

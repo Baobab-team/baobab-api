@@ -1,5 +1,5 @@
-from app.common.repositories import BaseRepository
-from app.users.models import User
+from api.app.common.repositories import BaseRepository
+from api.app.users.models import User
 
 
 class UserRepository(BaseRepository):

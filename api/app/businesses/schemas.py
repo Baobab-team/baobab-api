@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, post_load
 
-from .models import Category, Business
+from api.app.businesses.models import Category, Business
 
 
 class CategoryCreateSchema(Schema):
@@ -29,9 +29,11 @@ class BusinessCreateSchema(Schema):
     owner_id = fields.Integer(required=False)
     name = fields.String(required=True)
     description = fields.String(required=True)
+    phone = fields.String(required=False)
     website = fields.String(required=False)
     notes = fields.String(required=False)
     email = fields.Email(required=False)
+    activated = fields.Email(required=False)
 
     @post_load
     def make_object(self, data):

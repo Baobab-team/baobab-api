@@ -1,7 +1,7 @@
 from flask_restful import Resource, abort
 from flask_restful.reqparse import Argument
 
-from app.utils.decorators import parse_with, marshal_with, parse_request
+from api.app.utils.decorators import parse_with, marshal_with, parse_request
 from .repositories import BusinessRepository, CategoryRepository
 from .schemas import BusinessCreateSchema, CategorySchema, CategoryCreateSchema, CategoryUpdateSchema, BusinessSchema, \
     BusinessUpdateSchema

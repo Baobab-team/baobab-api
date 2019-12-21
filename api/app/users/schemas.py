@@ -1,6 +1,6 @@
 from marshmallow import Schema, post_load, fields, validates, ValidationError
 
-from app.users.models import User
+from api.app.users.models import User
 
 
 class UserCreateSchema(Schema):

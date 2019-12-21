@@ -1,7 +1,7 @@
 import unittest
 
 from api.app.config import TestingConfig
-from run import create_app, db
+from api.app import create_app, db
 
 
 class CategoryTestCase(unittest.TestCase):
@@ -17,12 +17,13 @@ class CategoryTestCase(unittest.TestCase):
         # binds the app to the current context
         with self.app.app_context():
             # create all tables
+            db.drop_all()
             db.create_all()
 
     def test_category_add(self):
         """Test API can create a category (POST request)"""
         res = self.client().post('/api_v1/categories', json=self.category1)
-        self.assertEqual( 201,res.status_code)
+        self.assertEqual(201, res.status_code)
         self.assertIn('Restaurant', str(res.data))
 
     def test_get_all_categories(self):

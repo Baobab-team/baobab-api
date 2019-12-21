@@ -1,5 +1,5 @@
-from app.businesses.models import Business, Category
-from app.common.repositories import BaseRepository
+from api.app.businesses.models import Business, Category
+from api.app.common.repositories import BaseRepository
 
 CONTAINS = '%{}%'
 

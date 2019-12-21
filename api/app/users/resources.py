@@ -3,10 +3,10 @@ from flask_jwt_extended import jwt_required, get_raw_jwt, jwt_refresh_token_requ
     create_access_token
 from flask_restful import Resource, abort, request
 
-from app.users.models import RevokedTokenModel
-from app.users.repositories import UserRepository
-from app.users.schemas import UserCreateSchema, UserSchema, UserUpdateSchema
-from app.utils.decorators import parse_with, marshal_with
+from api.app.users.models import RevokedTokenModel
+from api.app.users.repositories import UserRepository
+from api.app.users.schemas import UserCreateSchema, UserSchema, UserUpdateSchema
+from api.app.utils.decorators import parse_with, marshal_with
 
 
 class UserScalar(Resource):

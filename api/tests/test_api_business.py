@@ -1,8 +1,7 @@
 import unittest
 
 from api.app.config import TestingConfig
-from run import create_app, db
-
+from api.app import create_app, db
 
 class BusinessTestCase(unittest.TestCase):
     """This class represents the business test case"""
@@ -35,6 +34,7 @@ class BusinessTestCase(unittest.TestCase):
         # binds the app to the current context
         with self.app.app_context():
             # create all tables
+            db.drop_all()
             db.create_all()
 
     def tearDown(self):
