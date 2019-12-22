@@ -40,7 +40,6 @@ def parse_request(*args, **kwargs):
 
     return decorator
 
-
 def parse_with(schema, arg_name='entity', **kwargs):
     """Decorator used to parse json input using the specified schema
     :param kwargs will be passed down to the dump method from marshmallow Schema
@@ -77,7 +76,7 @@ def marshal_with(schema, many=False, success_code=200, **kwargs):
         @functools.wraps(f)
         def inner(*fargs, **fkwargs):
             va = f(*fargs, **fkwargs)
-            data = schema(many=many).dump(va).data
+            data = schema(many=many).dump(va)
 
             response = jsonify(data)
             response.status_code = success_code
