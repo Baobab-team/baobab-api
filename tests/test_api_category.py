@@ -1,7 +1,7 @@
 import unittest
 
-from api.app.config import TestingConfig
-from run import create_app, db
+from app.config import TestingConfig
+from app import create_app, db
 
 
 class CategoryTestCase(unittest.TestCase):
