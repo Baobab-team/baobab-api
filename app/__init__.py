@@ -24,7 +24,7 @@ def create_app(config=None):
         return "If you arent seing this, it means the setup went well !"
 
     if config is None:
-        app.config.from_envvar("APP_SETTINGS")
+        app.config.from_object(os.getenv("APP_SETTINGS"))
 
     app.config.from_object(config)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

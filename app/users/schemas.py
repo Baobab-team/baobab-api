@@ -15,7 +15,7 @@ class UserCreateSchema(Schema):
             raise ValidationError('Invalid user type')
 
     @post_load
-    def make_object(self, data):
+    def make_object(self, data, **kwargs):
         return User(**data)
 
 
@@ -25,7 +25,7 @@ class UserSchema(Schema):
     name = fields.String(required=False)
 
     @post_load
-    def make_object(self, data):
+    def make_object(self, data,**kwargs):
         return User(**data)
 
 
