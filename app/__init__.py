@@ -1,12 +1,12 @@
 import logging
 import os
 from logging.handlers import RotatingFileHandler
-
 from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.utils import import_string
 
 from .common.errors import page_not_found, page_error
 
@@ -24,7 +24,8 @@ def create_app(config=None):
         return "If you arent seing this, it means the setup went well !"
 
     if config is None:
-        app.config.from_object(os.getenv("APP_SETTINGS"))
+        cfg = import_string(os.getenv("APP_SETTINGS"))
+        app.config.from_object(cfg())
 
     app.config.from_object(config)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
