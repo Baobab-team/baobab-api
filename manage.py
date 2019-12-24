@@ -5,7 +5,6 @@ from app.businesses.models import Category, Business
 
 
 app = create_app()
-
 cli = FlaskGroup(app)
 
 
@@ -17,7 +16,7 @@ def create_db():
     db.session.commit()
 
 
-@cli.command("seed")
+@cli.command("seed_db")
 def seed_db():
 
     db.session.add(Category(name="Restaurant"))
