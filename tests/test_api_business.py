@@ -1,7 +1,8 @@
 import unittest
 
+from app.businesses.models import Category
 from config import TestingConfig
-from run import create_app, db
+from app import create_app, db
 
 
 class BusinessTestCase(unittest.TestCase):
@@ -36,6 +37,7 @@ class BusinessTestCase(unittest.TestCase):
         with self.app.app_context():
             # create all tables
             db.create_all()
+            db.session.add(Category(**self.category1))
 
     def tearDown(self):
         """teardown all initialized variables."""
@@ -47,21 +49,12 @@ class BusinessTestCase(unittest.TestCase):
     def test_business_add(self):
         """Test API can create a business (POST request)"""
 
-        # Add category
-        res = self.client().post('/api_v1/categories', json=self.category1)
-        self.assertEqual(201, res.status_code)
-        self.assertIn('Restaurant', str(res.data))
-
         # Add business
         res = self.client().post('/api_v1/businesses', json=self.business1)
         self.assertEqual(201, res.status_code)
         self.assertIn('Gracia Afrika', str(res.data))
 
     def test_get_all_business(self):
-        # Add category
-        res = self.client().post('/api_v1/categories', json=self.category1)
-        self.assertEqual(201, res.status_code)
-        self.assertIn('Restaurant', str(res.data))
 
         # Add business
         res = self.client().post('/api_v1/businesses', json=self.business1)
@@ -82,11 +75,6 @@ class BusinessTestCase(unittest.TestCase):
     def test_business_update(self):
         """Test API can create a business (POST request)"""
 
-        # Add category
-        res = self.client().post('/api_v1/categories', json=self.category1)
-        self.assertEqual(201, res.status_code)
-        self.assertIn('Restaurant', str(res.data))
-
         # Add business
         res = self.client().post('/api_v1/businesses', json=self.business1)
         self.assertEqual(201, res.status_code)
@@ -100,11 +88,6 @@ class BusinessTestCase(unittest.TestCase):
     def test_business_get(self):
         """Test API can create a business (POST request)"""
 
-        # Add category
-        res = self.client().post('/api_v1/categories', json=self.category1)
-        self.assertEqual(201, res.status_code)
-        self.assertIn('Restaurant', str(res.data))
-
         # Add business
         res = self.client().post('/api_v1/businesses', json=self.business1)
         self.assertEqual(201, res.status_code)
@@ -113,15 +96,11 @@ class BusinessTestCase(unittest.TestCase):
         # Fetch business
         res = self.client().get('/api_v1/businesses')
         self.assertEqual(200, res.status_code)
+
         self.assertIn('Gracia Afrika', str(res.data))
 
     def test_business_get_with_filter(self):
         """Test API can filter a business (GET request)"""
-
-        # Add category
-        res = self.client().post('/api_v1/categories', json=self.category1)
-        self.assertEqual(201, res.status_code)
-        self.assertIn('Restaurant', str(res.data))
 
         # Add business
         res = self.client().post('/api_v1/businesses', json=self.business1)

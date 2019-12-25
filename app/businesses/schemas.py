@@ -7,7 +7,7 @@ class CategoryCreateSchema(Schema):
     name = fields.String()
 
     @post_load
-    def make_object(self, data):
+    def make_object(self, data, **kwargs):
         return Category(**data)
 
 
@@ -20,21 +20,23 @@ class CategorySchema(Schema):
     name = fields.String(required=True)
 
     @post_load
-    def make_object(self, data):
+    def make_object(self, data, **kwargs):
         return Category(**data)
 
 
 class BusinessCreateSchema(Schema):
-    category_id = fields.Integer(required=True)
-    owner_id = fields.Integer(required=False)
     name = fields.String(required=True)
+    phone = fields.String(required=False)
     description = fields.String(required=True)
     website = fields.String(required=False)
-    notes = fields.String(required=False)
     email = fields.Email(required=False)
+    notes = fields.String(required=False)
+    category_id = fields.Integer(required=True)
+    owner_id = fields.Integer(required=False)
+
 
     @post_load
-    def make_object(self, data):
+    def make_business(self, data, **kwargs):
         return Business(**data)
 
 
@@ -57,6 +59,6 @@ class BusinessSchema(Schema):
     email = fields.Email()
 
     @post_load
-    def make_object(self, data):
+    def make_object(self, data, **kwargs):
         return Business(**data)
 
