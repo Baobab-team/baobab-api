@@ -1,25 +1,22 @@
-import os
-
 from app import create_app, db
 from flask.cli import FlaskGroup
 
 from app.businesses.models import Category, Business
 
-config = os.getenv('APP_SETTINGS')  # config_name = config.DevelopmentConfig
 
 app = create_app()
-
 cli = FlaskGroup(app)
 
 
 @cli.command("create_db")
 def create_db():
+
     db.drop_all()
     db.create_all()
     db.session.commit()
 
 
-@cli.command("seed")
+@cli.command("seed_db")
 def seed_db():
 
     db.session.add(Category(name="Restaurant"))

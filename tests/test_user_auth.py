@@ -2,8 +2,8 @@ import unittest
 
 from requests.auth import _basic_auth_str
 
-from api.app.config import TestingConfig
-from run import create_app, db
+from config import TestingConfig
+from app import create_app, db
 
 
 class UserAuthTestCase(unittest.TestCase):
@@ -11,7 +11,7 @@ class UserAuthTestCase(unittest.TestCase):
 
     def setUp(self):
         """Define test variables and initialize app."""
-        self.app = create_app(config=TestingConfig)
+        self.app = create_app(config=TestingConfig())
         self.client = self.app.test_client
 
         self.user1 = {
@@ -19,7 +19,6 @@ class UserAuthTestCase(unittest.TestCase):
             'email': 'john.doe@mail.com',
             'password': 'password',
             'type': 'customer',
-
         }
         self.user2 = {
             'name': 'John Doe',

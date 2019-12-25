@@ -1,12 +1,12 @@
 import logging
 import os
 from logging.handlers import RotatingFileHandler
-
 from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.utils import import_string
 
 from .common.errors import page_not_found, page_error
 
@@ -14,6 +14,7 @@ load_dotenv()
 
 db = SQLAlchemy()
 jwt = JWTManager()
+
 
 def create_app(config=None):
     app = Flask(__name__)
@@ -23,9 +24,10 @@ def create_app(config=None):
         return "If you arent seing this, it means the setup went well !"
 
     if config is None:
-        config = os.getenv('APP_SETTINGS')  # config_name = "development"
+        cfg = import_string(os.getenv("APP_SETTINGS"))
+        app.config.from_object(cfg())
 
-    app.config.from_object("app.config.DevelopmentConfig")
+    app.config.from_object(config)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['JWT_SECRET_KEY'] = os.getenv('SECRET_KEY')
     app.config['JWT_BLACKLIST_ENABLED'] = True
@@ -35,9 +37,8 @@ def create_app(config=None):
     jwt.init_app(app)
 
     # Initialize models
-    from .users.models import User,Customer,Owner, RevokedTokenModel
-    from .businesses.models import Business,BusinessHour,Category,Rating, Address
-
+    from .users.models import User, Customer, Owner, RevokedTokenModel
+    from .businesses.models import Business, BusinessHour, Category, Rating, Address
 
     # Initialize API
     from .businesses.blueprints import blueprint as business_blueprint
@@ -45,8 +46,7 @@ def create_app(config=None):
     from .users.blueprints import blueprint as user_bp
     app.register_blueprint(user_bp)
 
-
-    if app.debug == False:
+    if not app.debug:
         # Initliaze errors page
 
         if not os.path.exists('logs'):
@@ -63,7 +63,6 @@ def create_app(config=None):
 
         app.register_error_handler(500, page_error)
         app.register_error_handler(404, page_not_found)
-
 
     @jwt.token_in_blacklist_loader
     def check_if_token_in_blacklist(decrypted_token):
