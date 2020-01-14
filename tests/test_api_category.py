@@ -1,6 +1,6 @@
 import unittest
 
-from config import TestingConfig
+from app.config import TestingConfig
 from app import create_app, db
 
 

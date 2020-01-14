@@ -1,7 +1,7 @@
 import unittest
 
 from app.businesses.models import Category
-from config import TestingConfig
+from app.config import TestingConfig
 from app import create_app, db
 
 
