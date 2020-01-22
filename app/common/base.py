@@ -6,7 +6,7 @@ from app import db
 class TimestampMixin(object):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
-    deactivated_at = db.Column(db.DateTime, nullable=False, default=None)
+    deactivated_at = db.Column(db.DateTime, nullable=True, default=None)
 
     def __init__(self, **kwargs):
         super(TimestampMixin,self).__init__(**kwargs)
