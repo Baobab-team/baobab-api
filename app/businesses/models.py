@@ -34,7 +34,6 @@ class Business(db.Model, TimestampMixin):
     accepted = db.Column(db.Boolean, default=False)
     notes = db.Column(db.String(), nullable=True)
 
-    ratings = db.relationship('Rating', backref='business', lazy=True)
     business_hours = db.relationship('BusinessHour', backref='business', lazy=True)
     address = db.relationship('Address', backref='business', lazy=True, uselist=False)
 
@@ -43,23 +42,6 @@ class Business(db.Model, TimestampMixin):
 
     def __repr__(self):
         return '<Business {}>'.format(self.name)
-
-
-class Rating(db.Model, TimestampMixin):
-    """
-    Rating for business
-    """
-    __tablename__ = 'rating'
-
-    id = db.Column(db.Integer, primary_key=True)
-    business_id = db.Column(db.Integer, db.ForeignKey("business.id"))
-    user_id = db.Column(db.Integer, db.ForeignKey("customer.id"))
-
-    comment = db.Column(db.String(), nullable=True)
-    rate = db.Column(db.Integer)
-
-    def __repr__(self):
-        return '<Rating {} {}>'.format(self.rate, self.comment)
 
 
 class Address(db.Model):
@@ -132,21 +114,3 @@ class BusinessHour(db.Model):
 
     def __repr__(self):
         return '<BusinessHour {}: {} to {}>'.format(self.day, self.opening_time, self.closing_time)
-
-
-class Favorite(db.Model):
-    """
-    User's favorite business
-    """
-    id = db.Column(db.Integer, primary_key=True)
-    favorite = db.Column(db.Boolean, default=True)
-
-    def __repr__(self):
-        return '<FavoriteBusiness business={}, customer={}>'.format(self.business_id, self.customer_id)
-
-
-favorites = db.Table('favorites',
-                     db.Column('favorite_id', db.Integer, db.ForeignKey('favorite.id'), primary_key=True),
-                     db.Column('customer_id', db.Integer, db.ForeignKey('customer.id'), primary_key=True)
-                     )
-
