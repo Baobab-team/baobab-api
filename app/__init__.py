@@ -38,7 +38,7 @@ def create_app(config=None):
 
     # Initialize models
     from .users.models import User, Customer, Owner, RevokedTokenModel
-    from .businesses.models import Business, BusinessHour, Category, Rating, Address
+    from .businesses.models import Business, BusinessHour, Category, Address
 
     # Initialize API
     from .businesses.blueprints import blueprint as business_blueprint
