@@ -4,6 +4,14 @@ from enum import Enum
 from app import db
 from app.common.base import TimestampMixin
 
+
+class PaymentType(db.Model):
+    __tablename__ = 'payment_type'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(), unique=True)
+
+
 # TODO Change table to plurials
 class Category(db.Model):
     """
@@ -27,18 +35,22 @@ class Business(db.Model, TimestampMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=True, nullable=False)
+    legal_name = db.Column(db.String(), unique=True, nullable=False)
     phone = db.Column(db.String())
     description = db.Column(db.String())
+    slogan = db.Column(db.String())
     website = db.Column(db.String(), nullable=True)
     email = db.Column(db.String(), nullable=True)
     accepted = db.Column(db.Boolean, default=False)
     notes = db.Column(db.String(), nullable=True)
+    capacity = db.Column(db.Integer, nullable=True)
 
     business_hours = db.relationship('BusinessHour', backref='business', lazy=True)
     address = db.relationship('Address', backref='business', lazy=True, uselist=False)
 
     owner_id = db.Column(db.Integer, db.ForeignKey("owner.id"), nullable=True)
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)
+    payment_type = db.Column(db.Integer, db.ForeignKey("payment_type.id"), nullable=False)
 
     def __repr__(self):
         return '<Business {}>'.format(self.name)
@@ -80,6 +92,8 @@ class Address(db.Model):
     direction = db.Column(db.String(2))
     city = db.Column(db.String(), default="Montreal")
     province = db.Column(db.String(2))
+    region = db.Column(db.String())
+    country = db.Column(db.String())
     business_id = db.Column(db.Integer, db.ForeignKey('business.id'),
                             nullable=False)
 
