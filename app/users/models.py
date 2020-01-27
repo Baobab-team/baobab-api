@@ -1,7 +1,6 @@
 from flask_jwt_extended import create_access_token, create_refresh_token
 from sqlalchemy.exc import IntegrityError
 
-from  app.businesses.models import favorites
 from sqlalchemy.ext.hybrid import hybrid_property
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -71,8 +70,6 @@ class Customer(User):
     __tablename__ = 'customer'
 
     id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
-    favorites = db.relationship('Favorite', secondary=favorites, lazy='subquery',
-                           backref=db.backref('customer', lazy=True))
 
     __mapper_args__ = {
         'polymorphic_identity': 'customer',
