@@ -35,7 +35,7 @@ class Business(db.Model, TimestampMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=True, nullable=False)
-    legal_name = db.Column(db.String(), unique=True, nullable=False)
+    legal_name = db.Column(db.String(), unique=True, nullable=True)
     phone = db.Column(db.String())
     description = db.Column(db.String())
     slogan = db.Column(db.String())
@@ -47,10 +47,11 @@ class Business(db.Model, TimestampMixin):
 
     business_hours = db.relationship('BusinessHour', backref='business', lazy=True)
     address = db.relationship('Address', backref='business', lazy=True, uselist=False)
+    phones = db.relationship('Phone', backref='business', lazy=True, uselist=False)
 
     owner_id = db.Column(db.Integer, db.ForeignKey("owner.id"), nullable=True)
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)
-    payment_type = db.Column(db.Integer, db.ForeignKey("payment_type.id"), nullable=False)
+    payment_type = db.Column(db.Integer, db.ForeignKey("payment_type.id"), nullable=True)
 
     def __repr__(self):
         return '<Business {}>'.format(self.name)
@@ -128,3 +129,16 @@ class BusinessHour(db.Model):
 
     def __repr__(self):
         return '<BusinessHour {}: {} to {}>'.format(self.day, self.opening_time, self.closing_time)
+
+
+class Phone(db.Model):
+    """
+    Phone model
+    """
+    __tablename__ = "phones"
+    number = db.Column(db.String(), primary_key=True)
+    business_id = db.Column(db.Integer, db.ForeignKey('business.id'),
+                            nullable=False)
+
+    def __repr__(self):
+        return '<Phone: {}'.format(self.number)
