@@ -35,7 +35,7 @@ class Business(db.Model, TimestampMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=True, nullable=False)
-    legal_name = db.Column(db.String(), unique=True, nullable=False)
+    legal_name = db.Column(db.String(), unique=True, nullable=True)
     phone = db.Column(db.String())
     description = db.Column(db.String())
     slogan = db.Column(db.String())
@@ -51,7 +51,7 @@ class Business(db.Model, TimestampMixin):
 
     owner_id = db.Column(db.Integer, db.ForeignKey("owner.id"), nullable=True)
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)
-    payment_type = db.Column(db.Integer, db.ForeignKey("payment_type.id"), nullable=False)
+    payment_type = db.Column(db.Integer, db.ForeignKey("payment_type.id"), nullable=True)
 
     def __repr__(self):
         return '<Business {}>'.format(self.name)
