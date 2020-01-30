@@ -6,16 +6,26 @@
 
 
 
-### Setup 
+### Local setup 
 
 ```
+# enter postgres
+psql
+
+# create database
+CREATE DATABASE baobab_dev;
+
+# Exit postgres
+exit
+
 # Setup environment variables for local development without docker
 mv .env.local .env 
 
-# Setup environment variables for local development with docker
-mv .env.sample .env 
+# Create database
+python manage.py create_db
 
-
+# Seed database
+python manage.py seed_db 
 ```
 
 
