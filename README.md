@@ -30,6 +30,9 @@ python manage.py seed_db
 # Launch app
 python manage.py run
 
+
+# Seed database
+python manage.py seed_db 
 ```
 
 
