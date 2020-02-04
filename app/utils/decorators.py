@@ -52,7 +52,7 @@ def parse_with(schema, arg_name='entity', **kwargs):
         def inner(*fargs, **fkwargs):
             json = request.get_json() or {}
             try:
-                entity, errors = schema.load(json, **kwargs)
+                entity = schema.load(json, **kwargs)
                 fkwargs.update({arg_name: entity})
 
             except (ValidationError,ValueError, Exception) as e:
