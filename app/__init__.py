@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import import_string
 
@@ -14,6 +15,7 @@ load_dotenv()
 
 db = SQLAlchemy()
 jwt = JWTManager()
+migrate = Migrate()
 
 
 def create_app(config=None):
@@ -35,6 +37,7 @@ def create_app(config=None):
 
     db.init_app(app)
     jwt.init_app(app)
+    migrate.init_app(app, db)
 
     # Initialize models
     from .users.models import User, Customer, Owner, RevokedTokenModel
