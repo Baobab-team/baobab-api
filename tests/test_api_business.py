@@ -36,8 +36,10 @@ class BusinessTestCase(unittest.TestCase):
         # binds the app to the current context
         with self.app.app_context():
             # create all tables
+            db.drop_all()
             db.create_all()
             db.session.add(Category(**self.category1))
+            db.session.commit()
 
     def tearDown(self):
         """teardown all initialized variables."""
