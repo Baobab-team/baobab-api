@@ -7,15 +7,6 @@ from app.businesses.models import Category, Business
 app = create_app()
 cli = FlaskGroup(app)
 
-
-@cli.command("create_db")
-def create_db():
-
-    db.drop_all()
-    db.create_all()
-    db.session.commit()
-
-
 @cli.command("seed_db")
 def seed_db():
 
