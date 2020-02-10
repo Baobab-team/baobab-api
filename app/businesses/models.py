@@ -53,6 +53,8 @@ class Business(db.Model, TimestampMixin):
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)
     payment_type = db.Column(db.Integer, db.ForeignKey("payment_type.id"), nullable=True)
 
+    restaurant_id = db.Column(db.Integer, db.ForeignKey("restaurant.id"), nullable=True)
+
     def __repr__(self):
         return '<Business {}>'.format(self.name)
 
@@ -142,3 +144,29 @@ class Phone(db.Model):
 
     def __repr__(self):
         return '<Phone: {}'.format(self.number)
+
+
+class Restaurant(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    menus = db.relationship('Menu', backref='restaurant', lazy=True)
+
+
+class Menu(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(), nullable=False)
+    start = db.Column(db.Time, nullable=False, default=datetime.utcnow())
+    end = db.Column(db.Time, nullable=True)
+
+    plates = db.relationship('Plate', backref='menu', lazy=True)
+
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
+
+
+class Plate(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    description = db.Column(db.String(), nullable=False)
+
+    menu_id = db.Column(db.Integer, db.ForeignKey('menu.id'), nullable=False)
