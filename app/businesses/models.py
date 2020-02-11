@@ -4,9 +4,12 @@ from enum import Enum
 from app import db
 from app.common.base import TimestampMixin
 
+tags = db.Table('tags',
+                db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True),
+                db.Column('business_id', db.Integer, db.ForeignKey('business.id'), primary_key=True)
+                )
 
 class PaymentType(db.Model):
-    __tablename__ = 'payment_type'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=True)
@@ -17,8 +20,7 @@ class Category(db.Model):
     """
     Category model
     """
-    __tablename__ = 'category'
-    # TODO remove id and use name as primary key
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=True)
     businesses = db.relationship("Business", backref="category", lazy=True)
@@ -31,7 +33,6 @@ class Business(db.Model, TimestampMixin):
     """
     Business model
     """
-    __tablename__ = 'business'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=True, nullable=False)
@@ -46,8 +47,10 @@ class Business(db.Model, TimestampMixin):
     capacity = db.Column(db.Integer, nullable=True)
 
     business_hours = db.relationship('BusinessHour', backref='business', lazy=True)
-    address = db.relationship('Address', backref='business', lazy=True, uselist=False)
-    phones = db.relationship('Phone', backref='business', lazy=True, uselist=False)
+    address = db.relationship('Address', backref='business', lazy=True)
+    phones = db.relationship('Phone', backref='business', lazy=True)
+    social_links = db.relationship('SocialLink', backref='business', lazy=True)
+    tags = db.relationship('Tag', backref='businesses', lazy=True)
 
     owner_id = db.Column(db.Integer, db.ForeignKey("owner.id"), nullable=True)
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)
@@ -63,7 +66,6 @@ class Address(db.Model):
     """
     Address for a single business
     """
-    __tablename__ = 'business_address'
 
     class ProvinceEnum(Enum):
         qc = "QC"
@@ -94,6 +96,7 @@ class Address(db.Model):
     street_name = db.Column(db.String())
     direction = db.Column(db.String(2))
     city = db.Column(db.String(), default="Montreal")
+    zip_code = db.Column(db.String())
     province = db.Column(db.String(2))
     region = db.Column(db.String())
     country = db.Column(db.String())
@@ -112,7 +115,6 @@ class BusinessHour(db.Model):
     """
     Business hour  for a single day
     """
-    __tablename__ = 'business_hour'
 
     class DaysEnum(Enum):
         monday = "monday"
@@ -139,6 +141,8 @@ class Phone(db.Model):
     """
     __tablename__ = "phones"
     number = db.Column(db.String(), primary_key=True)
+    extension = db.Column(db.String(), nullable=True)
+    type = db.Column(db.String(), nullable=False, default="telephone")
     business_id = db.Column(db.Integer, db.ForeignKey('business.id'),
                             nullable=False)
 
@@ -170,3 +174,14 @@ class Plate(db.Model):
     description = db.Column(db.String(), nullable=False)
 
     menu_id = db.Column(db.Integer, db.ForeignKey('menu.id'), nullable=False)
+
+
+class SocialLink(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    link = db.Column(db.String(), nullable=False)
+    type = db.Column(db.String(), nullable=False)
+
+
+class Tag(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(), nullable=False)
