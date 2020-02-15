@@ -4,10 +4,6 @@ from enum import Enum
 from app import db
 from app.common.base import TimestampMixin
 
-tags = db.Table('tags',
-                db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True),
-                db.Column('business_id', db.Integer, db.ForeignKey('business.id'), primary_key=True)
-                )
 
 class PaymentType(db.Model):
 
@@ -29,6 +25,12 @@ class Category(db.Model):
         return '<Category {}>'.format(self.name)
 
 
+tags = db.Table('tags',
+                db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True),
+                db.Column('business_id', db.Integer, db.ForeignKey('business.id'), primary_key=True)
+                )
+
+
 class Business(db.Model, TimestampMixin):
     """
     Business model
@@ -37,7 +39,6 @@ class Business(db.Model, TimestampMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=True, nullable=False)
     legal_name = db.Column(db.String(), unique=True, nullable=True)
-    phone = db.Column(db.String())
     description = db.Column(db.String())
     slogan = db.Column(db.String())
     website = db.Column(db.String(), nullable=True)
@@ -50,8 +51,8 @@ class Business(db.Model, TimestampMixin):
     address = db.relationship('Address', backref='business', lazy=True)
     phones = db.relationship('Phone', backref='business', lazy=True)
     social_links = db.relationship('SocialLink', backref='business', lazy=True)
-    tags = db.relationship('Tag', backref='businesses', lazy=True)
-
+    tags = db.relationship('Tag', secondary=tags, lazy='subquery',
+                           backref=db.backref('pages', lazy=True))
     owner_id = db.Column(db.Integer, db.ForeignKey("owner.id"), nullable=True)
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)
     payment_type = db.Column(db.Integer, db.ForeignKey("payment_type.id"), nullable=True)
@@ -60,6 +61,11 @@ class Business(db.Model, TimestampMixin):
 
     def __repr__(self):
         return '<Business {}>'.format(self.name)
+
+
+class Tag(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(), nullable=False)
 
 
 class Address(db.Model):
@@ -139,9 +145,9 @@ class Phone(db.Model):
     """
     Phone model
     """
-    __tablename__ = "phones"
-    number = db.Column(db.String(), primary_key=True)
-    extension = db.Column(db.String(), nullable=True)
+    id = db.Column(db.Integer, primary_key=True)
+    number = db.Column(db.String(), nullable=False)
+    extension = db.Column(db.String(), nullable=False)
     type = db.Column(db.String(), nullable=False, default="telephone")
     business_id = db.Column(db.Integer, db.ForeignKey('business.id'),
                             nullable=False)
@@ -180,8 +186,6 @@ class SocialLink(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     link = db.Column(db.String(), nullable=False)
     type = db.Column(db.String(), nullable=False)
+    business_id = db.Column(db.Integer, db.ForeignKey('business.id'), nullable=False)
 
 
-class Tag(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(), nullable=False)

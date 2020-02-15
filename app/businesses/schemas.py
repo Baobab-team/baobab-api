@@ -3,6 +3,13 @@ from marshmallow import Schema, fields, post_load
 from .models import Category, Business
 
 
+class PhoneSchema(Schema):
+    id = fields.Integer()
+    number = fields.String()
+    extension = fields.String()
+    type = fields.String()
+
+
 class CategoryCreateSchema(Schema):
     name = fields.String()
 
@@ -26,7 +33,10 @@ class CategorySchema(Schema):
 
 class BusinessCreateSchema(Schema):
     name = fields.String(required=True)
-    phone = fields.String(required=False)
+    legal_name = fields.String(required=False)
+    phones = fields.List(
+        fields.Nested(PhoneSchema)
+    )
     description = fields.String(required=True)
     website = fields.String(required=False)
     email = fields.Email(required=False)
@@ -44,9 +54,11 @@ class BusinessUpdateSchema(Schema):
     category_id = fields.Integer()
     owner_id = fields.Integer()
     name = fields.String()
+    legal_name = fields.String()
     description = fields.String()
     website = fields.String()
     email = fields.Email()
+    phones = fields.List(fields.Nested(PhoneSchema))
 
 
 class BusinessSchema(Schema):
@@ -54,9 +66,11 @@ class BusinessSchema(Schema):
     category_id = fields.String(required=True)
     owner_id = fields.String(required=False)
     name = fields.String(required=True)
+    legal_name = fields.String(required=True)
     description = fields.String(required=True)
     website = fields.String()
     email = fields.Email()
+    phones = fields.List(fields.Nested(PhoneSchema))
 
     @post_load
     def make_object(self, data, **kwargs):
