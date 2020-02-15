@@ -27,14 +27,13 @@ class TestCategory(object):
 
 
 class TestBusiness(object):
-    @pytest.mark.parametrize("name, phone, description, website, email, notes,category_id,owner_id", [
-        ("Name","111111111","Lorem ipsum","site.web.com","john.doe@gmail.com","Notes....",1,1),
-        ("Name","111111111","Lorem ipsum","site.web.com","john.doe@gmail.com","Notes....",1,1)
+    @pytest.mark.parametrize("name, description, website, email, notes,category_id,owner_id", [
+        ("Name","Lorem ipsum","site.web.com","john.doe@gmail.com","Notes....",1,1),
+        ("Name","Lorem ipsum","site.web.com","john.doe@gmail.com","Notes....",1,1)
     ], ids=["T1","T2"])
-    def test_valid_business(self, name, phone, description, website, email, notes,category_id,owner_id):
+    def test_valid_business(self, name, description, website, email, notes,category_id,owner_id):
         data = {
             "name": name,
-            "phone": phone,
             "description": description,
             "website": website,
             "email": email,

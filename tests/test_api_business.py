@@ -1,8 +1,8 @@
 import unittest
 
+from app import create_app, db
 from app.businesses.models import Category
 from app.config import TestingConfig
-from app import create_app, db
 
 
 class BusinessTestCase(unittest.TestCase):
@@ -14,9 +14,17 @@ class BusinessTestCase(unittest.TestCase):
         self.client = self.app.test_client
 
         self.category1 = {'name': 'Restaurant'}
+        self.phone1 = {
+            'id': 1,
+            'number': '514-222-3333',
+            'extension': '',
+            'type': 'tel',
+        }
         self.business1 = {
             'name': 'Gracia Afrika',
-            'phone': '514-111-1111',
+            'phones': [
+
+            ],
             'website': 'yolo.website.com',
             'description': 'THe coolest restaurant',
             'email': 'gracia.afrika@gmail.com',
@@ -25,7 +33,9 @@ class BusinessTestCase(unittest.TestCase):
         }
         self.business2 = {
             'name': 'Le Bled',
-            'phone': '514-222-3333',
+            'phones': [
+                # self.phone1,
+            ],
             'website': 'yolo2.website.com',
             'description': 'THe cooleet restaurant2',
             'email': 'le.bled@gmail.com',
