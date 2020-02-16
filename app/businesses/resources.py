@@ -17,8 +17,7 @@ class BusinessCollection(Resource):
         self.repository = repository_factory()
 
     @parse_request(
-        Argument("name", type=str, store_missing=False),
-        Argument("description", type=str, store_missing=False),
+        Argument("querySearch", type=str, store_missing=False),
         Argument("accepted", type=bool, store_missing=False),
     )
     @marshal_with(BusinessSchema, many=True, success_code=200)

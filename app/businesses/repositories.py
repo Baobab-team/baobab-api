@@ -13,13 +13,9 @@ class BusinessRepository(BaseRepository):
 
     def filter(self, *args, **kwargs):
         query = self.query
-        if "name" in kwargs:
-            name = CONTAINS.format(kwargs.get("name"))
-            query = query.filter(Business.name.like(name))
-
-        if "description" in kwargs:
-            description = CONTAINS.format(kwargs.get("description"))
-            query = query.filter(Business.description.like(description))
+        if "querySearch" in kwargs:
+            name = CONTAINS.format(kwargs.get("querySearch"))
+            query = query.filter(Business.name.ilike(name) | Business.description.ilike(name))
 
         if "accepted" in kwargs:
             query = query.filter(Business.accepted == kwargs.get("accepted"))
