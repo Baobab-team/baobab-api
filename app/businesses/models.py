@@ -43,7 +43,7 @@ class Business(db.Model, TimestampMixin):
     slogan = db.Column(db.String())
     website = db.Column(db.String(), nullable=True)
     email = db.Column(db.String(), nullable=True)
-    accepted = db.Column(db.Boolean, default=False)
+    accepted_at = db.Column(db.DateTime, nullable=True, default=None)
     notes = db.Column(db.String(), nullable=True)
     capacity = db.Column(db.Integer, nullable=True)
 
