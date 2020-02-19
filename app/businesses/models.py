@@ -1,6 +1,8 @@
 from datetime import datetime
 from enum import Enum
 
+from sqlalchemy_utils import ChoiceType
+
 from app import db
 from app.common.base import TimestampMixin
 
@@ -38,7 +40,6 @@ class Business(db.Model, TimestampMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=True, nullable=False)
-    legal_name = db.Column(db.String(), unique=True, nullable=True)
     description = db.Column(db.String())
     slogan = db.Column(db.String())
     website = db.Column(db.String(), nullable=True)
@@ -87,23 +88,23 @@ class Address(db.Model):
         mb = "MB"
 
     class DirectionEnum(Enum):
-        e = "E"
-        n = "N"
-        ne = "NE"
-        nw = "NW"
-        s = "S"
-        se = "SE"
-        sw = "SW"
-        w = "W"
+        e = "East"
+        n = "North"
+        ne = "North East"
+        nw = "North West"
+        s = "South"
+        se = "South East"
+        sw = "South West"
+        w = "West"
 
     id = db.Column(db.Integer, primary_key=True)
     street_number = db.Column(db.String())
     street_type = db.Column(db.String(5))
     street_name = db.Column(db.String())
-    direction = db.Column(db.String(2))
+    direction = db.Column(ChoiceType(DirectionEnum, impl=db.String()))
     city = db.Column(db.String(), default="Montreal")
     zip_code = db.Column(db.String())
-    province = db.Column(db.String(2))
+    province = db.Column(ChoiceType(ProvinceEnum, impl=db.String()))
     region = db.Column(db.String())
     country = db.Column(db.String())
     business_id = db.Column(db.Integer, db.ForeignKey('business.id'),
@@ -132,7 +133,7 @@ class BusinessHour(db.Model):
         sunday = "sunday"
 
     id = db.Column(db.Integer, primary_key=True)
-    day = db.Column(db.String(2))
+    day = db.Column(ChoiceType(DaysEnum, impl=db.String()))
     closing_time = db.Column(db.Time, nullable=False, default=datetime.utcnow())
     opening_time = db.Column(db.Time, nullable=False, default=datetime.utcnow())
     business_id = db.Column(db.Integer, db.ForeignKey("business.id"))
@@ -143,12 +144,17 @@ class BusinessHour(db.Model):
 
 class Phone(db.Model):
     """
-    Phone model
+        Phone model
     """
+
+    class Type(Enum):
+        tel = "telephone"
+        fax = "fax"
+
     id = db.Column(db.Integer, primary_key=True)
     number = db.Column(db.String(), nullable=False)
     extension = db.Column(db.String(), nullable=False)
-    type = db.Column(db.String(), nullable=False, default="telephone")
+    type = db.Column(ChoiceType(Type, impl=db.String()))
     business_id = db.Column(db.Integer, db.ForeignKey('business.id'),
                             nullable=False)
 
@@ -183,9 +189,14 @@ class Plate(db.Model):
 
 
 class SocialLink(db.Model):
+    class Type(Enum):
+        instragram = "Instagram"
+        facebook = "Facebook"
+        linkedin = "LinkedIn"
+        snapchat = "Snapchat"
+        twitter = "Twitter"
+
     id = db.Column(db.Integer, primary_key=True)
     link = db.Column(db.String(), nullable=False)
-    type = db.Column(db.String(), nullable=False)
+    type = db.Column(ChoiceType(Type, impl=db.String()))
     business_id = db.Column(db.Integer, db.ForeignKey('business.id'), nullable=False)
-
-
