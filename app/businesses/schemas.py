@@ -33,7 +33,6 @@ class CategorySchema(Schema):
 
 class BusinessCreateSchema(Schema):
     name = fields.String(required=True)
-    legal_name = fields.String(required=False)
     phones = fields.List(
         fields.Nested(PhoneSchema)
     )
