@@ -29,6 +29,7 @@ class BusinessTestCase(unittest.TestCase):
             'description': 'THe coolest restaurant',
             'email': 'gracia.afrika@gmail.com',
             'notes': 'Lorem Ipsum',
+            'status': "pending",
             'category_id': 1,
         }
         self.business2 = {
@@ -67,7 +68,6 @@ class BusinessTestCase(unittest.TestCase):
         self.assertIn('Gracia Afrika', str(res.data))
 
     def test_get_all_business(self):
-
         # Add business
         res = self.client().post('/api_v1/businesses', json=self.business1)
         self.assertEqual(201, res.status_code)
@@ -120,7 +120,16 @@ class BusinessTestCase(unittest.TestCase):
         self.assertIn('Gracia Afrika', str(res.data))
 
         # Fetch business
-        res = self.client().get('/api_v1/businesses?description=coolest')
+        res = self.client().get('/api_v1/businesses?description=coolest&status=pending')
         self.assertEqual(200, res.status_code)
         self.assertIn('Gracia Afrika', str(res.data))
 
+    def test_business_action_accept(self):
+        # Add business
+        res = self.client().post('/api_v1/businesses', json=self.business1)
+        self.assertEqual(201, res.status_code)
+        self.assertIn('Gracia Afrika', str(res.data))
+
+        res = self.client().put('/api_v1/businesses/1/accept',json={"accept":True})
+        self.assertEqual(200, res.status_code)
+        self.assertIn("accepted", str(res.data))

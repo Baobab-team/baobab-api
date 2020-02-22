@@ -43,6 +43,7 @@ class BusinessCreateSchema(Schema):
     notes = fields.String(required=False)
     category_id = fields.Integer(required=True)
     owner_id = fields.Integer(required=False)
+    status = fields.String(required=False)
 
 
     @post_load
@@ -71,6 +72,8 @@ class BusinessSchema(Schema):
     website = fields.String()
     email = fields.Email()
     phones = fields.List(fields.Nested(PhoneSchema))
+    accepted_at = fields.String(required=False)
+    status = fields.String(required=False)
 
     @post_load
     def make_object(self, data, **kwargs):

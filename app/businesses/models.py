@@ -37,6 +37,10 @@ class Business(db.Model, TimestampMixin):
     """
     Business model
     """
+    class StatusEnum(Enum):
+        pending = "pending"
+        accepted = "accepted"
+        refused = "refused"
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=True, nullable=False)
@@ -44,6 +48,7 @@ class Business(db.Model, TimestampMixin):
     slogan = db.Column(db.String())
     website = db.Column(db.String(), nullable=True)
     email = db.Column(db.String(), nullable=True)
+    status = db.Column(ChoiceType(StatusEnum, impl=db.String()),default="pending")
     accepted_at = db.Column(db.DateTime, nullable=True, default=None)
     notes = db.Column(db.String(), nullable=True)
     capacity = db.Column(db.Integer, nullable=True)
@@ -62,6 +67,12 @@ class Business(db.Model, TimestampMixin):
 
     def __repr__(self):
         return '<Business {}>'.format(self.name)
+
+    def accept(self):
+        self.status = Business.StatusEnum.accepted
+
+    def refuse(self):
+        self.status = Business.StatusEnum.refused
 
 
 class Tag(db.Model):

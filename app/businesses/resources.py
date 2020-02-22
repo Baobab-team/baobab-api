@@ -1,3 +1,4 @@
+
 from flask_restful import Resource, abort
 from flask_restful.reqparse import Argument
 
@@ -18,7 +19,8 @@ class BusinessCollection(Resource):
 
     @parse_request(
         Argument("querySearch", type=str, store_missing=False),
-        Argument("accepted", type=bool, store_missing=False),
+        Argument("status", type=str, store_missing=False),
+        Argument("accepted_at", type=str,store_missing=False),
     )
     @marshal_with(BusinessSchema, many=True, success_code=200)
     def get(self, *args, **kwargs):
