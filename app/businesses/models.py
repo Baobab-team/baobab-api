@@ -9,11 +9,16 @@ from app.common.base import TimestampMixin
 
 class PaymentType(db.Model):
 
+    class PaymentType(Enum):
+        credit = "credit"
+        debit = "debit"
+        cash = "cash"
+        crypto = "crypto"
+
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(), unique=True)
+    type = db.Column(ChoiceType(PaymentType, impl=db.String()), default="cash")
 
 
-# TODO Change table to plurials
 class Category(db.Model):
     """
     Category model
@@ -29,6 +34,11 @@ class Category(db.Model):
 
 tags = db.Table('tags',
                 db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True),
+                db.Column('business_id', db.Integer, db.ForeignKey('business.id'), primary_key=True)
+                )
+
+payment_types = db.Table('payment_types',
+                db.Column('payment_type_id', db.Integer, db.ForeignKey('payment_type.id'), primary_key=True),
                 db.Column('business_id', db.Integer, db.ForeignKey('business.id'), primary_key=True)
                 )
 
@@ -59,9 +69,10 @@ class Business(db.Model, TimestampMixin):
     social_links = db.relationship('SocialLink', backref='business', lazy=True)
     tags = db.relationship('Tag', secondary=tags, lazy='subquery',
                            backref=db.backref('pages', lazy=True))
+    payment_types = db.relationship('PaymentType', secondary=payment_types, lazy='subquery',
+                           backref=db.backref('payment_types', lazy=True))
     owner_id = db.Column(db.Integer, db.ForeignKey("owner.id"), nullable=True)
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)
-    payment_type = db.Column(db.Integer, db.ForeignKey("payment_type.id"), nullable=True)
 
     restaurant_id = db.Column(db.Integer, db.ForeignKey("restaurant.id"), nullable=True)
 
