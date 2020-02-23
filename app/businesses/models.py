@@ -8,7 +8,6 @@ from app.common.base import TimestampMixin
 
 
 class PaymentType(db.Model):
-
     class PaymentType(Enum):
         credit = "credit"
         debit = "debit"
@@ -38,19 +37,22 @@ tags = db.Table('tags',
                 )
 
 payment_types = db.Table('payment_types',
-                db.Column('payment_type_id', db.Integer, db.ForeignKey('payment_type.id'), primary_key=True),
-                db.Column('business_id', db.Integer, db.ForeignKey('business.id'), primary_key=True)
-                )
+                         db.Column('payment_type_id', db.Integer, db.ForeignKey('payment_type.id'), primary_key=True),
+                         db.Column('business_id', db.Integer, db.ForeignKey('business.id'), primary_key=True)
+                         )
 
 
 class Business(db.Model, TimestampMixin):
     """
     Business model
     """
+
     class StatusEnum(Enum):
         pending = "pending"
         accepted = "accepted"
         refused = "refused"
+
+    statuses = [StatusEnum.pending.value, StatusEnum.accepted.value, StatusEnum.refused.value]
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=True, nullable=False)
@@ -58,7 +60,7 @@ class Business(db.Model, TimestampMixin):
     slogan = db.Column(db.String())
     website = db.Column(db.String(), nullable=True)
     email = db.Column(db.String(), nullable=True)
-    status = db.Column(ChoiceType(StatusEnum, impl=db.String()),default="pending")
+    status = db.Column(ChoiceType(StatusEnum, impl=db.String()), default="pending")
     accepted_at = db.Column(db.DateTime, nullable=True, default=None)
     notes = db.Column(db.String(), nullable=True)
     capacity = db.Column(db.Integer, nullable=True)
@@ -70,7 +72,7 @@ class Business(db.Model, TimestampMixin):
     tags = db.relationship('Tag', secondary=tags, lazy='subquery',
                            backref=db.backref('pages', lazy=True))
     payment_types = db.relationship('PaymentType', secondary=payment_types, lazy='subquery',
-                           backref=db.backref('payment_types', lazy=True))
+                                    backref=db.backref('payment_types', lazy=True))
     owner_id = db.Column(db.Integer, db.ForeignKey("owner.id"), nullable=True)
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)
 
@@ -79,11 +81,14 @@ class Business(db.Model, TimestampMixin):
     def __repr__(self):
         return '<Business {}>'.format(self.name)
 
-    def accept(self):
-        self.status = Business.StatusEnum.accepted
+    def process_status(self, status=StatusEnum.pending.value):
 
-    def refuse(self):
-        self.status = Business.StatusEnum.refused
+        self.status = status
+
+        if status == Business.StatusEnum.accepted.value:
+            self.accepted_at = datetime.utcnow()
+        else:
+            self.accepted_at = None
 
 
 class Tag(db.Model):

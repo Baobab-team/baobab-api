@@ -130,6 +130,20 @@ class BusinessTestCase(unittest.TestCase):
         self.assertEqual(201, res.status_code)
         self.assertIn('Gracia Afrika', str(res.data))
 
-        res = self.client().put('/api_v1/businesses/1/accept',json={"accept":True})
+        res = self.client().put('/api_v1/businesses/1/processStatus', json={"status": "accepted"})
         self.assertEqual(200, res.status_code)
         self.assertIn("accepted", str(res.data))
+
+        res = self.client().put('/api_v1/businesses/1/processStatus', json={"status": "refused"})
+        self.assertEqual(200, res.status_code)
+        self.assertIn("refused", str(res.data))
+
+        res = self.client().put('/api_v1/businesses/1/processStatus', json={"status": "pending"})
+        self.assertEqual(200, res.status_code)
+        self.assertIn("pending", str(res.data))
+
+        res = self.client().put('/api_v1/businesses/1/processStatus', json={"status": "YOLO"})
+        self.assertEqual(400, res.status_code)
+
+        res = self.client().put('/api_v1/businesses/1/processStatus', json={"bad param": "YOLO"})
+        self.assertEqual(400, res.status_code)
