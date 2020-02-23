@@ -1,9 +1,9 @@
 import unittest
 
-from requests.auth import _basic_auth_str
-
-from app.config import TestingConfig
-from app import create_app, db
+# from requests.auth import _basic_auth_str
+#
+# from app.config import TestingConfig
+# from app import create_app, db
 
 
 class UserAuthTestCase(unittest.TestCase):

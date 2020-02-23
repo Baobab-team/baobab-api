@@ -1,8 +1,8 @@
 import unittest
 
+from app import create_app, db
 from app.businesses.models import Category
 from app.config import TestingConfig
-from app import create_app, db
 
 
 class BusinessTestCase(unittest.TestCase):
@@ -14,18 +14,29 @@ class BusinessTestCase(unittest.TestCase):
         self.client = self.app.test_client
 
         self.category1 = {'name': 'Restaurant'}
+        self.phone1 = {
+            'id': 1,
+            'number': '514-222-3333',
+            'extension': '',
+            'type': 'tel',
+        }
         self.business1 = {
             'name': 'Gracia Afrika',
-            'phone': '514-111-1111',
+            'phones': [
+
+            ],
             'website': 'yolo.website.com',
             'description': 'THe coolest restaurant',
             'email': 'gracia.afrika@gmail.com',
             'notes': 'Lorem Ipsum',
+            'status': "pending",
             'category_id': 1,
         }
         self.business2 = {
             'name': 'Le Bled',
-            'phone': '514-222-3333',
+            'phones': [
+                # self.phone1,
+            ],
             'website': 'yolo2.website.com',
             'description': 'THe cooleet restaurant2',
             'email': 'le.bled@gmail.com',
@@ -57,7 +68,6 @@ class BusinessTestCase(unittest.TestCase):
         self.assertIn('Gracia Afrika', str(res.data))
 
     def test_get_all_business(self):
-
         # Add business
         res = self.client().post('/api_v1/businesses', json=self.business1)
         self.assertEqual(201, res.status_code)
@@ -110,7 +120,30 @@ class BusinessTestCase(unittest.TestCase):
         self.assertIn('Gracia Afrika', str(res.data))
 
         # Fetch business
-        res = self.client().get('/api_v1/businesses?description=coolest')
+        res = self.client().get('/api_v1/businesses?description=coolest&status=pending')
         self.assertEqual(200, res.status_code)
         self.assertIn('Gracia Afrika', str(res.data))
 
+    def test_business_action_accept(self):
+        # Add business
+        res = self.client().post('/api_v1/businesses', json=self.business1)
+        self.assertEqual(201, res.status_code)
+        self.assertIn('Gracia Afrika', str(res.data))
+
+        res = self.client().put('/api_v1/businesses/1/processStatus', json={"status": "accepted"})
+        self.assertEqual(200, res.status_code)
+        self.assertIn("accepted", str(res.data))
+
+        res = self.client().put('/api_v1/businesses/1/processStatus', json={"status": "refused"})
+        self.assertEqual(200, res.status_code)
+        self.assertIn("refused", str(res.data))
+
+        res = self.client().put('/api_v1/businesses/1/processStatus', json={"status": "pending"})
+        self.assertEqual(200, res.status_code)
+        self.assertIn("pending", str(res.data))
+
+        res = self.client().put('/api_v1/businesses/1/processStatus', json={"status": "YOLO"})
+        self.assertEqual(400, res.status_code)
+
+        res = self.client().put('/api_v1/businesses/1/processStatus', json={"bad param": "YOLO"})
+        self.assertEqual(400, res.status_code)
