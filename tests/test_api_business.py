@@ -63,9 +63,9 @@ class BusinessTestCase(unittest.TestCase):
         """Test API can create a business (POST request)"""
 
         # Add business
-        res = self.client().post('/api_v1/businesses', json=self.business1)
+        res = self.client().post('/api_v1/businesses', json=self.business2)
         self.assertEqual(201, res.status_code)
-        self.assertIn('Gracia Afrika', str(res.data))
+        self.assertIn('Le Bled', str(res.data))
 
     def test_get_all_business(self):
         # Add business

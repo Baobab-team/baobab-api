@@ -8,14 +8,19 @@ from app.common.base import TimestampMixin
 
 
 class PaymentType(db.Model):
-    class PaymentType(Enum):
+    class TypeEnum(Enum):
         credit = "credit"
         debit = "debit"
         cash = "cash"
         crypto = "crypto"
 
+        @staticmethod
+        def list():
+            return list(map(str, PaymentType.TypeEnum))
+
     id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(ChoiceType(PaymentType, impl=db.String()), default="cash")
+    type = db.Column(ChoiceType(TypeEnum, impl=db.String()), default="cash")
+
 
 
 class Category(db.Model):
@@ -52,7 +57,9 @@ class Business(db.Model, TimestampMixin):
         accepted = "accepted"
         refused = "refused"
 
-    statuses = [StatusEnum.pending.value, StatusEnum.accepted.value, StatusEnum.refused.value]
+        @staticmethod
+        def list():
+            return [x.value for x in Business.StatusEnum]
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=True, nullable=False)
@@ -89,6 +96,7 @@ class Business(db.Model, TimestampMixin):
             self.accepted_at = datetime.utcnow()
         else:
             self.accepted_at = None
+
 
 
 class Tag(db.Model):
@@ -216,14 +224,20 @@ class Plate(db.Model):
 
 
 class SocialLink(db.Model):
-    class Type(Enum):
+    class TypeEnum(Enum):
         instragram = "Instagram"
         facebook = "Facebook"
         linkedin = "LinkedIn"
         snapchat = "Snapchat"
         twitter = "Twitter"
 
+        @staticmethod
+        def list():
+            return list(map(str, SocialLink.TypeEnum))
+
     id = db.Column(db.Integer, primary_key=True)
     link = db.Column(db.String(), nullable=False)
-    type = db.Column(ChoiceType(Type, impl=db.String()))
+    type = db.Column(ChoiceType(TypeEnum, impl=db.String()))
     business_id = db.Column(db.Integer, db.ForeignKey('business.id'), nullable=False)
+
+
