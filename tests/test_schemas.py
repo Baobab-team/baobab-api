@@ -1,3 +1,5 @@
+from datetime import datetime, time
+
 import pytest
 
 from app.businesses.schemas import *
@@ -27,18 +29,28 @@ class TestCategory(object):
 
 
 class TestBusiness(object):
-    @pytest.mark.parametrize("name, description, website, email, notes,category_id,owner_id", [
-        ("Name","Lorem ipsum","site.web.com","john.doe@gmail.com","Notes....",1,1),
-        ("Name","Lorem ipsum","site.web.com","john.doe@gmail.com","Notes....",1,1)
-    ], ids=["T1","T2"])
-    def test_valid_business(self, name, description, website, email, notes,category_id,owner_id):
+
+    def test_valid_business(self):
         data = {
-            "name": name,
-            "description": description,
-            "website": website,
-            "email": email,
-            "notes": notes,
-            "category_id": category_id,
-            "owner_id": owner_id,
+            "name": "Restaurant name",
+            "description": "Restaurant desc",
+            "website": "resto.com",
+            "email": "john.doe@gmail.com",
+            "notes": "notes",
+            "category_id": 5,
+            "owner_id": 1,
+            "capacity": 120,
+            "business_hours": [
+                {
+                    "day": "Monday",
+                    "closing_time": time().isoformat(),
+                    "opening_time": time().isoformat(),
+                },
+                {
+                    "day": "Monday",
+                    "closing_time": time(10, 30, 0).isoformat(),
+                    "opening_time": time(18, 30, 0).isoformat(),
+                }
+            ],
         }
         assert BusinessCreateSchema().validate(data=data) == {}

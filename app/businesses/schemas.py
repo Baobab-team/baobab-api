@@ -35,9 +35,9 @@ class PaymentTypeSchema(Schema):
 
 class BusinessHourSchema(Schema):
     id = fields.Integer()
-    day = fields.String()
-    opening_time = fields.String()
-    closing_time = fields.String()
+    day = fields.String(required=True)
+    opening_time = fields.Time(required=True)
+    closing_time = fields.Time(required=True)
 
 
 class PhoneSchema(Schema):
@@ -81,7 +81,7 @@ class BusinessCreateSchema(Schema):
     owner_id = fields.Integer(required=False)
     status = fields.String(required=False)
     capacity = fields.Integer(required=False)
-    business_hours = fields.Nested(BusinessHourSchema)
+    business_hours = fields.List(fields.Nested(BusinessHourSchema))
     address = fields.Nested(AddressSchema)
     social_link = fields.Nested(SocialLinkSchema)
     tags = fields.List(fields.Nested(TagSchema))
@@ -101,7 +101,7 @@ class BusinessUpdateSchema(Schema):
     email = fields.Email()
     phones = fields.List(fields.Nested(PhoneSchema))
     capacity = fields.Integer(required=False)
-    business_hours = fields.Nested(BusinessHourSchema)
+    business_hours = fields.List(fields.Nested(BusinessHourSchema))
     address = fields.Nested(AddressSchema)
     social_link = fields.Nested(SocialLinkSchema)
     tags = fields.List(fields.Nested(TagSchema))
@@ -121,7 +121,7 @@ class BusinessSchema(Schema):
     accepted_at = fields.String(required=False)
     status = fields.String(required=False)
     capacity = fields.Integer(required=False)
-    business_hours = fields.Nested(BusinessHourSchema)
+    business_hours = fields.List(fields.Nested(BusinessHourSchema))
     address = fields.Nested(AddressSchema)
     social_link = fields.Nested(SocialLinkSchema)
     tags = fields.List(fields.Nested(TagSchema))
