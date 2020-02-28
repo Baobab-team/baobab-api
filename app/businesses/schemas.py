@@ -29,7 +29,7 @@ class TagSchema(Schema):
 
 
 class PaymentTypeSchema(Schema):
-    id = fields.String(required=True)
+    id = fields.String()
     type = fields.String(required=True,validate=OneOf(PaymentType.TypeEnum.list()))
 
 
@@ -85,7 +85,7 @@ class BusinessCreateSchema(Schema):
     addresses = fields.List(fields.Nested(AddressSchema))
     social_links = fields.List(fields.Nested(SocialLinkSchema))
     tags = fields.List(fields.Nested(TagSchema))
-    payment_type = fields.List(fields.Nested(PaymentTypeSchema))
+    payment_types = fields.List(fields.Nested(PaymentTypeSchema))
 
     @post_load
     def make_business(self, data, **kwargs):
@@ -105,7 +105,7 @@ class BusinessUpdateSchema(Schema):
     addresses = fields.List(fields.Nested(AddressSchema))
     social_links = fields.List(fields.Nested(SocialLinkSchema))
     tags = fields.List(fields.Nested(TagSchema))
-    payment_type = fields.List(fields.Nested(PaymentTypeSchema))
+    payment_types = fields.List(fields.Nested(PaymentTypeSchema))
 
 
 class BusinessSchema(Schema):
@@ -125,7 +125,7 @@ class BusinessSchema(Schema):
     addresses = fields.List(fields.Nested(AddressSchema))
     social_links = fields.List(fields.Nested(SocialLinkSchema))
     tags = fields.List(fields.Nested(TagSchema))
-    payment_type = fields.List(fields.Nested(PaymentTypeSchema))
+    payment_types = fields.List(fields.Nested(PaymentTypeSchema))
 
     @post_load
     def make_object(self, data, **kwargs):

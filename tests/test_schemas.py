@@ -1,4 +1,4 @@
-from datetime import datetime, time
+from datetime import time
 
 import pytest
 
@@ -63,12 +63,15 @@ class TestBusiness(object):
                 "country": "Canada",
                 "province": "QC",
             }],
-            "social_links" : [
-                {"link":"facebook.com","type":"Twitter"}
+            "social_links": [
+                {"link": "facebook.com", "type": "Twitter"}
+            ],
+            "payment_types": [
+                {"type": "cash"}
             ],
             "tags": [
-                {"name":"Tag1",},
-                {"name":"Tag2",}
+                {"name": "Tag1", },
+                {"name": "Tag2", }
             ]
         }
         assert BusinessCreateSchema().validate(data=data) == {}
