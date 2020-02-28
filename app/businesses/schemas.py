@@ -18,9 +18,9 @@ class AddressSchema(Schema):
 
 
 class SocialLinkSchema(Schema):
-    id = fields.Integer(required=True)
-    link = fields.String(required=True, validate=OneOf(SocialLink.TypeEnum.list()))
-    type = fields.String(required=True)
+    id = fields.Integer()
+    link = fields.String(required=True)
+    type = fields.String(required=True, validate=OneOf(SocialLink.TypeEnum.list()))
 
 
 class TagSchema(Schema):
@@ -83,7 +83,7 @@ class BusinessCreateSchema(Schema):
     capacity = fields.Integer(required=False)
     business_hours = fields.List(fields.Nested(BusinessHourSchema))
     addresses = fields.List(fields.Nested(AddressSchema))
-    social_link = fields.Nested(SocialLinkSchema)
+    social_links = fields.List(fields.Nested(SocialLinkSchema))
     tags = fields.List(fields.Nested(TagSchema))
     payment_type = fields.List(fields.Nested(PaymentTypeSchema))
 
@@ -103,7 +103,7 @@ class BusinessUpdateSchema(Schema):
     capacity = fields.Integer(required=False)
     business_hours = fields.List(fields.Nested(BusinessHourSchema))
     addresses = fields.List(fields.Nested(AddressSchema))
-    social_link = fields.Nested(SocialLinkSchema)
+    social_links = fields.List(fields.Nested(SocialLinkSchema))
     tags = fields.List(fields.Nested(TagSchema))
     payment_type = fields.List(fields.Nested(PaymentTypeSchema))
 
@@ -123,7 +123,7 @@ class BusinessSchema(Schema):
     capacity = fields.Integer(required=False)
     business_hours = fields.List(fields.Nested(BusinessHourSchema))
     addresses = fields.List(fields.Nested(AddressSchema))
-    social_link = fields.Nested(SocialLinkSchema)
+    social_links = fields.List(fields.Nested(SocialLinkSchema))
     tags = fields.List(fields.Nested(TagSchema))
     payment_type = fields.List(fields.Nested(PaymentTypeSchema))
 

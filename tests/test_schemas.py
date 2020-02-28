@@ -62,6 +62,9 @@ class TestBusiness(object):
                 "region": "",
                 "country": "Canada",
                 "province": "QC",
-            }]
+            }],
+            "social_links" : [
+                {"link":"facebook.com","type":"Twitter"}
+            ]
         }
         assert BusinessCreateSchema().validate(data=data) == {}
