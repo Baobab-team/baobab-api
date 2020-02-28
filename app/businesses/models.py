@@ -16,7 +16,7 @@ class PaymentType(db.Model):
 
         @staticmethod
         def list():
-            return list(map(str, PaymentType.TypeEnum))
+            return [e.value for e in PaymentType.TypeEnum]
 
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(ChoiceType(TypeEnum, impl=db.String()), default="cash")
@@ -73,7 +73,7 @@ class Business(db.Model, TimestampMixin):
     capacity = db.Column(db.Integer, nullable=True)
 
     business_hours = db.relationship('BusinessHour', backref='business', lazy=True)
-    address = db.relationship('Address', backref='business', lazy=True)
+    addresses = db.relationship('Address', backref='business', lazy=True)
     phones = db.relationship('Phone', backref='business', lazy=True)
     social_links = db.relationship('SocialLink', backref='business', lazy=True)
     tags = db.relationship('Tag', secondary=tags, lazy='subquery',
@@ -122,6 +122,10 @@ class Address(db.Model):
         nl = "NL"
         mb = "MB"
 
+        @staticmethod
+        def list():
+            return [e.value for e in Address.ProvinceEnum]
+
     class DirectionEnum(Enum):
         e = "East"
         n = "North"
@@ -131,6 +135,11 @@ class Address(db.Model):
         se = "South East"
         sw = "South West"
         w = "West"
+        none = ""
+
+        @staticmethod
+        def list():
+            return [e.value for e in Address.DirectionEnum]
 
     id = db.Column(db.Integer, primary_key=True)
     street_number = db.Column(db.String())
@@ -233,7 +242,7 @@ class SocialLink(db.Model):
 
         @staticmethod
         def list():
-            return list(map(str, SocialLink.TypeEnum))
+            return [e.value for e in SocialLink.TypeEnum]
 
     id = db.Column(db.Integer, primary_key=True)
     link = db.Column(db.String(), nullable=False)

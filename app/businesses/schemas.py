@@ -1,18 +1,18 @@
 from marshmallow import Schema, fields, post_load
 from marshmallow.validate import OneOf
 
-from .models import Category, Business, SocialLink, PaymentType
+from .models import Category, Business, SocialLink, PaymentType, Address
 
 
 class AddressSchema(Schema):
-    id = fields.String(required=True)
+    id = fields.String()
     street_number = fields.String(required=True)
     street_type = fields.String(required=True)
     street_name = fields.String(required=True)
-    direction = fields.String(required=True)
+    direction = fields.String(required=True,validate=OneOf(Address.DirectionEnum.list()))
     city = fields.String(required=True)
     zip_code = fields.String(required=True)
-    province = fields.String(required=True)
+    province = fields.String(required=True,validate=OneOf(Address.ProvinceEnum.list()))
     region = fields.String(required=True)
     country = fields.String(required=True)
 
@@ -82,7 +82,7 @@ class BusinessCreateSchema(Schema):
     status = fields.String(required=False)
     capacity = fields.Integer(required=False)
     business_hours = fields.List(fields.Nested(BusinessHourSchema))
-    address = fields.Nested(AddressSchema)
+    addresses = fields.List(fields.Nested(AddressSchema))
     social_link = fields.Nested(SocialLinkSchema)
     tags = fields.List(fields.Nested(TagSchema))
     payment_type = fields.List(fields.Nested(PaymentTypeSchema))
@@ -102,7 +102,7 @@ class BusinessUpdateSchema(Schema):
     phones = fields.List(fields.Nested(PhoneSchema))
     capacity = fields.Integer(required=False)
     business_hours = fields.List(fields.Nested(BusinessHourSchema))
-    address = fields.Nested(AddressSchema)
+    addresses = fields.List(fields.Nested(AddressSchema))
     social_link = fields.Nested(SocialLinkSchema)
     tags = fields.List(fields.Nested(TagSchema))
     payment_type = fields.List(fields.Nested(PaymentTypeSchema))
@@ -122,7 +122,7 @@ class BusinessSchema(Schema):
     status = fields.String(required=False)
     capacity = fields.Integer(required=False)
     business_hours = fields.List(fields.Nested(BusinessHourSchema))
-    address = fields.Nested(AddressSchema)
+    addresses = fields.List(fields.Nested(AddressSchema))
     social_link = fields.Nested(SocialLinkSchema)
     tags = fields.List(fields.Nested(TagSchema))
     payment_type = fields.List(fields.Nested(PaymentTypeSchema))

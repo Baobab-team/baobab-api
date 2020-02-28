@@ -52,5 +52,16 @@ class TestBusiness(object):
                     "opening_time": time(18, 30, 0).isoformat(),
                 }
             ],
+            "addresses": [{
+                "street_number": "2700",
+                "street_name": "Kent",
+                "street_type": "Street",
+                "direction": "",
+                "city": "Montreal",
+                "zip_code": "H1h 0H0",
+                "region": "",
+                "country": "Canada",
+                "province": "QC",
+            }]
         }
         assert BusinessCreateSchema().validate(data=data) == {}
