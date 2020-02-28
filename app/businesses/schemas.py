@@ -24,7 +24,7 @@ class SocialLinkSchema(Schema):
 
 
 class TagSchema(Schema):
-    id = fields.String(required=True)
+    id = fields.String()
     name = fields.String(required=True)
 
 

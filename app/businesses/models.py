@@ -101,7 +101,7 @@ class Business(db.Model, TimestampMixin):
 
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(), nullable=False)
+    name = db.Column(db.String(), unique=True)
 
 
 class Address(db.Model):

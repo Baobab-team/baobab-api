@@ -65,6 +65,10 @@ class TestBusiness(object):
             }],
             "social_links" : [
                 {"link":"facebook.com","type":"Twitter"}
+            ],
+            "tags": [
+                {"name":"Tag1",},
+                {"name":"Tag2",}
             ]
         }
         assert BusinessCreateSchema().validate(data=data) == {}
