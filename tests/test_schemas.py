@@ -42,12 +42,12 @@ class TestBusiness(object):
             "capacity": 120,
             "business_hours": [
                 {
-                    "day": "Monday",
+                    "day": "thursday",
                     "closing_time": time().isoformat(),
                     "opening_time": time().isoformat(),
                 },
                 {
-                    "day": "Monday",
+                    "day": "monday",
                     "closing_time": time(10, 30, 0).isoformat(),
                     "opening_time": time(18, 30, 0).isoformat(),
                 }
@@ -75,3 +75,82 @@ class TestBusiness(object):
             ]
         }
         assert BusinessCreateSchema().validate(data=data) == {}
+
+
+class TestTags(object):
+    @pytest.mark.parametrize("name", [
+        ("tag1"),
+        ("tag2"),
+        ("tag3"),
+    ], ids=["T1", "T2", "T3"])
+    def test_valid_tags(self, name):
+        data = {
+            "name": name,
+        }
+        assert TagSchema().validate(data=data) == {}
+
+    @pytest.mark.parametrize("name", [
+        (None),
+        (10),
+    ], ids=["None", "integer"])
+    def test_valid_tags(self, name):
+        data = {
+            "name": name,
+        }
+        assert TagSchema().validate(data=data) != {}
+
+
+class TestBusinessHours(object):
+
+    @pytest.mark.parametrize("day, opening_time, closing_time", [
+        ("monday", time(10, 10, 10), time(20, 20, 0)),
+        ("thursday", time(10, 10, 10), time(20, 20, 0)),
+    ])
+    def test_valid_business_hour(self, day, opening_time, closing_time):
+        data = {
+            "day": day,
+            "opening_time": opening_time.isoformat(),
+            "closing_time": closing_time.isoformat(),
+        }
+        assert BusinessHourSchema().validate(data=data) == {}
+
+    @pytest.mark.parametrize("day, opening_time, closing_time", [
+        ("None", time(10, 10, 10), time(20, 20, 0)),
+        ("", time(10, 10, 10), time(22, 20, 0)),
+    ])
+    def test_invalid_business_hour(self, day, opening_time, closing_time):
+        data = {
+            "day": day,
+            "opening_time": opening_time.isoformat(),
+            "closing_time": closing_time.isoformat(),
+        }
+        assert BusinessHourSchema().validate(data=data) != {}
+
+
+class TestPhoneSchema(object):
+
+    @pytest.mark.parametrize("number, extension, type", [
+        ("5147545588", "56", "fax"),
+        ("514", "123", "telephone"),
+    ])
+    def test_valid_phone(self, number, extension, type):
+        data = {
+            "number": number,
+            "extension": extension,
+            "type": type,
+        }
+        assert PhoneSchema().validate(data=data) == {}
+
+    @pytest.mark.parametrize("number, extension, type", [
+        (12323123, None, "fax"),
+        (None, 213213123, "telephone"),
+        ("514", 213213123, "telephone"),
+        (None, 213213123, "loll"),
+    ])
+    def test_invalid_phone(self, number, extension, type):
+        data = {
+            "number": number,
+            "extension": extension,
+            "type": type,
+        }
+        assert PhoneSchema().validate(data=data) != {}

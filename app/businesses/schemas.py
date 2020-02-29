@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields, post_load
 from marshmallow.validate import OneOf
 
-from .models import Category, Business, SocialLink, PaymentType, Address
+from .models import Category, Business, SocialLink, PaymentType, Address, BusinessHour, Phone
 
 
 class AddressSchema(Schema):
@@ -35,16 +35,16 @@ class PaymentTypeSchema(Schema):
 
 class BusinessHourSchema(Schema):
     id = fields.Integer()
-    day = fields.String(required=True)
+    day = fields.String(required=True,validate=OneOf(BusinessHour.DaysEnum.list()))
     opening_time = fields.Time(required=True)
     closing_time = fields.Time(required=True)
 
 
 class PhoneSchema(Schema):
     id = fields.Integer()
-    number = fields.String()
-    extension = fields.String()
-    type = fields.String()
+    number = fields.String(required=True)
+    extension = fields.String(required=False)
+    type = fields.String(required=True,validate=OneOf(Phone.Type.list()))
 
 
 class CategoryCreateSchema(Schema):

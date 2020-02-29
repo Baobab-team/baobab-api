@@ -19,7 +19,7 @@ class PaymentType(db.Model):
             return [e.value for e in PaymentType.TypeEnum]
 
     id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(ChoiceType(TypeEnum, impl=db.String()), default="cash")
+    type = db.Column(ChoiceType(TypeEnum, impl=db.String()), default=TypeEnum.cash.value)
 
 
 
@@ -67,7 +67,7 @@ class Business(db.Model, TimestampMixin):
     slogan = db.Column(db.String())
     website = db.Column(db.String(), nullable=True)
     email = db.Column(db.String(), nullable=True)
-    status = db.Column(ChoiceType(StatusEnum, impl=db.String()), default="pending")
+    status = db.Column(ChoiceType(StatusEnum, impl=db.String()), default=StatusEnum.pending.value)
     accepted_at = db.Column(db.DateTime, nullable=True, default=None)
     notes = db.Column(db.String(), nullable=True)
     capacity = db.Column(db.Integer, nullable=True)
@@ -176,6 +176,10 @@ class BusinessHour(db.Model):
         saturday = "saturday"
         sunday = "sunday"
 
+        @staticmethod
+        def list():
+            return [e.value for e in BusinessHour.DaysEnum]
+
     id = db.Column(db.Integer, primary_key=True)
     day = db.Column(ChoiceType(DaysEnum, impl=db.String()))
     closing_time = db.Column(db.Time, nullable=False, default=datetime.utcnow())
@@ -194,6 +198,10 @@ class Phone(db.Model):
     class Type(Enum):
         tel = "telephone"
         fax = "fax"
+
+        @staticmethod
+        def list():
+            return [e.value for e in Phone.Type]
 
     id = db.Column(db.Integer, primary_key=True)
     number = db.Column(db.String(), nullable=False)
