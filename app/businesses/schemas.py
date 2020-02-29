@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields, post_load
 from marshmallow.validate import OneOf
 
-from .models import Category, Business, SocialLink, PaymentType, Address, BusinessHour, Phone
+from .models import Category, Business, SocialLink, Address, BusinessHour, Phone
 
 
 class AddressSchema(Schema):
@@ -26,11 +26,6 @@ class SocialLinkSchema(Schema):
 class TagSchema(Schema):
     id = fields.String()
     name = fields.String(required=True)
-
-
-class PaymentTypeSchema(Schema):
-    id = fields.String()
-    type = fields.String(required=True,validate=OneOf(PaymentType.TypeEnum.list()))
 
 
 class BusinessHourSchema(Schema):
@@ -85,7 +80,7 @@ class BusinessCreateSchema(Schema):
     addresses = fields.List(fields.Nested(AddressSchema))
     social_links = fields.List(fields.Nested(SocialLinkSchema))
     tags = fields.List(fields.Nested(TagSchema))
-    payment_types = fields.List(fields.Nested(PaymentTypeSchema))
+    payment_types = fields.List(fields.String())
 
     @post_load
     def make_business(self, data, **kwargs):
@@ -105,7 +100,7 @@ class BusinessUpdateSchema(Schema):
     addresses = fields.List(fields.Nested(AddressSchema))
     social_links = fields.List(fields.Nested(SocialLinkSchema))
     tags = fields.List(fields.Nested(TagSchema))
-    payment_types = fields.List(fields.Nested(PaymentTypeSchema))
+    payment_types = fields.List(fields.String())
 
 
 class BusinessSchema(Schema):
@@ -125,7 +120,7 @@ class BusinessSchema(Schema):
     addresses = fields.List(fields.Nested(AddressSchema))
     social_links = fields.List(fields.Nested(SocialLinkSchema))
     tags = fields.List(fields.Nested(TagSchema))
-    payment_types = fields.List(fields.Nested(PaymentTypeSchema))
+    payment_types = fields.List(fields.String())
 
     @post_load
     def make_object(self, data, **kwargs):

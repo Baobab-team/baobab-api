@@ -66,9 +66,7 @@ class TestBusiness(object):
             "social_links": [
                 {"link": "facebook.com", "type": "Twitter"}
             ],
-            "payment_types": [
-                {"type": "cash"}
-            ],
+            "payment_types": ["cash"],
             "tags": [
                 {"name": "Tag1", },
                 {"name": "Tag2", }

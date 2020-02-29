@@ -1,26 +1,10 @@
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy_utils import ChoiceType
+from sqlalchemy_utils import ChoiceType, ScalarListType
 
 from app import db
 from app.common.base import TimestampMixin
-
-
-class PaymentType(db.Model):
-    class TypeEnum(Enum):
-        credit = "credit"
-        debit = "debit"
-        cash = "cash"
-        crypto = "crypto"
-
-        @staticmethod
-        def list():
-            return [e.value for e in PaymentType.TypeEnum]
-
-    id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(ChoiceType(TypeEnum, impl=db.String()), default=TypeEnum.cash.value)
-
 
 
 class Category(db.Model):
@@ -41,11 +25,6 @@ tags = db.Table('tags',
                 db.Column('business_id', db.Integer, db.ForeignKey('business.id'), primary_key=True)
                 )
 
-payment_types = db.Table('payment_types',
-                         db.Column('payment_type_id', db.Integer, db.ForeignKey('payment_type.id'), primary_key=True),
-                         db.Column('business_id', db.Integer, db.ForeignKey('business.id'), primary_key=True)
-                         )
-
 
 class Business(db.Model, TimestampMixin):
     """
@@ -61,6 +40,16 @@ class Business(db.Model, TimestampMixin):
         def list():
             return [x.value for x in Business.StatusEnum]
 
+    class PaymentTypeEnum(Enum):
+        credit = "credit"
+        debit = "debit"
+        cash = "cash"
+        crypto = "crypto"
+
+        @staticmethod
+        def list():
+            return [e.value for e in Business.TypeEnum]
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=True, nullable=False)
     description = db.Column(db.String())
@@ -71,15 +60,14 @@ class Business(db.Model, TimestampMixin):
     accepted_at = db.Column(db.DateTime, nullable=True, default=None)
     notes = db.Column(db.String(), nullable=True)
     capacity = db.Column(db.Integer, nullable=True)
-
+    payment_types = db.Column(ScalarListType(), default=[PaymentTypeEnum.cash.value])
     business_hours = db.relationship('BusinessHour', backref='business', lazy=True)
     addresses = db.relationship('Address', backref='business', lazy=True)
     phones = db.relationship('Phone', backref='business', lazy=True)
     social_links = db.relationship('SocialLink', backref='business', lazy=True)
     tags = db.relationship('Tag', secondary=tags, lazy='subquery',
                            backref=db.backref('pages', lazy=True))
-    payment_types = db.relationship('PaymentType', secondary=payment_types, lazy='subquery',
-                                    backref=db.backref('payment_types', lazy=True))
+
     owner_id = db.Column(db.Integer, db.ForeignKey("owner.id"), nullable=True)
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)
 
