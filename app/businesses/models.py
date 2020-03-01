@@ -68,7 +68,6 @@ class Business(db.Model, TimestampMixin):
     tags = db.relationship('Tag', secondary=tags, lazy='subquery',
                            backref=db.backref('pages', lazy=True))
 
-    owner_id = db.Column(db.Integer, db.ForeignKey("owner.id"), nullable=True)
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)
 
     restaurant_id = db.Column(db.Integer, db.ForeignKey("restaurant.id"), nullable=True)

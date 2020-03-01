@@ -63,31 +63,6 @@ class User(db.Model):
     }
 
 
-class Customer(User):
-    """
-    Customer model
-    """
-    __tablename__ = 'customer'
-
-    id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
-
-    __mapper_args__ = {
-        'polymorphic_identity': 'customer',
-    }
-
-
-class Owner(User):
-    """
-    Owner model
-    """
-    __tablename__ = 'owner'
-
-    id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
-    business = db.relationship('Business', backref='owner', lazy=True)
-
-    __mapper_args__ = {
-        'polymorphic_identity': 'owner',
-    }
 
 
 class RevokedTokenModel(db.Model):

@@ -40,7 +40,7 @@ def create_app(config=None):
     migrate.init_app(app, db)
 
     # Initialize models
-    from .users.models import User, Customer, Owner, RevokedTokenModel
+    from .users.models import User, RevokedTokenModel
     from .businesses.models import Business, BusinessHour, Category, Address
 
     # Initialize API
