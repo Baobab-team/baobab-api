@@ -21,12 +21,12 @@ def seed_db():
                                 Phone(
                                     number="514-555-5555",
                                     extension="",
-                                    type="tel",
+                                    type="telephone",
                                 ),
                                 Phone(
                                     number="514-232-3456",
                                     extension="",
-                                    type="tel",
+                                    type="telephone",
                                 ),
                             ]
                             ))
@@ -54,6 +54,7 @@ def seed_db():
                             ))
     db.session.commit()
 
+    print("Suuccesfuly seeded the database")
 
 if __name__ == '__main__':
     cli()

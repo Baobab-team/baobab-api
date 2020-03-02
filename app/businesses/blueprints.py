@@ -22,7 +22,7 @@ def accept_business(id_):
         abort(400, message="Bad request")
 
     new_status = data["status"]
-    if new_status in Business.statuses:
+    if new_status in Business.StatusEnum.list():
         business.process_status(new_status)
         business_repository.save(business)
     else:
