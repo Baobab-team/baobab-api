@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy_utils import ChoiceType, ScalarListType
+from sqlalchemy_utils import ScalarListType
 
 from app import db
 from app.common.base import TimestampMixin
@@ -56,7 +56,7 @@ class Business(db.Model, TimestampMixin):
     slogan = db.Column(db.String())
     website = db.Column(db.String(), nullable=True)
     email = db.Column(db.String(), nullable=True)
-    status = db.Column(ChoiceType(StatusEnum, impl=db.String()), default=StatusEnum.pending.value)
+    status = db.Column(db.String(), default=StatusEnum.pending.value)
     accepted_at = db.Column(db.DateTime, nullable=True, default=None)
     notes = db.Column(db.String(), nullable=True)
     capacity = db.Column(db.Integer, nullable=True)
@@ -132,10 +132,10 @@ class Address(db.Model):
     street_number = db.Column(db.String())
     street_type = db.Column(db.String(5))
     street_name = db.Column(db.String())
-    direction = db.Column(ChoiceType(DirectionEnum, impl=db.String()))
+    direction = db.Column(db.String())
     city = db.Column(db.String(), default="Montreal")
     zip_code = db.Column(db.String())
-    province = db.Column(ChoiceType(ProvinceEnum, impl=db.String()))
+    province = db.Column(db.String())
     region = db.Column(db.String())
     country = db.Column(db.String())
     business_id = db.Column(db.Integer, db.ForeignKey('business.id'),
@@ -168,7 +168,7 @@ class BusinessHour(db.Model):
             return [e.value for e in BusinessHour.DaysEnum]
 
     id = db.Column(db.Integer, primary_key=True)
-    day = db.Column(ChoiceType(DaysEnum, impl=db.String()))
+    day = db.Column(db.String(), nullable=False)
     closing_time = db.Column(db.Time, nullable=False, default=datetime.utcnow())
     opening_time = db.Column(db.Time, nullable=False, default=datetime.utcnow())
     business_id = db.Column(db.Integer, db.ForeignKey("business.id"))
@@ -193,7 +193,7 @@ class Phone(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     number = db.Column(db.String(), nullable=False)
     extension = db.Column(db.String(), nullable=False)
-    type = db.Column(ChoiceType(Type, impl=db.String()))
+    type = db.Column(db.String(), default=Type.tel.value)
     business_id = db.Column(db.Integer, db.ForeignKey('business.id'),
                             nullable=False)
 
@@ -241,7 +241,7 @@ class SocialLink(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     link = db.Column(db.String(), nullable=False)
-    type = db.Column(ChoiceType(TypeEnum, impl=db.String()))
+    type = db.Column(db.String())
     business_id = db.Column(db.Integer, db.ForeignKey('business.id'), nullable=False)
 
 
