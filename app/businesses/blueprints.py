@@ -14,7 +14,7 @@ business_repository = BusinessRepository()
 
 @blueprint.route('/businesses/<int:id_>/processStatus', methods=['PUT'])
 @marshal_with(BusinessSchema, success_code=200)
-def accept_business(id_):
+def processStatus(id_):
     business = business_repository.get(id_)
     data = request.get_json()
 
