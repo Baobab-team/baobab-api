@@ -12,7 +12,7 @@ class MyTestCase(unittest.TestCase):
         self.app = create_app(config=TestingConfig)
         self.client = self.app.test_client
 
-        self.tags = [Tag(**{"name": "Tag{}".format(i)}) for i in range(10)]
+        self.tags = [Tag(**{"name": "Tag{}".format(i)}) for i in range(1,10)]
 
         # binds the app to the current context
         with self.app.app_context():
@@ -31,25 +31,31 @@ class MyTestCase(unittest.TestCase):
             db.drop_all()
 
     def test_post(self):
-        # Add business
         res = self.client().post('/api_v1/tags', json={"name": "LOL"})
         self.assertEqual(201, res.status_code)
         self.assertIn('LOL', str(res.data))
 
     def test_put(self):
-        # Add business
         res = self.client().put('/api_v1/tags/1', json={"name": "Another tag"})
         self.assertEqual(200, res.status_code)
         self.assertIn('Another tag', str(res.data))
 
     def test_get(self):
-        # Add business
         res = self.client().get('/api_v1/tags')
         self.assertEqual(200, res.status_code)
         self.assertIn('Tag1', str(res.data))
         self.assertIn('Tag3', str(res.data))
         self.assertIn('Tag9', str(res.data))
 
+    def test_get_one(self):
+        res = self.client().get('/api_v1/tags/1')
+        self.assertEqual(200, res.status_code)
+        self.assertIn('Tag1', str(res.data))
+
+    def test_delete(self):
+        res = self.client().delete('/api_v1/tags/1')
+        self.assertEqual(204, res.status_code)
+        self.assertEqual("", res.data.decode("utf-8"))
 
 if __name__ == '__main__':
     unittest.main()
