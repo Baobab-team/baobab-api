@@ -1,11 +1,10 @@
-
 from flask_restful import Resource, abort
 from flask_restful.reqparse import Argument
 
 from app.utils.decorators import parse_with, marshal_with, parse_request
-from .repositories import BusinessRepository, CategoryRepository
+from .repositories import BusinessRepository, CategoryRepository, TagRepository
 from .schemas import BusinessCreateSchema, CategorySchema, CategoryCreateSchema, CategoryUpdateSchema, BusinessSchema, \
-    BusinessUpdateSchema
+    BusinessUpdateSchema, TagSchema, TagSchemaCreateOrUpdate
 
 
 class BusinessCollection(Resource):
@@ -51,11 +50,6 @@ class BusinessScalar(Resource):
     def get(self, id):
         return self.repository.query.filter_by(id=id).first_or_404(description='Business doesnt exist')
 
-    def delete(self, id):
-        # return proper status code
-        self.repository.delete(id)
-        return None, 204
-
 
 class CategoryScalar(Resource):
 
@@ -100,4 +94,44 @@ class CategoriesCollection(Resource):
         return self.repository.save(entity)
 
 
+class TagScalar(Resource):
 
+    def __init__(self, repository_factory=TagRepository):
+        super(TagScalar, self).__init__()
+        self.repository = repository_factory()
+
+    @parse_with(TagSchemaCreateOrUpdate(), arg_name="entity")
+    @marshal_with(TagSchema)
+    def put(self, id, entity, **kwargs):
+        return self.repository.update(id, **entity)
+
+    def delete(self, id):
+
+        # return proper status code
+        if self.repository.delete(id):
+            return None, 204
+        else:
+            return {"message": "Tag doesnt exist"}, 404
+
+    @marshal_with(TagSchema)
+    def get(self, id):
+        return self.repository.query.filter_by(id=id).first_or_404(description='Tag doesnt exist')
+
+
+class TagCollection(Resource):
+
+    def __init__(self, repository_factory=TagRepository):
+        super(TagCollection, self).__init__()
+        self.repository = repository_factory()
+
+    @marshal_with(TagSchema, many=True, success_code=200)
+    def get(self):
+        return self.repository.query.all()
+
+    @parse_with(TagSchema(), arg_name="entity")
+    @marshal_with(TagSchema, success_code=201)
+    def post(self, entity, **kwargs):
+        if self.repository.exist(entity.name):
+            abort(400, message="Tag already exist")
+
+        return self.repository.save(entity)

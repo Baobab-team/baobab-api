@@ -52,7 +52,7 @@ class Business(db.Model, TimestampMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=True, nullable=False)
-    description = db.Column(db.String())
+    description = db.Column(db.String(),nullable=True)
     slogan = db.Column(db.String())
     website = db.Column(db.String(), nullable=True)
     email = db.Column(db.String(), nullable=True)

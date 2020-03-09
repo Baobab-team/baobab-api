@@ -39,3 +39,6 @@ api.add_resource(res.BusinessScalar, "/businesses/<int:id>")
 api.add_resource(res.CategoriesCollection, "/categories")
 api.add_resource(res.CategoryScalar, "/categories/<int:id>")
 
+api.add_resource(res.TagCollection, "/tags")
+api.add_resource(res.TagScalar, "/tags/<int:id>")
+

@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields, post_load
 from marshmallow.validate import OneOf
 
-from .models import Category, Business, SocialLink, Address, BusinessHour, Phone
+from .models import Category, Business, SocialLink, Address, BusinessHour, Phone, Tag
 
 
 class AddressSchema(Schema):
@@ -23,9 +23,17 @@ class SocialLinkSchema(Schema):
     type = fields.String(required=True, validate=OneOf(SocialLink.TypeEnum.list()))
 
 
+class TagSchemaCreateOrUpdate(Schema):
+    name = fields.String(required=True)
+
+
 class TagSchema(Schema):
     id = fields.String()
     name = fields.String(required=True)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return Tag(**data)
 
 
 class BusinessHourSchema(Schema):
