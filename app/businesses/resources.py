@@ -2,9 +2,10 @@ from flask_restful import Resource, abort
 from flask_restful.reqparse import Argument
 
 from app.utils.decorators import parse_with, marshal_with, parse_request
+from .models import Tag
 from .repositories import BusinessRepository, CategoryRepository, TagRepository
 from .schemas import BusinessCreateSchema, CategorySchema, CategoryCreateSchema, CategoryUpdateSchema, BusinessSchema, \
-    BusinessUpdateSchema, TagSchema, TagSchemaCreateOrUpdate
+    BusinessUpdateSchema, TagSchema, TagSchemaCreateOrUpdate, TagListSchema
 
 
 class BusinessCollection(Resource):
@@ -19,7 +20,7 @@ class BusinessCollection(Resource):
     @parse_request(
         Argument("querySearch", type=str, store_missing=False),
         Argument("status", type=str, store_missing=False),
-        Argument("accepted_at", type=str,store_missing=False),
+        Argument("accepted_at", type=str, store_missing=False),
     )
     @marshal_with(BusinessSchema, many=True, success_code=200)
     def get(self, *args, **kwargs):
@@ -50,6 +51,44 @@ class BusinessScalar(Resource):
     def get(self, id):
         return self.repository.query.filter_by(id=id).first_or_404(description='Business doesnt exist')
 
+
+class BusinessTagCollection(Resource):
+
+    def __init__(self, repository_factory=BusinessRepository):
+        super(BusinessTagCollection, self).__init__()
+        self.repository = repository_factory()
+
+    @marshal_with(TagSchema, many=True)
+    def get(self, id):
+        business = self.repository.get(id, description="Business doesnt exist")
+        return business.tags
+
+    @parse_with(TagSchema(), many=True, arg_name="tags")
+    @marshal_with(TagSchema, many=True, success_code=201)
+    def post(self, id, tags, **kwargs):
+        business = self.repository.get(id, description='Business doesnt exist')
+
+        for tag in tags:
+            tag.addBusinessTag(business)
+
+        self.repository.save(business)
+        return business.tags
+
+
+class BusinessTagScalar(Resource):
+
+    def __init__(self, repository_factory=BusinessRepository):
+        super(BusinessTagScalar, self).__init__()
+        self.repository = repository_factory()
+
+    def delete(self, id, tag_id, **kwargs):
+        business = self.repository.get(id, description='Business doesnt exist')
+        tag = Tag.query.get(tag_id)
+        tag.removeBusinessTag(business)
+
+        self.repository.save(business)
+
+        return None,204
 
 class CategoryScalar(Resource):
 

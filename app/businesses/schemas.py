@@ -36,6 +36,10 @@ class TagSchema(Schema):
         return Tag(**data)
 
 
+class TagListSchema(Schema):
+    tags = fields.List(fields.Nested(TagSchema))
+
+
 class BusinessHourSchema(Schema):
     id = fields.Integer()
     day = fields.String(required=True,validate=OneOf(BusinessHour.DaysEnum.list()))

@@ -19,8 +19,8 @@ class BaseRepository(object):
         assert self.model, "A model is required to use the query property."
         return self.session.query(self.model)
 
-    def get(self, id_, strict=False):
-        entity = self.query.get(id_)
+    def get(self, id, description="Object doesnt exist", strict=False):
+        entity = self.query.get_or_404(id, description=description)
         if strict and not entity:
             raise KeyError("DB Object not found.")
         return entity
