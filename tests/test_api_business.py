@@ -72,18 +72,14 @@ class BusinessTestCase(unittest.TestCase):
             db.session.remove()
             db.drop_all()
 
-    def setup_minimal_data(self):
-        business = Business(name="business1", category_id="1")
-        tag = Tag(name="Tag1")
-        tag.addBusinessTag(business)
+    def setup_minimal_data(self, models):
         # binds the app to the current context
         with self.app.app_context():
             # create all tables
             db.drop_all()
             db.create_all()
-            db.session.add(Category(**self.category1))
-            db.session.add(tag)
-            db.session.add(business)
+            for model in models:
+                db.session.add(model)
             db.session.commit()
 
     def test_business_add(self):
@@ -176,28 +172,44 @@ class BusinessTestCase(unittest.TestCase):
         self.assertEqual(400, res.status_code)
 
     def test_business_tag_get(self):
-        self.setup_minimal_data()
+        business = Business(name="business1", category_id="1")
+        tag = Tag(name="Tag1")
+        tag.addBusinessTag(business)
+        category = Category(**self.category1)
+        self.setup_minimal_data([business, tag, category])
 
         res = self.client().get('/api_v1/businesses/1/tags')
         self.assertEqual(200, res.status_code)
         self.assertIn('Tag1', str(res.data))
 
     def test_business_tag_post(self):
-        self.setup_minimal_data()
+        business = Business(name="business1", category_id="1")
+        tag = Tag(name="Tag1")
+        tag.addBusinessTag(business)
+        category = Category(**self.category1)
+        self.setup_minimal_data([business, tag, category])
 
         res = self.client().post('/api_v1/businesses/1/tags', json=[{ "name": "Beauty"}])
         self.assertEqual(201, res.status_code)
         self.assertIn('Beauty', str(res.data))
 
     def test_business_tag_post(self):
-        self.setup_minimal_data()
+        business = Business(name="business1", category_id="1")
+        tag = Tag(name="Tag1")
+        tag.addBusinessTag(business)
+        category = Category(**self.category1)
+        self.setup_minimal_data([business, tag, category])
 
         res = self.client().post('/api_v1/businesses/1/tags', json=[{ "name": "Beauty"}])
         self.assertEqual(201, res.status_code)
         self.assertIn('Beauty', str(res.data))
 
     def test_business_tag_delete(self):
-        self.setup_minimal_data()
+        business = Business(name="business1", category_id="1")
+        tag = Tag(name="Tag1")
+        tag.addBusinessTag(business)
+        category = Category(**self.category1)
+        self.setup_minimal_data([business,tag,category])
 
         res = self.client().delete('/api_v1/businesses/1/tags/1')
         self.assertEqual(204, res.status_code)
