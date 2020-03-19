@@ -14,7 +14,7 @@ business_repository = BusinessRepository()
 
 @blueprint.route('/businesses/<int:id_>/processStatus', methods=['PUT'])
 @marshal_with(BusinessSchema, success_code=200)
-def accept_business(id_):
+def processStatus(id_):
     business = business_repository.get(id_)
     data = request.get_json()
 
@@ -35,7 +35,12 @@ api = Api(blueprint)
 
 api.add_resource(res.BusinessCollection, "/businesses")
 api.add_resource(res.BusinessScalar, "/businesses/<int:id>")
+api.add_resource(res.BusinessTagCollection, "/businesses/<int:id>/tags")
+api.add_resource(res.BusinessTagScalar, "/businesses/<int:id>/tags/<int:tag_id>")
 
 api.add_resource(res.CategoriesCollection, "/categories")
 api.add_resource(res.CategoryScalar, "/categories/<int:id>")
+
+api.add_resource(res.TagCollection, "/tags")
+api.add_resource(res.TagScalar, "/tags/<int:id>")
 

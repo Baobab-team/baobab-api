@@ -1,4 +1,4 @@
-from app.businesses.models import Business, Category
+from app.businesses.models import Business, Category, Tag
 from app.common.repositories import BaseRepository
 
 CONTAINS = '%{}%'
@@ -55,6 +55,33 @@ class CategoryRepository(BaseRepository):
         category = self.get(id_)
 
         if category is None or len(category.businesses) > 0:
+            return False
+
+        return self._delete(id_)
+
+
+class TagRepository(BaseRepository):
+    model = Tag
+
+    def save(self, entity):
+        super(TagRepository, self).save(entity)
+        return entity
+
+    def exist(self, name):
+        entity = self.filter(name=name).first()
+        if entity:
+            return True
+        return False
+
+    def filter(self, *args, **kwargs):
+        query = super(TagRepository, self).filter(**kwargs)
+
+        return query
+
+    def delete(self, id_):
+        category = self.get(id_)
+
+        if category is None:
             return False
 
         return self._delete(id_)

@@ -52,7 +52,7 @@ class Business(db.Model, TimestampMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=True, nullable=False)
-    description = db.Column(db.String())
+    description = db.Column(db.String(), nullable=True)
     slogan = db.Column(db.String())
     website = db.Column(db.String(), nullable=True)
     email = db.Column(db.String(), nullable=True)
@@ -66,7 +66,7 @@ class Business(db.Model, TimestampMixin):
     phones = db.relationship('Phone', backref='business', lazy=True)
     social_links = db.relationship('SocialLink', backref='business', lazy=True)
     tags = db.relationship('Tag', secondary=tags, lazy='subquery',
-                           backref=db.backref('pages', lazy=True))
+                           backref=db.backref('businesses', lazy=True))
 
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)
 
@@ -90,6 +90,21 @@ class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=True)
 
+    def addBusinessTag(self, business):
+        """
+        Add item to tags association table
+        :param business:
+        :return:
+        """
+        self.businesses.append(business)
+
+    def addBusinessTags(self,businesses):
+        for business in businesses:
+            self.addBusinessTag(business)
+
+    def removeBusinessTag(self,business):
+        index = self.businesses.index(business)
+        self.businesses.pop(index)
 
 class Address(db.Model):
     """
@@ -243,5 +258,3 @@ class SocialLink(db.Model):
     link = db.Column(db.String(), nullable=False)
     type = db.Column(db.String())
     business_id = db.Column(db.Integer, db.ForeignKey('business.id'), nullable=False)
-
-
