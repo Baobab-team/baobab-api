@@ -6,6 +6,7 @@ from .models import Tag
 from .repositories import BusinessRepository, CategoryRepository, TagRepository
 from .schemas import BusinessCreateSchema, CategorySchema, CategoryCreateSchema, CategoryUpdateSchema, BusinessSchema, \
     BusinessUpdateSchema, TagSchema, TagSchemaCreateOrUpdate
+from ..consts import BUSINESS_PER_PAGE
 
 
 class BusinessCollection(Resource):
@@ -23,13 +24,16 @@ class BusinessCollection(Resource):
         Argument("accepted_at", type=str, store_missing=False),
         Argument("order_by", type=str, choices=("name"), default='name'),
         Argument("order", type=str, choices=("ASC", "DESC"), default="ASC"),
+        Argument("page", type=int, default=1),
+        Argument("businessPerPage", type=int, default=BUSINESS_PER_PAGE),
     )
     @marshal_with(BusinessSchema, many=True, success_code=200)
-    def get(self, querySearch=None, accepted_at=None, status=None, order=None, order_by=None, **kwargs):
+    def get(self, querySearch=None, accepted_at=None, status=None, order=None, order_by=None, page=1,
+            businessPerPage=BUSINESS_PER_PAGE, **kwargs):
         return self.repository.filter(
             querySearch=querySearch, accepted_at=accepted_at, status=status, order=order,
             order_by=order_by, **kwargs
-        ).all()
+        ).paginate(page, businessPerPage, False).items
 
     @parse_with(BusinessCreateSchema(), arg_name="entity")
     @marshal_with(BusinessSchema, success_code=201)
