@@ -1,9 +1,8 @@
-import unittest
 import json
+import unittest
 
 from app import create_app, db
 from app.businesses.models import Category, Tag, Business
-from app.businesses.schemas import BusinessSchema
 from app.config import TestingConfig
 
 
@@ -22,7 +21,7 @@ class BusinessTestCase(unittest.TestCase):
             'extension': '',
             'type': 'tel',
         }
-        self.business1 = {
+        self.businessA = {
             'name': 'Gracia Afrika',
             'phones': [
 
@@ -40,118 +39,91 @@ class BusinessTestCase(unittest.TestCase):
                 }
             ]
         }
-        self.business2 = {
-            'name': 'Le Bled',
-            'phones': [
-                # self.phone1,
-            ],
-            'website': 'yolo2.website.com',
-            'description': 'THe cooleet restaurant2',
-            'email': 'le.bled@gmail.com',
-            'notes': 'Lorem Ipsum',
-            'category_id': 1,
-        }
 
-        category = Category(**self.category1)
-        business = Business(name="business1", category_id="1")
-        tag = Tag(name="Tag1")
-        tag.addBusinessTag(business)
+        category1 = Category(name="category1")
+        category2 = Category(name="category2")
+        businessA = Business(name="businessA", category_id="1", description="coolest")
+        businessB = Business(name="businessB", category_id="1")
+        businessC = Business(name="businessC", category_id="2")
+        tag1 = Tag(name="Tag1")
+        tag2 = Tag(name="Tag2")
+        tag1.addBusinessTags([businessA, businessB, businessC])
+        tag2.addBusinessTags([businessA])
 
         # binds the app to the current context
         with self.app.app_context():
-            # create all tables
             db.drop_all()
             db.create_all()
-            db.session.add(category)
+            for model in [category1, category2, tag1, tag2, businessA, businessB, businessC]:
+                db.session.add(model)
             db.session.commit()
 
     def tearDown(self):
         """teardown all initialized variables."""
         with self.app.app_context():
-            # drop all tables
             db.session.remove()
             db.drop_all()
 
-    def setup_minimal_data(self, models):
-        # binds the app to the current context
-        with self.app.app_context():
-            # create all tables
-            db.drop_all()
-            db.create_all()
-            for model in models:
-                db.session.add(model)
-            db.session.commit()
+    def test_business_post(self):
 
-    def test_business_add(self):
-        """Test API can create a business (POST request)"""
-
-        # Add business
-        res = self.client().post('/api_v1/businesses', json=self.business2)
+        res = self.client().post('/api_v1/businesses', json={"name": "BusinessA", "category_id": "1"})
+        self.assertIn('BusinessA', str(res.data))
         self.assertEqual(201, res.status_code)
-        self.assertIn('Le Bled', str(res.data))
 
-    def test_get_all_business(self):
-        # Add business
-        res = self.client().post('/api_v1/businesses', json=self.business1)
-        self.assertEqual(201, res.status_code)
-        self.assertIn('Gracia Afrika', str(res.data))
-
-        # Add business
-        # res = self.client().post('/api_v1/businesses', json=self.business2)
-        # self.assertEqual(201, res.status_code)
-        # self.assertIn('Le Bled', str(res.data))
-
-        # Fetch business
-        res = self.client().get('/api_v1/businesses')
+    def test_business_get_by_id(self):
+        res = self.client().get('/api_v1/businesses/2')
         self.assertEqual(200, res.status_code)
-        self.assertIn('Gracia Afrika', str(res.data))
-        # self.assertIn('Le Bled', str(res.data))
+        self.assertIn('businessB', str(res.data))
 
-    def test_business_update(self):
-        """Test API can create a business (POST request)"""
-
-        # Add business
-        res = self.client().post('/api_v1/businesses', json=self.business1)
-        self.assertEqual(201, res.status_code)
-        self.assertIn('Gracia Afrika', str(res.data))
-
-        # Update business
-        res = self.client().put('/api_v1/businesses/1', json={'name': 'New name'})
+        res = self.client().get('/api_v1/businesses/3')
         self.assertEqual(200, res.status_code)
-        self.assertIn('New name', str(res.data))
+        self.assertIn('businessC', str(res.data))
+
+        res = self.client().get('/api_v1/businesses/1')
+        self.assertEqual(200, res.status_code)
+        self.assertIn('businessA', str(res.data))
 
     def test_business_get(self):
-        """Test API can create a business (POST request)"""
-
-        # Add business
-        res = self.client().post('/api_v1/businesses', json=self.business1)
-        self.assertEqual(201, res.status_code)
-        self.assertIn('Gracia Afrika', str(res.data))
-
-        # Fetch business
         res = self.client().get('/api_v1/businesses')
         self.assertEqual(200, res.status_code)
+        self.assertIn('businessA', str(res.data))
+        self.assertIn('businessB', str(res.data))
+        self.assertIn('businessC', str(res.data))
 
-        self.assertIn('Gracia Afrika', str(res.data))
+    def test_business_update(self):
+
+        res = self.client().put('/api_v1/businesses/1', json={"name": "Pizza hut"})
+        self.assertEqual(200, res.status_code)
+        self.assertIn('Pizza hut', str(res.data))
+
+    def test_business_get_with_sort_asc(self):
+        res = self.client().get('/api_v1/businesses?order_by=name')
+        self.assertEqual(200, res.status_code)
+        json_data = json.loads(res.data)
+
+        self.assertEqual(3, len(json_data))
+        self.assertEqual(json_data[0]["name"], "businessA")
+        self.assertEqual(json_data[1]["name"], "businessB")
+        self.assertEqual(json_data[2]["name"], "businessC")
+
+    def test_business_get_with_sort_desc(self):
+
+        res = self.client().get('/api_v1/businesses?order_by=name&order=DESC')
+        self.assertEqual(200, res.status_code)
+        json_data = json.loads(res.data)
+
+        self.assertEqual(3,len(json_data))
+        self.assertEqual(json_data[0]["name"], "businessC")
+        self.assertEqual(json_data[1]["name"], "businessB")
+        self.assertEqual(json_data[2]["name"], "businessA")
 
     def test_business_get_with_filter(self):
-        """Test API can filter a business (GET request)"""
 
-        # Add business
-        res = self.client().post('/api_v1/businesses', json=self.business1)
-        self.assertEqual(201, res.status_code)
-        self.assertIn('Gracia Afrika', str(res.data))
-
-        # Fetch business
         res = self.client().get('/api_v1/businesses?description=coolest&status=pending')
         self.assertEqual(200, res.status_code)
-        self.assertIn('Gracia Afrika', str(res.data))
+        self.assertIn('businessA', str(res.data))
 
     def test_business_action_accept(self):
-        # Add business
-        res = self.client().post('/api_v1/businesses', json=self.business1)
-        self.assertEqual(201, res.status_code)
-        self.assertIn('Gracia Afrika', str(res.data))
 
         res = self.client().put('/api_v1/businesses/1/processStatus', json={"status": "accepted"})
         self.assertEqual(200, res.status_code)
@@ -172,44 +144,17 @@ class BusinessTestCase(unittest.TestCase):
         self.assertEqual(400, res.status_code)
 
     def test_business_tag_get(self):
-        business = Business(name="business1", category_id="1")
-        tag = Tag(name="Tag1")
-        tag.addBusinessTag(business)
-        category = Category(**self.category1)
-        self.setup_minimal_data([business, tag, category])
-
         res = self.client().get('/api_v1/businesses/1/tags')
         self.assertEqual(200, res.status_code)
         self.assertIn('Tag1', str(res.data))
+        self.assertIn('Tag2', str(res.data))
 
     def test_business_tag_post(self):
-        business = Business(name="business1", category_id="1")
-        tag = Tag(name="Tag1")
-        tag.addBusinessTag(business)
-        category = Category(**self.category1)
-        self.setup_minimal_data([business, tag, category])
-
-        res = self.client().post('/api_v1/businesses/1/tags', json=[{ "name": "Beauty"}])
-        self.assertEqual(201, res.status_code)
-        self.assertIn('Beauty', str(res.data))
-
-    def test_business_tag_post(self):
-        business = Business(name="business1", category_id="1")
-        tag = Tag(name="Tag1")
-        tag.addBusinessTag(business)
-        category = Category(**self.category1)
-        self.setup_minimal_data([business, tag, category])
-
-        res = self.client().post('/api_v1/businesses/1/tags', json=[{ "name": "Beauty"}])
+        res = self.client().post('/api_v1/businesses/1/tags', json=[{"name": "Beauty"}])
         self.assertEqual(201, res.status_code)
         self.assertIn('Beauty', str(res.data))
 
     def test_business_tag_delete(self):
-        business = Business(name="business1", category_id="1")
-        tag = Tag(name="Tag1")
-        tag.addBusinessTag(business)
-        category = Category(**self.category1)
-        self.setup_minimal_data([business,tag,category])
-
         res = self.client().delete('/api_v1/businesses/1/tags/1')
         self.assertEqual(204, res.status_code)
+        self.assertEqual("", res.data.decode("utf-8"))

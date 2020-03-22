@@ -80,7 +80,7 @@ class BusinessCreateSchema(Schema):
     phones = fields.List(
         fields.Nested(PhoneSchema)
     )
-    description = fields.String(required=True)
+    description = fields.String(required=False)
     website = fields.String(required=False)
     email = fields.Email(required=False)
     notes = fields.String(required=False)
@@ -118,7 +118,7 @@ class BusinessUpdateSchema(Schema):
 class BusinessSchema(Schema):
     id = fields.String(required=True)
     category_id = fields.Integer(required=True)
-    restaurant_id = fields.Integer(required=True)
+    restaurant_id = fields.Integer(required=False)
     owner_id = fields.String(required=False)
     name = fields.String(required=True)
     description = fields.String(required=True)

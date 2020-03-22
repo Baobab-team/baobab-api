@@ -19,16 +19,6 @@ def parse_request(*args, **kwargs):
     for arg in args:
         parser.add_argument(arg)
 
-    if kwargs.get('allow_ordering', None):
-        parser_args = [p.name for p in parser.args]
-        default_args = [
-            reqparse.Argument("sort_by", type=str, store_missing=False),
-            reqparse.Argument("order", type=str, store_missing=False, choices=('asc', 'desc')),
-        ]
-        for p in default_args:
-            if p.name not in parser_args:
-                parser.add_argument(p)
-
     def decorator(f):
         @functools.wraps(f)
         def inner(*fargs, **fkwargs):
@@ -57,7 +47,7 @@ def parse_with(schema, arg_name='entity', many=False, **kwargs):
 
             except (ValidationError, ValueError, Exception) as e:
                 logger.error("parse_with: {}".format(str(e)))
-                abort(400)
+                abort(400, message="An error occured")
 
             return f(*fargs, **fkwargs)
 
