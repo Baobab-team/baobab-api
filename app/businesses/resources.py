@@ -21,11 +21,12 @@ class BusinessCollection(Resource):
         Argument("querySearch", type=str, store_missing=False),
         Argument("status", type=str, store_missing=False),
         Argument("accepted_at", type=str, store_missing=False),
+        Argument("order_by", type=str, choices=("name"), default='name'),
+        Argument("order", type=str, choices=("ASC","DESC"),default="ASC"),
     )
     @marshal_with(BusinessSchema, many=True, success_code=200)
     def get(self, *args, **kwargs):
-        businesesses = self.repository.filter(*args, **kwargs).all()
-        return businesesses
+        return self.repository.filter(*args, **kwargs).all()
 
     @parse_with(BusinessCreateSchema(), arg_name="entity")
     @marshal_with(BusinessSchema, success_code=201)
@@ -89,6 +90,7 @@ class BusinessTagScalar(Resource):
         self.repository.save(business)
 
         return None,204
+
 
 class CategoryScalar(Resource):
 

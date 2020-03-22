@@ -1,3 +1,5 @@
+from sqlalchemy import asc, desc
+
 from app.businesses.models import Business, Category, Tag
 from app.common.repositories import BaseRepository
 
@@ -13,6 +15,9 @@ class BusinessRepository(BaseRepository):
 
     def filter(self, *args, **kwargs):
         query = self.query
+        order = kwargs.get("order", None)
+        order_by = kwargs.get("order_by", None)
+
         if "querySearch" in kwargs:
             querySearch = CONTAINS.format(kwargs.get("querySearch"))
             query = query.filter(Business.name.ilike(querySearch) | Business.description.ilike(querySearch))
@@ -23,10 +28,16 @@ class BusinessRepository(BaseRepository):
         if "status" in kwargs:
             query = query.filter(Business.status == kwargs.get("status"))
 
+        if order_by:
+            order = asc if order == "ASC" else desc
+            if order_by == "name":
+                query = query.order_by(order(Business.name))
+
+
         return query
 
     def exist(self, name):
-        entity = self.filter(name=name).first()
+        entity = self.query.filter_by(name=name).first()
         if entity:
             return True
         return False
@@ -40,7 +51,7 @@ class CategoryRepository(BaseRepository):
         return entity
 
     def exist(self, name):
-        entity = self.filter(name=name).first()
+        entity = self.query.filter_by(name=name).first()
         if entity:
             return True
         return False
@@ -52,7 +63,7 @@ class CategoryRepository(BaseRepository):
 
     def delete(self, id_):
 
-        category = self.get(id_)
+        category = self.get(id_,description="Category doesnt exist")
 
         if category is None or len(category.businesses) > 0:
             return False
@@ -68,7 +79,7 @@ class TagRepository(BaseRepository):
         return entity
 
     def exist(self, name):
-        entity = self.filter(name=name).first()
+        entity = self.query.filter_by(name=name).first()
         if entity:
             return True
         return False
@@ -79,7 +90,7 @@ class TagRepository(BaseRepository):
         return query
 
     def delete(self, id_):
-        category = self.get(id_)
+        category = self.get(id_,description="Tag doesnt exist")
 
         if category is None:
             return False
