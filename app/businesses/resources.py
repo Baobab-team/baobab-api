@@ -5,7 +5,7 @@ from app.utils.decorators import parse_with, marshal_with, parse_request
 from .models import Tag
 from .repositories import BusinessRepository, CategoryRepository, TagRepository
 from .schemas import BusinessCreateSchema, CategorySchema, CategoryCreateSchema, CategoryUpdateSchema, BusinessSchema, \
-    BusinessUpdateSchema, TagSchema, TagSchemaCreateOrUpdate, TagListSchema
+    BusinessUpdateSchema, TagSchema, TagSchemaCreateOrUpdate
 
 
 class BusinessCollection(Resource):
@@ -22,11 +22,14 @@ class BusinessCollection(Resource):
         Argument("status", type=str, store_missing=False),
         Argument("accepted_at", type=str, store_missing=False),
         Argument("order_by", type=str, choices=("name"), default='name'),
-        Argument("order", type=str, choices=("ASC","DESC"),default="ASC"),
+        Argument("order", type=str, choices=("ASC", "DESC"), default="ASC"),
     )
     @marshal_with(BusinessSchema, many=True, success_code=200)
-    def get(self, *args, **kwargs):
-        return self.repository.filter(*args, **kwargs).all()
+    def get(self, querySearch=None, accepted_at=None, status=None, order=None, order_by=None, **kwargs):
+        return self.repository.filter(
+            querySearch=querySearch, accepted_at=accepted_at, status=status, order=order,
+            order_by=order_by, **kwargs
+        ).all()
 
     @parse_with(BusinessCreateSchema(), arg_name="entity")
     @marshal_with(BusinessSchema, success_code=201)

@@ -13,26 +13,23 @@ class BusinessRepository(BaseRepository):
         super(BusinessRepository, self).save(entity)
         return entity
 
-    def filter(self, *args, **kwargs):
+    def filter(self, querySearch=None, accepted_at=None, status=None, order=None, order_by=None, **kwargs):
         query = self.query
-        order = kwargs.get("order", None)
-        order_by = kwargs.get("order_by", None)
 
-        if "querySearch" in kwargs:
-            querySearch = CONTAINS.format(kwargs.get("querySearch"))
+        if querySearch:
+            querySearch = CONTAINS.format(querySearch)
             query = query.filter(Business.name.ilike(querySearch) | Business.description.ilike(querySearch))
 
-        if "accepted_at" in kwargs:
-            query = query.filter(Business.accepted_at == kwargs.get("accepted_at"))
+        if accepted_at:
+            query = query.filter(Business.accepted_at == accepted_at)
 
-        if "status" in kwargs:
-            query = query.filter(Business.status == kwargs.get("status"))
+        if status:
+            query = query.filter(Business.status == status)
 
         if order_by:
             order = asc if order == "ASC" else desc
             if order_by == "name":
                 query = query.order_by(order(Business.name))
-
 
         return query
 
@@ -63,7 +60,7 @@ class CategoryRepository(BaseRepository):
 
     def delete(self, id_):
 
-        category = self.get(id_,description="Category doesnt exist")
+        category = self.get(id_, description="Category doesnt exist")
 
         if category is None or len(category.businesses) > 0:
             return False
@@ -90,7 +87,7 @@ class TagRepository(BaseRepository):
         return query
 
     def delete(self, id_):
-        category = self.get(id_,description="Tag doesnt exist")
+        category = self.get(id_, description="Tag doesnt exist")
 
         if category is None:
             return False
