@@ -45,6 +45,9 @@ class BusinessTestCase(unittest.TestCase):
         businessA = Business(name="businessA", category_id="1", description="coolest")
         businessB = Business(name="businessB", category_id="1")
         businessC = Business(name="businessC", category_id="2")
+        businessA.process_status(Business.StatusEnum.accepted.value)
+        businessB.process_status(Business.StatusEnum.accepted.value)
+        businessC.process_status(Business.StatusEnum.accepted.value)
         tag1 = Tag(name="Tag1")
         tag2 = Tag(name="Tag2")
         tag1.addBusinessTags([businessA, businessB, businessC])
@@ -115,7 +118,7 @@ class BusinessTestCase(unittest.TestCase):
         self.assertEqual(json_data[2]["name"], "businessA")
 
     def test_business_get_with_filter(self):
-        res = self.client().get('/api_v1/businesses?description=coolest&status=pending')
+        res = self.client().get('/api_v1/businesses?description=coolest&status=accepted')
         self.assertEqual(200, res.status_code)
         self.assertIn('businessA', str(res.data))
 
