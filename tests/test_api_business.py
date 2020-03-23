@@ -65,7 +65,6 @@ class BusinessTestCase(unittest.TestCase):
             db.drop_all()
 
     def test_business_post(self):
-
         res = self.client().post('/api_v1/businesses', json={"name": "BusinessA", "category_id": "1"})
         self.assertIn('BusinessA', str(res.data))
         self.assertEqual(201, res.status_code)
@@ -91,7 +90,6 @@ class BusinessTestCase(unittest.TestCase):
         self.assertIn('businessC', str(res.data))
 
     def test_business_update(self):
-
         res = self.client().put('/api_v1/businesses/1', json={"name": "Pizza hut"})
         self.assertEqual(200, res.status_code)
         self.assertIn('Pizza hut', str(res.data))
@@ -107,24 +105,21 @@ class BusinessTestCase(unittest.TestCase):
         self.assertEqual(json_data[2]["name"], "businessC")
 
     def test_business_get_with_sort_desc(self):
-
         res = self.client().get('/api_v1/businesses?order_by=name&order=DESC')
         self.assertEqual(200, res.status_code)
         json_data = json.loads(res.data)
 
-        self.assertEqual(3,len(json_data))
+        self.assertEqual(3, len(json_data))
         self.assertEqual(json_data[0]["name"], "businessC")
         self.assertEqual(json_data[1]["name"], "businessB")
         self.assertEqual(json_data[2]["name"], "businessA")
 
     def test_business_get_with_filter(self):
-
         res = self.client().get('/api_v1/businesses?description=coolest&status=pending')
         self.assertEqual(200, res.status_code)
         self.assertIn('businessA', str(res.data))
 
     def test_business_action_accept(self):
-
         res = self.client().put('/api_v1/businesses/1/processStatus', json={"status": "accepted"})
         self.assertEqual(200, res.status_code)
         self.assertIn("accepted", str(res.data))
@@ -158,3 +153,29 @@ class BusinessTestCase(unittest.TestCase):
         res = self.client().delete('/api_v1/businesses/1/tags/1')
         self.assertEqual(204, res.status_code)
         self.assertEqual("", res.data.decode("utf-8"))
+
+    def test_business_pagination(self):
+        res = self.client().get('/api_v1/businesses?page=1')
+        self.assertEqual(200, res.status_code)
+        self.assertIn('businessA', str(res.data))
+        self.assertIn('businessB', str(res.data))
+        self.assertIn('businessC', str(res.data))
+
+    def test_business_pagination_page_1(self):
+        res = self.client().get('/api_v1/businesses?page=1&businessPerPage=2')
+        self.assertEqual(200, res.status_code)
+        self.assertIn('businessA', str(res.data))
+        self.assertIn('businessB', str(res.data))
+        self.assertNotIn('businessC', str(res.data))
+
+    def test_business_pagination_page_2(self):
+        res = self.client().get('/api_v1/businesses?page=2&businessPerPage=2')
+        self.assertEqual(200, res.status_code)
+        self.assertNotIn('businessA', str(res.data))
+        self.assertNotIn('businessB', str(res.data))
+        self.assertIn('businessC', str(res.data))
+
+    def test_business_pagination_outside_of_range(self):
+        res = self.client().get('/api_v1/businesses?page=100')
+        self.assertEqual(200, res.status_code)
+        self.assertEqual([], json.loads(res.data))
