@@ -67,8 +67,8 @@ class CategoryUpdateSchema(Schema):
 
 
 class CategorySchema(Schema):
-    id = fields.String(required=False)
-    name = fields.String(required=True)
+    id = fields.Integer(required=False)
+    name = fields.String(required=False)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -84,7 +84,7 @@ class BusinessCreateSchema(Schema):
     website = fields.String(required=False)
     email = fields.Email(required=False)
     notes = fields.String(required=False)
-    category_id = fields.Integer(required=True)
+    category = fields.Nested(CategorySchema, required=True)
     owner_id = fields.Integer(required=False)
     status = fields.String(required=False)
     capacity = fields.Integer(required=False)
@@ -100,7 +100,7 @@ class BusinessCreateSchema(Schema):
 
 
 class BusinessUpdateSchema(Schema):
-    category_id = fields.Integer()
+    category = fields.Nested(CategorySchema)
     owner_id = fields.Integer()
     name = fields.String()
     description = fields.String()
@@ -117,7 +117,7 @@ class BusinessUpdateSchema(Schema):
 
 class BusinessSchema(Schema):
     id = fields.String(required=True)
-    category_id = fields.Integer(required=True)
+    category = fields.Nested(CategorySchema)
     restaurant_id = fields.Integer(required=False)
     owner_id = fields.String(required=False)
     name = fields.String(required=True)
