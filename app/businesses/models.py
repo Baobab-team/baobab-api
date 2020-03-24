@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy_utils import ScalarListType
+from sqlalchemy_utils import *
 
 from app import db
 from app.common.base import TimestampMixin
@@ -85,7 +85,6 @@ class Business(db.Model, TimestampMixin):
             self.accepted_at = None
 
 
-
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=True)
@@ -105,6 +104,7 @@ class Tag(db.Model):
     def removeBusinessTag(self,business):
         index = self.businesses.index(business)
         self.businesses.pop(index)
+
 
 class Address(db.Model):
     """
@@ -244,7 +244,7 @@ class Plate(db.Model):
 
 class SocialLink(db.Model):
     class TypeEnum(Enum):
-        instragram = "Instagram"
+        instagram = "Instagram"
         facebook = "Facebook"
         linkedin = "LinkedIn"
         snapchat = "Snapchat"
