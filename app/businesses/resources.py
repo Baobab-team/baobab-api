@@ -2,7 +2,7 @@ from flask_restful import Resource, abort
 from flask_restful.reqparse import Argument
 
 from app.utils.decorators import parse_with, marshal_with, parse_request
-from .models import Tag
+from .models import Tag, Business
 from .repositories import BusinessRepository, CategoryRepository, TagRepository
 from .schemas import BusinessCreateSchema, CategorySchema, CategoryCreateSchema, CategoryUpdateSchema, BusinessSchema, \
     BusinessUpdateSchema, TagSchema, TagSchemaCreateOrUpdate
@@ -28,7 +28,8 @@ class BusinessCollection(Resource):
         Argument("businessPerPage", type=int, default=BUSINESS_PER_PAGE),
     )
     @marshal_with(BusinessSchema, many=True, success_code=200)
-    def get(self, querySearch=None, accepted_at=None, status=None, order=None, order_by=None, page=1,
+    def get(self, querySearch=None, accepted_at=None, status=Business.StatusEnum.accepted.value, order=None,
+            order_by=None, page=1,
             businessPerPage=BUSINESS_PER_PAGE, **kwargs):
         return self.repository.filter(
             querySearch=querySearch, accepted_at=accepted_at, status=status, order=order,
