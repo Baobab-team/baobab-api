@@ -1,7 +1,7 @@
 from flask.cli import FlaskGroup
 
 from app import create_app, db
-from app.businesses.models import Category, Business, Phone, Tag, BusinessHour, SocialLink
+from app.businesses.models import Category, Business, Phone, Tag, BusinessHour, SocialLink, Address
 import datetime
 
 app = create_app()
@@ -37,6 +37,30 @@ def seed_db():
                             website="www.helloworld.com",
                             email="helloworld@hello.com",
                             capacity=23,
+                            addresses=[
+                                Address(
+                                    street_number="5692",
+                                    street_type="rue",
+                                    street_name="saint-André",
+                                    direction=Address.DirectionEnum.e.value,
+                                    city="Montreal",
+                                    zip_code="h3s2k1",
+                                    province=Address.ProvinceEnum.qc.value,
+                                    region="Quebec",
+                                    country="Canada"
+                                ),
+                                Address(
+                                    street_number="6325",
+                                    street_type="av",
+                                    street_name="somerled",
+                                    direction=Address.DirectionEnum.w.value,
+                                    city="Montreal",
+                                    zip_code="h3s2k1",
+                                    province=Address.ProvinceEnum.ab.value,
+                                    region="Quebec",
+                                    country="Canada"
+                                )
+                            ],
                             payment_types=[
                                 Business.PaymentTypeEnum.cash.value,
                                 Business.PaymentTypeEnum.credit.value
