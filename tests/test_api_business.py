@@ -42,9 +42,9 @@ class BusinessTestCase(unittest.TestCase):
 
         category1 = Category(name="category1")
         category2 = Category(name="category2")
-        businessA = Business(name="businessA", category_id="1", description="coolest")
-        businessB = Business(name="businessB", category_id="1")
-        businessC = Business(name="businessC", category_id="2")
+        businessA = Business(name="businessA", category=category1, description="coolest")
+        businessB = Business(name="businessB", category=category2)
+        businessC = Business(name="businessC", category=category2)
         businessA.process_status(Business.StatusEnum.accepted.value)
         businessB.process_status(Business.StatusEnum.accepted.value)
         businessC.process_status(Business.StatusEnum.accepted.value)
@@ -68,7 +68,7 @@ class BusinessTestCase(unittest.TestCase):
             db.drop_all()
 
     def test_business_post(self):
-        res = self.client().post('/api_v1/businesses', json={"name": "BusinessA", "category_id": "1"})
+        res = self.client().post('/api_v1/businesses', json={"name": "BusinessA", "category": {"name": "barbershop"}})
         self.assertIn('BusinessA', str(res.data))
         self.assertEqual(201, res.status_code)
 

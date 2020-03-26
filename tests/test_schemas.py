@@ -37,7 +37,10 @@ class TestBusiness(object):
             "website": "resto.com",
             "email": "john.doe@gmail.com",
             "notes": "notes",
-            "category_id": 5,
+            "category": {
+                "id": "100",
+                "name": "resto"
+            },
             "owner_id": 1,
             "capacity": 120,
             "business_hours": [
