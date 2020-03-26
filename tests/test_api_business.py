@@ -118,7 +118,7 @@ class BusinessTestCase(unittest.TestCase):
         self.assertEqual(json_data[2]["name"], "businessA")
 
     def test_business_get_with_filter_status(self):
-        res = self.client().get('/api_v1/businesses?description=coolest&status=accepted')
+        res = self.client().get('/api_v1/businesses?status=accepted')
         self.assertEqual(200, res.status_code)
         self.assertIn('businessA', str(res.data))
         self.assertIn('businessB', str(res.data))
