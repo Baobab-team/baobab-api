@@ -20,7 +20,7 @@ class BusinessCollection(Resource):
 
     @parse_request(
         Argument("querySearch", type=str, store_missing=False),
-        Argument("status", type=str, store_missing=False),
+        Argument("status", type=str, store_missing=False, action="append"),
         Argument("accepted_at", type=str, store_missing=False),
         Argument("order_by", type=str, choices=("name"), default='name'),
         Argument("order", type=str, choices=("ASC", "DESC"), default="ASC"),
@@ -28,9 +28,9 @@ class BusinessCollection(Resource):
         Argument("businessPerPage", type=int, default=BUSINESS_PER_PAGE),
     )
     @marshal_with(BusinessSchema, many=True, success_code=200)
-    def get(self, querySearch=None, accepted_at=None, status=Business.StatusEnum.accepted.value, order=None,
-            order_by=None, page=1,
-            businessPerPage=BUSINESS_PER_PAGE, **kwargs):
+    def get(self, page, businessPerPage, status=None, querySearch=None, accepted_at=None,  order=None,
+            order_by=None,
+             **kwargs):
         return self.repository.filter(
             querySearch=querySearch, accepted_at=accepted_at, status=status, order=order,
             order_by=order_by, **kwargs
