@@ -48,6 +48,8 @@ class BusinessTestCase(unittest.TestCase):
         businessA.process_status(Business.StatusEnum.accepted.value)
         businessB.process_status(Business.StatusEnum.accepted.value)
         businessC.process_status(Business.StatusEnum.refused.value)
+        businessC.process_status(Business.StatusEnum.accepted.value)
+
         tag1 = Tag(name="Tag1")
         tag2 = Tag(name="Tag2")
         tag1.addBusinessTags([businessA, businessB, businessC])
