@@ -24,7 +24,8 @@ class BusinessRepository(BaseRepository):
             query = query.filter(Business.accepted_at == accepted_at)
 
         if status:
-            query = query.filter(Business.status == status)
+            for s in status:
+                query = query.filter(Business.status == s)
 
         if order_by:
             order = asc if order == "ASC" else desc
