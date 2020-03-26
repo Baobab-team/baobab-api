@@ -68,7 +68,7 @@ class CategoryUpdateSchema(Schema):
 
 class CategorySchema(Schema):
     id = fields.Integer(required=False)
-    name = fields.String(required=False)
+    name = fields.String(required=True)
 
     @post_load
     def make_object(self, data, **kwargs):
