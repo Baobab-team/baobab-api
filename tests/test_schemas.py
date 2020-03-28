@@ -5,6 +5,21 @@ import pytest
 from app.businesses.schemas import *
 
 
+class TestBaseSchema(object):
+
+    def test_valid_base_schema(self):
+        data = {
+
+        }
+        assert BaseSchema().validate(data=data) == {}
+
+    def test_invalid_base_schema(self):
+        data = {
+            "name": "fail",
+        }
+        assert BaseSchema().validate(data=data) != {}
+
+
 class TestCategory(object):
 
     @pytest.mark.parametrize("name", [
