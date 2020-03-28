@@ -48,8 +48,8 @@ class CategoryRepository(BaseRepository):
         super(CategoryRepository, self).save(entity)
         return entity
 
-    def exist(self, name):
-        entity = self.query.filter_by(name=name).first()
+    def exist(self, id):
+        entity = self.get(id, description="Category doesnt exist")
         if entity:
             return True
         return False
