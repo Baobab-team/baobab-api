@@ -5,9 +5,8 @@ from .models import Category, Business, SocialLink, Address, BusinessHour, Phone
 
 
 class BaseSchema(Schema):
-    def __init__(self, *args, **kwargs):
-        super(BaseSchema, self).__init__(*args, **kwargs)
-        self.unknown = RAISE
+    class Meta:
+        unknown = RAISE
 
 
 class AddressSchema(BaseSchema):
