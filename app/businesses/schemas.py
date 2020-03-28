@@ -93,9 +93,12 @@ class BusinessCreateSchema(BaseSchema):
 
     @post_load
     def make_business(self, data, **kwargs):
+        self.process_category(data)
+        return Business(**data)
+
+    def process_category(self, data):
         data["category_id"] = data["category"].id
         del data["category"]
-        return Business(**data)
 
 
 class BusinessUpdateSchema(BaseSchema):
