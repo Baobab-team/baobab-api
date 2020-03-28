@@ -1,33 +1,38 @@
-from marshmallow import Schema, fields, post_load
+from marshmallow import Schema, fields, post_load, RAISE
 from marshmallow.validate import OneOf
 
 from .models import Category, Business, SocialLink, Address, BusinessHour, Phone, Tag
 
 
-class AddressSchema(Schema):
+class BaseSchema(Schema):
+    class Meta:
+        unknown = RAISE
+
+
+class AddressSchema(BaseSchema):
     id = fields.String()
     street_number = fields.String(required=True)
     street_type = fields.String(required=True)
     street_name = fields.String(required=True)
-    direction = fields.String(required=True,validate=OneOf(Address.DirectionEnum.list()))
+    direction = fields.String(required=True, validate=OneOf(Address.DirectionEnum.list()))
     city = fields.String(required=True)
     zip_code = fields.String(required=True)
-    province = fields.String(required=True,validate=OneOf(Address.ProvinceEnum.list()))
+    province = fields.String(required=True, validate=OneOf(Address.ProvinceEnum.list()))
     region = fields.String(required=True)
     country = fields.String(required=True)
 
 
-class SocialLinkSchema(Schema):
+class SocialLinkSchema(BaseSchema):
     id = fields.Integer()
     link = fields.String(required=True)
     type = fields.String(required=True, validate=OneOf(SocialLink.TypeEnum.list()))
 
 
-class TagSchemaCreateOrUpdate(Schema):
+class TagSchemaCreateOrUpdate(BaseSchema):
     name = fields.String(required=True)
 
 
-class TagSchema(Schema):
+class TagSchema(BaseSchema):
     id = fields.String()
     name = fields.String(required=True)
 
@@ -36,25 +41,25 @@ class TagSchema(Schema):
         return Tag(**data)
 
 
-class TagListSchema(Schema):
+class TagListSchema(BaseSchema):
     tags = fields.List(fields.Nested(TagSchema))
 
 
-class BusinessHourSchema(Schema):
+class BusinessHourSchema(BaseSchema):
     id = fields.Integer()
-    day = fields.String(required=True,validate=OneOf(BusinessHour.DaysEnum.list()))
+    day = fields.String(required=True, validate=OneOf(BusinessHour.DaysEnum.list()))
     opening_time = fields.Time(required=True)
     closing_time = fields.Time(required=True)
 
 
-class PhoneSchema(Schema):
+class PhoneSchema(BaseSchema):
     id = fields.Integer()
     number = fields.String(required=True)
     extension = fields.String(required=False)
-    type = fields.String(required=True,validate=OneOf(Phone.Type.list()))
+    type = fields.String(required=True, validate=OneOf(Phone.Type.list()))
 
 
-class CategoryCreateSchema(Schema):
+class CategoryCreateSchema(BaseSchema):
     name = fields.String()
 
     @post_load
@@ -62,11 +67,11 @@ class CategoryCreateSchema(Schema):
         return Category(**data)
 
 
-class CategoryUpdateSchema(Schema):
+class CategoryUpdateSchema(BaseSchema):
     name = fields.String()
 
 
-class CategorySchema(Schema):
+class CategorySchema(BaseSchema):
     id = fields.Integer(required=False)
     name = fields.String(required=True)
 
@@ -75,7 +80,7 @@ class CategorySchema(Schema):
         return Category(**data)
 
 
-class BusinessCreateSchema(Schema):
+class BusinessCreateSchema(BaseSchema):
     name = fields.String(required=True)
     phones = fields.List(
         fields.Nested(PhoneSchema)
@@ -99,7 +104,7 @@ class BusinessCreateSchema(Schema):
         return Business(**data)
 
 
-class BusinessUpdateSchema(Schema):
+class BusinessUpdateSchema(BaseSchema):
     category = fields.Nested(CategorySchema)
     owner_id = fields.Integer()
     name = fields.String()
@@ -115,7 +120,7 @@ class BusinessUpdateSchema(Schema):
     payment_types = fields.List(fields.String())
 
 
-class BusinessSchema(Schema):
+class BusinessSchema(BaseSchema):
     id = fields.String(required=True)
     category = fields.Nested(CategorySchema)
     restaurant_id = fields.Integer(required=False)

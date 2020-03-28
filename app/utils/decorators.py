@@ -3,7 +3,7 @@ import logging
 
 from flask import request, jsonify
 from flask_restful import reqparse, abort
-from marshmallow import ValidationError
+from marshmallow import ValidationError, RAISE
 
 logger = logging.getLogger(__name__)
 
@@ -42,12 +42,12 @@ def parse_with(schema, arg_name='entity', many=False, **kwargs):
         def inner(*fargs, **fkwargs):
             json = request.get_json() or {}
             try:
-                entity = schema.load(json,many=many, **kwargs)
+                entity = schema.load(json,many=many **kwargs)
                 fkwargs.update({arg_name: entity})
 
             except (ValidationError, ValueError, Exception) as e:
                 logger.error("parse_with: {}".format(str(e)))
-                abort(400, message="An error occured")
+                abort(400, message="An error occurred. \n {}".format((str(e))))
 
             return f(*fargs, **fkwargs)
 
