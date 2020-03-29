@@ -69,8 +69,15 @@ class BusinessTestCase(unittest.TestCase):
             db.drop_all()
 
     def test_business_post(self):
-        res = self.client().post('/api_v1/businesses', json={"name": "BusinessA", "category": {"name": "barbershop"}})
+        res = self.client().post('/api_v1/businesses',
+                                 json={"name": "BusinessA", "category": {"id": 1, "name": "category1"}})
         self.assertIn('BusinessA', str(res.data))
+        self.assertEqual(201, res.status_code)
+
+    def test_business_post_add_business_with_existing_category(self):
+        res = self.client().post('/api_v1/businesses',
+                                 json={"name": "NewBusiness", "category": {"id": 1, "name": "category1"}})
+        self.assertIn('NewBusiness', str(res.data))
         self.assertEqual(201, res.status_code)
 
     def test_business_get_by_id(self):
@@ -185,3 +192,4 @@ class BusinessTestCase(unittest.TestCase):
         res = self.client().get('/api_v1/businesses?page=100')
         self.assertEqual(200, res.status_code)
         self.assertEqual([], json.loads(res.data))
+

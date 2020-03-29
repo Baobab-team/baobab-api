@@ -4,7 +4,7 @@ from flask_restful.reqparse import Argument
 from app.utils.decorators import parse_with, marshal_with, parse_request
 from .models import Tag, Business
 from .repositories import BusinessRepository, CategoryRepository, TagRepository
-from .schemas import BusinessCreateSchema, CategorySchema, CategoryCreateSchema, CategoryUpdateSchema, BusinessSchema, \
+from .schemas import BusinessCreateSchema, CategorySchema, CategoryUpdateSchema, BusinessSchema, \
     BusinessUpdateSchema, TagSchema, TagSchemaCreateOrUpdate
 from ..consts import BUSINESS_PER_PAGE
 
@@ -134,10 +134,10 @@ class CategoriesCollection(Resource):
     def get(self):
         return self.repository.query.all()
 
-    @parse_with(CategoryCreateSchema(), arg_name="entity")
+    @parse_with(CategorySchema(), arg_name="entity")
     @marshal_with(CategorySchema, success_code=201)
     def post(self, entity, **kwargs):
-        if self.repository.exist(entity.name):
+        if self.repository.exist(entity.id):
             abort(400, message="Category already exist")
 
         return self.repository.save(entity)

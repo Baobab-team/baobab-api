@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields, post_load, RAISE
+from marshmallow import Schema, fields, post_load, EXCLUDE
 from marshmallow.validate import OneOf
 
 from .models import Category, Business, SocialLink, Address, BusinessHour, Phone, Tag
@@ -6,7 +6,7 @@ from .models import Category, Business, SocialLink, Address, BusinessHour, Phone
 
 class BaseSchema(Schema):
     class Meta:
-        unknown = RAISE
+        unknown = EXCLUDE
 
 
 class AddressSchema(BaseSchema):
@@ -59,20 +59,12 @@ class PhoneSchema(BaseSchema):
     type = fields.String(required=True, validate=OneOf(Phone.Type.list()))
 
 
-class CategoryCreateSchema(BaseSchema):
-    name = fields.String()
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return Category(**data)
-
-
 class CategoryUpdateSchema(BaseSchema):
     name = fields.String()
 
 
 class CategorySchema(BaseSchema):
-    id = fields.Integer(required=False)
+    id = fields.Integer(required=True)
     name = fields.String(required=True)
 
     @post_load
@@ -101,7 +93,12 @@ class BusinessCreateSchema(BaseSchema):
 
     @post_load
     def make_business(self, data, **kwargs):
+        self.process_category(data)
         return Business(**data)
+
+    def process_category(self, data):
+        data["category_id"] = data["category"].id
+        del data["category"]
 
 
 class BusinessUpdateSchema(BaseSchema):
