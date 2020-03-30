@@ -4,7 +4,6 @@ from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import import_string
@@ -14,7 +13,6 @@ from .common.errors import page_not_found, page_error
 load_dotenv()
 
 db = SQLAlchemy()
-jwt = JWTManager()
 migrate = Migrate()
 
 
@@ -31,12 +29,8 @@ def create_app(config=None):
 
     app.config.from_object(config)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['JWT_SECRET_KEY'] = os.getenv('SECRET_KEY')
-    app.config['JWT_BLACKLIST_ENABLED'] = True
-    app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
 
     db.init_app(app)
-    jwt.init_app(app)
     migrate.init_app(app, db)
 
     # Initialize models
