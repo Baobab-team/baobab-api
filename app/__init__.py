@@ -40,14 +40,11 @@ def create_app(config=None):
     migrate.init_app(app, db)
 
     # Initialize models
-    from .users.models import User, RevokedTokenModel
     from .businesses.models import Business, BusinessHour, Category, Address
 
     # Initialize API
     from .businesses.blueprints import blueprint as business_blueprint
     app.register_blueprint(business_blueprint)
-    from .users.blueprints import blueprint as user_bp
-    app.register_blueprint(user_bp)
 
     if not app.debug:
         # Initliaze errors page
