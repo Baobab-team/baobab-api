@@ -64,10 +64,6 @@ def create_app(config=None):
         app.register_error_handler(500, page_error)
         app.register_error_handler(404, page_not_found)
 
-    @jwt.token_in_blacklist_loader
-    def check_if_token_in_blacklist(decrypted_token):
-        jti = decrypted_token['jti']
-        return RevokedTokenModel.is_jti_blacklisted(jti)
 
     # enable CORS
     CORS(app, resources={r'/*': {'origins': '*'}})
