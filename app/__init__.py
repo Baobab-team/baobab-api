@@ -9,7 +9,6 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import import_string
 
-from .common.errors import page_not_found, page_error
 
 load_dotenv()
 
@@ -64,8 +63,6 @@ def create_app(config=None):
         app.logger.setLevel(logging.INFO)
         app.logger.info('Baobab startup')
 
-        app.register_error_handler(500, page_error)
-        app.register_error_handler(404, page_not_found)
 
     @jwt.token_in_blacklist_loader
     def check_if_token_in_blacklist(decrypted_token):
