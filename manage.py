@@ -1,8 +1,8 @@
 from flask.cli import FlaskGroup
 
 from app import create_app, db
-from app.businesses.models import Category, Business, Phone, Tag, BusinessHour, SocialLink, Address
-import datetime
+from app.businesses.models import Category, Business, Phone, Plate, Tag, BusinessHour, SocialLink, Address, Restaurant, Menu
+from datetime import time, timedelta, date
 
 app = create_app()
 cli = FlaskGroup(app)
@@ -15,6 +15,34 @@ def seed_db():
     db.create_all()
 
     db.session.add(Category(name="Restaurant"))
+    db.session.add(
+        Restaurant(
+            menus=[
+                Menu(
+                    name="menu1",
+                    start=time(19, 30),
+                    end=time(9, 30),
+                    plates=[
+                        Plate(
+                            name="poulet",
+                            price=22.50,
+                            description="hello plate"
+                        ),
+                        Plate(
+                            name="couscous",
+                            price=20.50,
+                            description="hello world"
+                        ),
+                        Plate(
+                            name="foufou",
+                            price=10.50,
+                            description="hello foufou"
+                        )
+                    ]
+                )
+            ]
+        ),
+    )
     db.session.add(Business(name="Gracia Afrika",
                             description="Lorem Ipsum is simply dummy text of the printing and typesetting industry. "
                                         "Lorem Ipsum has been the industry's standard dummy text ever since the "
@@ -33,9 +61,12 @@ def seed_db():
                                   "and more recently with desktop publishing software like Aldus PageMaker including "
                                   "versions of Lorem Ipsum.",
                             category_id=1,
+                            accepted_at=date.today(),
                             slogan="Hello world",
                             website="www.helloworld.com",
                             email="helloworld@hello.com",
+                            created_at=date.today(),
+                            restaurant_id=1,
                             capacity=23,
                             addresses=[
                                 Address(
@@ -79,33 +110,33 @@ def seed_db():
                             business_hours=[
                                 BusinessHour(
                                     day=BusinessHour.DaysEnum.thursday.value,
-                                    closing_time=datetime.time(19, 30),
-                                    opening_time=datetime.time(9, 30)
+                                    closing_time=time(19, 30),
+                                    opening_time=time(9, 30)
                                 ),
                                 BusinessHour(
                                     day=BusinessHour.DaysEnum.wednesday.value,
-                                    closing_time=datetime.time(19, 30),
-                                    opening_time=datetime.time(9, 30)
+                                    closing_time=time(19, 30),
+                                    opening_time=time(9, 30)
                                 ),
                                 BusinessHour(
                                     day=BusinessHour.DaysEnum.tuesday.value,
-                                    closing_time=datetime.time(19, 30),
-                                    opening_time=datetime.time(9, 30)
+                                    closing_time=time(19, 30),
+                                    opening_time=time(9, 30)
                                 ),
                                 BusinessHour(
                                     day=BusinessHour.DaysEnum.friday.value,
-                                    closing_time=datetime.time(19, 30),
-                                    opening_time=datetime.time(9, 30)
+                                    closing_time=time(19, 30),
+                                    opening_time=time(9, 30)
                                 ),
                                 BusinessHour(
                                     day=BusinessHour.DaysEnum.saturday.value,
-                                    closing_time=datetime.time(19, 30),
-                                    opening_time=datetime.time(9, 30)
+                                    closing_time=time(19, 30),
+                                    opening_time=time(9, 30)
                                 ),
                                 BusinessHour(
                                     day=BusinessHour.DaysEnum.sunday.value,
-                                    closing_time=datetime.time(19, 30),
-                                    opening_time=datetime.time(9, 30)
+                                    closing_time=time(19, 30),
+                                    opening_time=time(9, 30)
                                 )
                             ],
                             tags=[
