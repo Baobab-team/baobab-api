@@ -94,7 +94,6 @@ class TestBusiness(object):
         assert BusinessCreateSchema().validate(data=data) == {}
 
 
-class TestTags(object):
     @pytest.mark.parametrize("name", [
         ("tag1"),
         ("tag2"),
@@ -117,7 +116,6 @@ class TestTags(object):
         assert TagSchema().validate(data=data) != {}
 
 
-class TestBusinessHours(object):
 
     @pytest.mark.parametrize("day, opening_time, closing_time", [
         ("monday", time(10, 10, 10), time(20, 20, 0)),
@@ -144,7 +142,6 @@ class TestBusinessHours(object):
         assert BusinessHourSchema().validate(data=data) != {}
 
 
-class TestPhoneSchema(object):
 
     @pytest.mark.parametrize("number, extension, type", [
         ("5147545588", "56", "fax"),
