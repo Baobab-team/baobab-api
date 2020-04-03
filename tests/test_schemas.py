@@ -13,25 +13,26 @@ class TestBaseSchema(object):
         }
         assert BaseSchema().validate(data=data) == {}
 
-    def test_invalid_base_schema(self):
+    def test_base_unknown_field_exclusion(self):
         data = {
             "name": "fail",
         }
-        assert BaseSchema().validate(data=data) != {}
+        assert BaseSchema().validate(data=data) == {}
 
 
 class TestCategory(object):
 
-    @pytest.mark.parametrize("name", [
-        ("Category1"),
-        ("Category2"),
-        ("Category3"),
+    @pytest.mark.parametrize("id, name", [
+        (1,"Category1"),
+        (2,"Category2"),
+        (3,"Category3"),
     ], ids=["T1", "T2", "T3"])
-    def test_valid_category(self, name):
+    def test_valid_category(self, id, name):
         data = {
             "name": name,
+            "id": id,
         }
-        assert CategoryCreateSchema().validate(data=data) == {}
+        assert CategorySchema().validate(data=data) == {}
 
     @pytest.mark.parametrize("name", [
         (10),
@@ -40,7 +41,7 @@ class TestCategory(object):
         data = {
             "name": name,
         }
-        assert CategoryCreateSchema().validate(data=data) != {}
+        assert CategorySchema().validate(data=data) != {}
 
 
 class TestBusiness(object):
@@ -93,7 +94,6 @@ class TestBusiness(object):
         assert BusinessCreateSchema().validate(data=data) == {}
 
 
-class TestTags(object):
     @pytest.mark.parametrize("name", [
         ("tag1"),
         ("tag2"),
@@ -116,7 +116,6 @@ class TestTags(object):
         assert TagSchema().validate(data=data) != {}
 
 
-class TestBusinessHours(object):
 
     @pytest.mark.parametrize("day, opening_time, closing_time", [
         ("monday", time(10, 10, 10), time(20, 20, 0)),
@@ -143,7 +142,6 @@ class TestBusinessHours(object):
         assert BusinessHourSchema().validate(data=data) != {}
 
 
-class TestPhoneSchema(object):
 
     @pytest.mark.parametrize("number, extension, type", [
         ("5147545588", "56", "fax"),

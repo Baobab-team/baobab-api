@@ -46,6 +46,12 @@ class BaseRepository(object):
         self.session.commit()
         return db_entity
 
+    def exist(self, id=None):
+        if id:
+            return self.get(id)
+        else:
+            False
+
     @classmethod
     def _update_fields(cls, db_entity, **kwargs):
         for key, value in kwargs.items():
@@ -88,12 +94,6 @@ class BusinessRepository(BaseRepository):
 
         return query
 
-    def exist(self, name):
-        entity = self.query.filter_by(name=name).first()
-        if entity:
-            return True
-        return False
-
 
 class CategoryRepository(BaseRepository):
     model = Category
@@ -101,12 +101,6 @@ class CategoryRepository(BaseRepository):
     def save(self, entity):
         super(CategoryRepository, self).save(entity)
         return entity
-
-    def exist(self, id):
-        entity = self.get(id, description="Category doesnt exist")
-        if entity:
-            return True
-        return False
 
     def filter(self, *args, **kwargs):
         query = super(CategoryRepository, self).filter(**kwargs)
@@ -129,12 +123,6 @@ class TagRepository(BaseRepository):
     def save(self, entity):
         super(TagRepository, self).save(entity)
         return entity
-
-    def exist(self, name):
-        entity = self.query.filter_by(name=name).first()
-        if entity:
-            return True
-        return False
 
     def filter(self, *args, **kwargs):
         query = super(TagRepository, self).filter(**kwargs)

@@ -64,12 +64,32 @@ class CategoryUpdateSchema(BaseSchema):
 
 
 class CategorySchema(BaseSchema):
-    id = fields.Integer(required=True)
+    id = fields.Integer(required=False)
     name = fields.String(required=True)
 
     @post_load
     def make_object(self, data, **kwargs):
         return Category(**data)
+
+
+class Plate(BaseSchema):
+    id = fields.Integer()
+    name = fields.String()
+    description = fields.String()
+    price = fields.Float()
+
+
+class Menu(BaseSchema):
+    id = fields.Integer()
+    name = fields.String(required=True)
+    start = fields.DateTime(required=True)
+    end = fields.DateTime()
+    menus = fields.List(fields.Nested(Plate))
+
+
+class RestaurantSchema(BaseSchema):
+    id = fields.Integer()
+    menus = fields.List(fields.Nested(Menu))
 
 
 class BusinessCreateSchema(BaseSchema):
@@ -120,7 +140,6 @@ class BusinessUpdateSchema(BaseSchema):
 class BusinessSchema(BaseSchema):
     id = fields.String(required=True)
     category = fields.Nested(CategorySchema)
-    restaurant_id = fields.Integer(required=False)
     owner_id = fields.String(required=False)
     name = fields.String(required=True)
     description = fields.String(required=True)
@@ -130,6 +149,7 @@ class BusinessSchema(BaseSchema):
     accepted_at = fields.String(required=False)
     status = fields.String(required=False)
     capacity = fields.Integer(required=False)
+    restaurant = fields.Nested(BusinessHourSchema)
     business_hours = fields.List(fields.Nested(BusinessHourSchema))
     addresses = fields.List(fields.Nested(AddressSchema))
     social_links = fields.List(fields.Nested(SocialLinkSchema))
