@@ -39,7 +39,7 @@ class BusinessCollection(Resource):
     @parse_with(BusinessCreateSchema(), arg_name="entity")
     @marshal_with(BusinessSchema, success_code=201)
     def post(self, entity, **kwargs):
-        if self.repository.exist(entity.name):
+        if self.repository.exist(entity.id):
             abort(400, message="Business already exist")
 
         return self.repository.save(entity)
@@ -180,7 +180,7 @@ class TagCollection(Resource):
     @parse_with(TagSchema(), arg_name="entity")
     @marshal_with(TagSchema, success_code=201)
     def post(self, entity, **kwargs):
-        if self.repository.exist(entity.name):
+        if self.repository.exist(entity.id):
             abort(400, message="Tag already exist")
 
         return self.repository.save(entity)

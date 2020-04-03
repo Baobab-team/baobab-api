@@ -64,7 +64,7 @@ class CategoryUpdateSchema(BaseSchema):
 
 
 class CategorySchema(BaseSchema):
-    id = fields.Integer(required=True)
+    id = fields.Integer(required=False)
     name = fields.String(required=True)
 
     @post_load
