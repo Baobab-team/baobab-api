@@ -1,4 +1,4 @@
-from datetime import time
+from datetime import time, datetime, date
 
 import pytest
 
@@ -23,9 +23,9 @@ class TestBaseSchema(object):
 class TestCategory(object):
 
     @pytest.mark.parametrize("id, name", [
-        (1,"Category1"),
-        (2,"Category2"),
-        (3,"Category3"),
+        (1, "Category1"),
+        (2, "Category2"),
+        (3, "Category3"),
     ], ids=["T1", "T2", "T3"])
     def test_valid_category(self, id, name):
         data = {
@@ -94,10 +94,11 @@ class TestBusiness(object):
         assert BusinessCreateSchema().validate(data=data) == {}
 
 
+class TestTags(object):
     @pytest.mark.parametrize("name", [
-        ("tag1"),
-        ("tag2"),
-        ("tag3"),
+        "tag1",
+        "tag2",
+        "tag3",
     ], ids=["T1", "T2", "T3"])
     def test_valid_tags(self, name):
         data = {
@@ -116,6 +117,7 @@ class TestBusiness(object):
         assert TagSchema().validate(data=data) != {}
 
 
+class TestBusinessHours(object):
 
     @pytest.mark.parametrize("day, opening_time, closing_time", [
         ("monday", time(10, 10, 10), time(20, 20, 0)),
@@ -142,6 +144,7 @@ class TestBusiness(object):
         assert BusinessHourSchema().validate(data=data) != {}
 
 
+class TestPhoneSchema(object):
 
     @pytest.mark.parametrize("number, extension, type", [
         ("5147545588", "56", "fax"),
@@ -168,3 +171,91 @@ class TestBusiness(object):
             "type": type,
         }
         assert PhoneSchema().validate(data=data) != {}
+
+
+class TestPlateSchema(object):
+
+    @pytest.mark.parametrize("id, name,description,price", [
+        (100, "Sushi", "Poisson cru", 50.00),
+        (None, "Sushi", "Poisson cru", 50.00),
+        (None, "Sushi", "Poisson cru", 0.00),
+        (100, "Sushi", "Poisson cru", 0),
+    ])
+    def test_valid_plate(self, id, name, description, price):
+        data = {
+            "name": name,
+            "price": price,
+            "description": description,
+        }
+        if id:
+            data["id"] = id
+
+        assert PlateSchema().validate(data=data) == {}
+
+
+class TestMenuSchema(object):
+    start = date(2010, 12, 1)
+    end = date(2010, 12, 2)
+
+    @pytest.mark.parametrize("id, name, start, end, plates", [
+        (100, "Menu1", start.isoformat(), None, []),
+        (100, "Menu1", start.isoformat(), end.isoformat(), []),
+        (None, "Menu1", start.isoformat(), end.isoformat(), []),
+    ])
+    def test_valid_menu(self, id, name, start, end, plates):
+        data = {
+            "name": name,
+            "start": start,
+            "end": end,
+            "plates": plates,
+        }
+        if id:
+            data["id"] = id
+
+        assert MenuSchema().validate(data=data) == {}
+
+    @pytest.mark.parametrize("id, name, start, end, plates", [
+        (100, "Menu1", None, None, []),
+        (100, "Menu1", 21321, None, []),
+        (None, "Menu1", 21321, 122, []),
+        (None, "Menu1", 21321, 122, None),
+    ])
+    def test_invalid_menu(self, id, name, start, end, plates):
+        data = {
+            "name": name,
+            "start": start,
+            "end": end,
+            "plates": plates,
+        }
+        if id:
+            data["id"] = id
+
+        assert MenuSchema().validate(data=data) != {}
+
+
+class TestRestaurantSchema(object):
+
+    @pytest.mark.parametrize("id, menus", [
+       (1000,[]),
+       (None,[])
+    ])
+    def test_valid_restaurant(self, id, menus):
+        data = {
+            "menus": menus,
+        }
+        if id:
+            data["id"] = id
+
+        assert RestaurantSchema().validate(data=data) == {}
+
+    @pytest.mark.parametrize("id, menus", [
+       (None,None)
+    ])
+    def test_invalid_restaurant(self, id, menus):
+        data = {
+            "menus": menus,
+        }
+        if id:
+            data["id"] = id
+
+        assert RestaurantSchema().validate(data=data) != {}
