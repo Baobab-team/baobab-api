@@ -127,7 +127,7 @@ class BusinessCreateSchema(BaseSchema):
         del data["category"]
 
     def process_restaurant(self, data):
-        if data["restaurant"]:
+        if "restaurant" in data:
             data["restaurant_id"] = data["restaurant"].id
             del data["restaurant"]
 
