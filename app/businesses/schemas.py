@@ -64,7 +64,7 @@ class CategoryUpdateSchema(BaseSchema):
 
 
 class CategorySchema(BaseSchema):
-    id = fields.Integer(required=False)
+    id = fields.Integer(allow_none=True)
     name = fields.String(required=True)
 
     @post_load
@@ -119,11 +119,17 @@ class BusinessCreateSchema(BaseSchema):
     @post_load
     def make_business(self, data, **kwargs):
         self.process_category(data)
+        self.process_restaurant(data)
         return Business(**data)
 
     def process_category(self, data):
         data["category_id"] = data["category"].id
         del data["category"]
+
+    def process_restaurant(self, data):
+        if data["restaurant"]:
+            data["restaurant_id"] = data["restaurant"].id
+            del data["restaurant"]
 
 
 class BusinessUpdateSchema(BaseSchema):
