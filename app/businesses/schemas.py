@@ -1,6 +1,6 @@
-from marshmallow import Schema, fields, post_load, EXCLUDE
+from marshmallow import Schema, fields, post_load, EXCLUDE, validates_schema, ValidationError
 from marshmallow.validate import OneOf
-
+from datetime import date
 from .models import Category, Business, SocialLink, Address, BusinessHour, Phone, Tag
 
 
@@ -64,7 +64,7 @@ class CategoryUpdateSchema(BaseSchema):
 
 
 class CategorySchema(BaseSchema):
-    id = fields.Integer(required=False)
+    id = fields.Integer(allow_none=True)
     name = fields.String(required=True)
 
     @post_load
@@ -72,24 +72,30 @@ class CategorySchema(BaseSchema):
         return Category(**data)
 
 
-class Plate(BaseSchema):
-    id = fields.Integer()
-    name = fields.String()
-    description = fields.String()
-    price = fields.Float()
-
-
-class Menu(BaseSchema):
-    id = fields.Integer()
+class PlateSchema(BaseSchema):
+    id = fields.Integer(allow_none=True)
     name = fields.String(required=True)
-    start = fields.DateTime(required=True)
-    end = fields.DateTime()
-    menus = fields.List(fields.Nested(Plate))
+    description = fields.String(required=False)
+    price = fields.Float(required=True)
+
+
+class MenuSchema(BaseSchema):
+    id = fields.Integer(allow_none=True)
+    name = fields.String(required=True)
+    start = fields.Date(required=True)
+    end = fields.Date(allow_none=True)
+    plates = fields.List(fields.Nested(PlateSchema))
+
+    @validates_schema
+    def validate_dates(self, data, **kwargs):
+
+        if data["end"] and data["start"] > data["end"]:
+            raise ValidationError("End date must be greater then start date")
 
 
 class RestaurantSchema(BaseSchema):
-    id = fields.Integer()
-    menus = fields.List(fields.Nested(Menu))
+    id = fields.Integer(allow_none=True)
+    menus = fields.List(fields.Nested(MenuSchema))
 
 
 class BusinessCreateSchema(BaseSchema):
@@ -102,7 +108,6 @@ class BusinessCreateSchema(BaseSchema):
     email = fields.Email(required=False)
     notes = fields.String(required=False)
     category = fields.Nested(CategorySchema, required=True)
-    owner_id = fields.Integer(required=False)
     status = fields.String(required=False)
     capacity = fields.Integer(required=False)
     business_hours = fields.List(fields.Nested(BusinessHourSchema))
@@ -114,16 +119,21 @@ class BusinessCreateSchema(BaseSchema):
     @post_load
     def make_business(self, data, **kwargs):
         self.process_category(data)
+        self.process_restaurant(data)
         return Business(**data)
 
     def process_category(self, data):
         data["category_id"] = data["category"].id
         del data["category"]
 
+    def process_restaurant(self, data):
+        if "restaurant" in data:
+            data["restaurant_id"] = data["restaurant"].id
+            del data["restaurant"]
+
 
 class BusinessUpdateSchema(BaseSchema):
     category = fields.Nested(CategorySchema)
-    owner_id = fields.Integer()
     name = fields.String()
     description = fields.String()
     website = fields.String()
@@ -140,7 +150,6 @@ class BusinessUpdateSchema(BaseSchema):
 class BusinessSchema(BaseSchema):
     id = fields.String(required=True)
     category = fields.Nested(CategorySchema)
-    owner_id = fields.String(required=False)
     name = fields.String(required=True)
     description = fields.String(required=True)
     website = fields.String()
