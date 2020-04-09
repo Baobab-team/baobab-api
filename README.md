@@ -21,7 +21,7 @@ exit
 # Setup environment variables for local development without docker
 mv .env.local .env 
 
-# Create database
+# Enable migrations in the database
 python manage.py db init
 
 # Generate migrations file 
