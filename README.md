@@ -21,8 +21,14 @@ exit
 # Setup environment variables for local development without docker
 mv .env.local .env 
 
-# Create database
-python manage.py create_db
+# Enable migrations in the database
+python manage.py db init
+
+# Generate migrations file 
+python manage.py db migrate
+
+# Apply migrations 
+python manage.py db upgrade
 
 # Seed database
 python manage.py seed_db 
@@ -30,9 +36,6 @@ python manage.py seed_db
 # Launch app
 python manage.py run
 
-
-# Seed database
-python manage.py seed_db 
 ```
 
 
