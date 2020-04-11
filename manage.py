@@ -72,7 +72,7 @@ def seed_db():
                                 Address(
                                     street_number="5692",
                                     street_type="rue",
-                                    street_name="saint-André",
+                                    street_name="saint-Andre",
                                     direction=Address.DirectionEnum.e.value,
                                     city="Montreal",
                                     zip_code="h3s2k1",
