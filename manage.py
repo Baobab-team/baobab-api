@@ -1,8 +1,10 @@
+from datetime import time, date
+
 from flask.cli import FlaskGroup
 
 from app import create_app, db
-from app.businesses.models import Category, Business, Phone, Plate, Tag, BusinessHour, SocialLink, Address, Restaurant, Menu
-from datetime import time, timedelta, date
+from app.businesses.models import Category, Business, Phone, Plate, Tag, BusinessHour, SocialLink, Address, Restaurant, \
+    Menu
 
 app = create_app()
 cli = FlaskGroup(app)
@@ -187,7 +189,8 @@ def seed_db():
                             ))
     db.session.commit()
 
-    print("Suuccesfuly seeded the database")
+    print("Successfully seeded the database")
+
 
 if __name__ == '__main__':
     cli()

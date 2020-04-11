@@ -1,19 +1,20 @@
 import logging
 import os
 from logging.handlers import RotatingFileHandler
+
 from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import import_string
-
 
 load_dotenv()
 
 db = SQLAlchemy()
 migrate = Migrate()
-
+jwt = JWTManager()
 
 def create_app(config=None):
     app = Flask(__name__)
@@ -28,12 +29,16 @@ def create_app(config=None):
 
     app.config.from_object(config)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['JWT_SECRET_KEY'] = os.getenv('SECRET_KEY')
+    app.config['JWT_BLACKLIST_ENABLED'] = True
+    app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
 
     db.init_app(app)
+    jwt.init_app(app)
     migrate.init_app(app, db)
 
     # Initialize models
-    from .businesses.models import Business, BusinessHour, Category, Address
+    from .businesses.models import Business, BusinessHour, Category, Address, User, RevokedTokenModel
 
     # Initialize API
     from .businesses.blueprints import blueprint as business_blueprint
@@ -54,7 +59,10 @@ def create_app(config=None):
         app.logger.setLevel(logging.INFO)
         app.logger.info('Baobab startup')
 
-
+    @jwt.token_in_blacklist_loader
+    def check_if_token_in_blacklist(decrypted_token):
+        jti = decrypted_token['jti']
+        return RevokedTokenModel.is_jti_blacklisted(jti)
 
     # enable CORS
     CORS(app, resources={r'/*': {'origins': '*'}})
