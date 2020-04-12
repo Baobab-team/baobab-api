@@ -1,32 +1,9 @@
 from datetime import datetime
 from enum import Enum
-
 from sqlalchemy_utils import ScalarListType
 
 from app import db
-
-
-class TimestampMixin(object):
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
-    deleted_at = db.Column(db.DateTime, nullable=True, default=None)
-
-    def delete(self):
-        self.deleted_at = datetime.utcnow()
-
-
-class Category(db.Model):
-    """
-    Category model
-    """
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(), unique=True)
-    businesses = db.relationship("Business", backref="category", lazy=True)
-
-    def __repr__(self):
-        return '<Category {}>'.format(self.name)
-
+from app.businesses.models.base import TimestampMixin
 
 tags = db.Table('tags',
                 db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True),
@@ -35,10 +12,6 @@ tags = db.Table('tags',
 
 
 class Business(db.Model, TimestampMixin):
-    """
-    Business model
-    """
-
     class StatusEnum(Enum):
         pending = "pending"
         accepted = "accepted"
@@ -93,7 +66,6 @@ class Business(db.Model, TimestampMixin):
             self.accepted_at = None
 
 
-
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=True)
@@ -106,19 +78,16 @@ class Tag(db.Model):
         """
         self.businesses.append(business)
 
-    def addBusinessTags(self,businesses):
+    def addBusinessTags(self, businesses):
         for business in businesses:
             self.addBusinessTag(business)
 
-    def removeBusinessTag(self,business):
+    def removeBusinessTag(self, business):
         index = self.businesses.index(business)
         self.businesses.pop(index)
 
-class Address(db.Model):
-    """
-    Address for a single business
-    """
 
+class Address(db.Model):
     class ProvinceEnum(Enum):
         qc = "QC"
         on = "ON"
@@ -222,32 +191,6 @@ class Phone(db.Model):
 
     def __repr__(self):
         return '<Phone: {}'.format(self.number)
-
-
-class Restaurant(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-
-    menus = db.relationship('Menu', backref='restaurant', lazy=True)
-
-
-class Menu(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(), nullable=False)
-    start = db.Column(db.Time, nullable=False, default=datetime.utcnow())
-    end = db.Column(db.Time, nullable=True)
-
-    plates = db.relationship('Plate', backref='menu', lazy=True)
-
-    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
-
-
-class Plate(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    description = db.Column(db.String(), nullable=False)
-
-    menu_id = db.Column(db.Integer, db.ForeignKey('menu.id'), nullable=False)
 
 
 class SocialLink(db.Model):
