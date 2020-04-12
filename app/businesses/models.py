@@ -11,10 +11,6 @@ class TimestampMixin(object):
     updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
     deleted_at = db.Column(db.DateTime, nullable=True, default=None)
 
-    def __init__(self, **kwargs):
-        super(TimestampMixin,self).__init__(**kwargs)
-        self.deleted_at = None
-
     def delete(self):
         self.deleted_at = datetime.utcnow()
 
