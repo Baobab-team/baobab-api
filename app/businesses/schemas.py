@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields, post_load, EXCLUDE, validates_schema, ValidationError
 from marshmallow.validate import OneOf
-from datetime import date
-from .models import Category, Business, SocialLink, Address, BusinessHour, Phone, Tag
+
+from .models import Category, Business, SocialLink, Address, BusinessHour, Phone, Tag, User
 
 
 class BaseSchema(Schema):
@@ -88,7 +88,6 @@ class MenuSchema(BaseSchema):
 
     @validates_schema
     def validate_dates(self, data, **kwargs):
-
         if data["end"] and data["start"] > data["end"]:
             raise ValidationError("End date must be greater then start date")
 
@@ -168,3 +167,28 @@ class BusinessSchema(BaseSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return Business(**data)
+
+
+class PermissionSchema(Schema):
+    id = fields.String(required=True)
+    name = fields.Email(required=True)
+    action = fields.Email(required=True)
+
+
+class RoleSchema(Schema):
+    id = fields.String(required=True)
+    name = fields.Email(required=True)
+    permissions = fields.List(fields.Nested(PermissionSchema))
+
+
+class UserSchema(Schema):
+    id = fields.String(required=True)
+    email = fields.Email(required=True)
+    first_name = fields.String(required=False)
+    last_name = fields.String(required=False)
+    active = fields.Boolean(required=False)
+    role = fields.Nested(RoleSchema)
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return User(**data)
