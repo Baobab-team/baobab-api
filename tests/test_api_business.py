@@ -151,6 +151,11 @@ class BusinessTestCase(unittest.TestCase):
         res = self.client().put('/api_v1/businesses/1/processStatus', json={"bad param": "YOLO"})
         self.assertEqual(400, res.status_code)
 
+    def test_business_delete(self):
+        res = self.client().delete('/api_v1/businesses/1')
+        self.assertEqual(204, res.status_code)
+        self.assertEqual("", res.data.decode("utf-8"))
+
     def test_business_tag_get(self):
         res = self.client().get('/api_v1/businesses/1/tags')
         self.assertEqual(200, res.status_code)

@@ -2,7 +2,7 @@ from flask_restful import Resource, abort
 from flask_restful.reqparse import Argument
 
 from app.utils.decorators import parse_with, marshal_with, parse_request
-from .models import Tag, Business
+from .models import Tag
 from .repositories import BusinessRepository, CategoryRepository, TagRepository
 from .schemas import BusinessCreateSchema, CategorySchema, CategoryUpdateSchema, BusinessSchema, \
     BusinessUpdateSchema, TagSchema, TagSchemaCreateOrUpdate
@@ -59,6 +59,13 @@ class BusinessScalar(Resource):
     @marshal_with(BusinessSchema)
     def get(self, id):
         return self.repository.query.filter_by(id=id).first_or_404(description='Business doesnt exist')
+
+    def delete(self, id):
+        business = self.repository.get(id=id, description="Business doesnt exists")
+        business.delete()
+        self.repository.save(business)
+
+        return None, 204
 
 
 class BusinessTagCollection(Resource):

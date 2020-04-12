@@ -13,16 +13,20 @@ class TimestampMixin(object):
 
     def __init__(self, **kwargs):
         super(TimestampMixin,self).__init__(**kwargs)
-        self.deactivated_at = None
+        self.deleted_at = None
 
     def is_active(self):
-        return self.deactivated_at is None
+        return self.deleted_at is None
 
     def activate(self):
-        self.deactivated_at = None
+        self.deleted_at = None
 
-    def deactivate(self):
-        self.deactivated_at = datetime.utcnow()
+    def delete(self):
+        """
+        Suppress the record, without actually deleting it
+        :return:
+        """
+        self.deleted_at = datetime.utcnow()
 
 
 class Category(db.Model):
