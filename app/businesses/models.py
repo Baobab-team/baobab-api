@@ -15,13 +15,7 @@ class TimestampMixin(object):
         super(TimestampMixin,self).__init__(**kwargs)
         self.deleted_at = None
 
-    def is_active(self):
-        return self.deleted_at is None
-
-    def activate(self):
-        self.deleted_at = None
-
-    def deactivate(self):
+    def delete(self):
         self.deleted_at = datetime.utcnow()
 
 

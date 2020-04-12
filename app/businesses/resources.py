@@ -62,7 +62,7 @@ class BusinessScalar(Resource):
 
     def delete(self, id):
         business = self.repository.get(id=id, description="Business doesnt exists")
-        business.deactivate()
+        business.delete()
         self.repository.save(business)
 
         return None, 204
