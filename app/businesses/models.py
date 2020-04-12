@@ -21,11 +21,7 @@ class TimestampMixin(object):
     def activate(self):
         self.deleted_at = None
 
-    def delete(self):
-        """
-        Suppress the record, without actually deleting it
-        :return:
-        """
+    def deactivate(self):
         self.deleted_at = datetime.utcnow()
 
 
