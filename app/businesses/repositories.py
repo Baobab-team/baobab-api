@@ -2,7 +2,7 @@ from flask import current_app
 from sqlalchemy import asc, desc
 
 from app import db
-from app.businesses.models import Business, Category, Tag
+from app.businesses.models import Business, Category, Tag, User
 
 CONTAINS = '%{}%'
 
@@ -133,6 +133,27 @@ class TagRepository(BaseRepository):
         category = self.get(id_, description="Tag doesnt exist")
 
         if category is None:
+            return False
+
+        return self._delete(id_)
+
+
+class UserRepository(BaseRepository):
+    model = User
+
+    def save(self, entity):
+        super(UserRepository, self).save(entity)
+        return entity
+
+    def filter(self, *args, **kwargs):
+        query = super(UserRepository, self).filter(**kwargs)
+
+        return query
+
+    def delete(self, id_):
+        user = self.get(id_)
+
+        if user is None:
             return False
 
         return self._delete(id_)

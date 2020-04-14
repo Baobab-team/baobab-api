@@ -169,19 +169,19 @@ class BusinessSchema(BaseSchema):
         return Business(**data)
 
 
-class PermissionSchema(Schema):
+class PermissionSchema(BaseSchema):
     id = fields.Integer(allow_none=True)
     name = fields.String(required=True)
     action = fields.String(required=True)
 
 
-class RoleSchema(Schema):
+class RoleSchema(BaseSchema):
     id = fields.Integer(allow_none=True)
     name = fields.String(required=True)
     permissions = fields.List(fields.Nested(PermissionSchema))
 
 
-class UserSchema(Schema):
+class UserSchema(BaseSchema):
     id = fields.Integer(allow_none=True)
     email = fields.Email(required=True)
     first_name = fields.String(required=True,)
@@ -192,3 +192,8 @@ class UserSchema(Schema):
     @post_load
     def make_object(self, data, **kwargs):
         return User(**data)
+
+
+class UserTokenSchema(BaseSchema):
+    access_token = fields.String(required=True)
+    refresh_token = fields.String(required=True)
