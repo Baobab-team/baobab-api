@@ -1,6 +1,5 @@
 from datetime import datetime
 from enum import Enum
-
 from sqlalchemy_utils import ScalarListType
 
 from app import db
@@ -13,7 +12,6 @@ tags = db.Table('tags',
 
 
 class Business(db.Model, TimestampMixin):
-
     class StatusEnum(Enum):
         pending = "pending"
         accepted = "accepted"
@@ -68,7 +66,6 @@ class Business(db.Model, TimestampMixin):
             self.accepted_at = None
 
 
-
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=True)
@@ -81,16 +78,16 @@ class Tag(db.Model):
         """
         self.businesses.append(business)
 
-    def addBusinessTags(self,businesses):
+    def addBusinessTags(self, businesses):
         for business in businesses:
             self.addBusinessTag(business)
 
-    def removeBusinessTag(self,business):
+    def removeBusinessTag(self, business):
         index = self.businesses.index(business)
         self.businesses.pop(index)
 
-class Address(db.Model):
 
+class Address(db.Model):
     class ProvinceEnum(Enum):
         qc = "QC"
         on = "ON"
