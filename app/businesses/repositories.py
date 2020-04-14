@@ -23,8 +23,8 @@ class BaseRepository(object):
         assert self.model, "A model is required to use the query property."
         return self.session.query(self.model)
 
-    def get(self, id, description="Object doesnt exist", strict=False):
-        entity = self.query.get_or_404(id, description=description)
+    def get(self, id, error_message="Object doesnt exist", strict=False):
+        entity = self.query.get_or_404(id, description=error_message)
         if strict and not entity:
             raise KeyError("DB Object not found.")
         return entity
@@ -94,6 +94,11 @@ class BusinessRepository(BaseRepository):
 
         return query
 
+    def delete(self,id,error_message):
+        business = self.get(id=id, error_message=error_message)
+        business.delete()
+        self.save(business)
+
 
 class CategoryRepository(BaseRepository):
     model = Category
@@ -109,7 +114,7 @@ class CategoryRepository(BaseRepository):
 
     def delete(self, id_):
 
-        category = self.get(id_, description="Category doesnt exist")
+        category = self.get(id_, error_message="Category doesnt exist")
 
         if category is None or len(category.businesses) > 0:
             return False
@@ -130,7 +135,7 @@ class TagRepository(BaseRepository):
         return query
 
     def delete(self, id_):
-        category = self.get(id_, description="Tag doesnt exist")
+        category = self.get(id_, error_message="Tag doesnt exist")
 
         if category is None:
             return False

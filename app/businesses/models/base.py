@@ -12,16 +12,10 @@ class TimestampMixin(object):
     updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
     deleted_at = db.Column(db.DateTime, nullable=True, default=None)
 
-    def __init__(self, **kwargs):
-        super(TimestampMixin,self).__init__(**kwargs)
-        self.deactivated_at = None
+    def is_deleted(self):
+        if self.deleted_at is None:
+            return True
+        return False
 
-    def is_active(self):
-        return self.deactivated_at is None
-
-    def activate(self):
-        self.deactivated_at = None
-
-    def deactivate(self):
-        self.deactivated_at = datetime.utcnow()
-
+    def delete(self):
+        self.deleted_at = datetime.utcnow()

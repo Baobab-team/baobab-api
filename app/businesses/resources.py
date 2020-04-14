@@ -2,7 +2,7 @@ from flask_restful import Resource, abort
 from flask_restful.reqparse import Argument
 
 from app.utils.decorators import parse_with, marshal_with, parse_request
-from .models import Tag, Business
+from .models import Tag
 from .repositories import BusinessRepository, CategoryRepository, TagRepository
 from .schemas import BusinessCreateSchema, CategorySchema, CategoryUpdateSchema, BusinessSchema, \
     BusinessUpdateSchema, TagSchema, TagSchemaCreateOrUpdate
@@ -60,6 +60,10 @@ class BusinessScalar(Resource):
     def get(self, id):
         return self.repository.query.filter_by(id=id).first_or_404(description='Business doesnt exist')
 
+    def delete(self, id):
+        self.repository.delete(id=id, error_message="Business doesnt exists")
+        return None, 204
+
 
 class BusinessTagCollection(Resource):
 
@@ -69,13 +73,13 @@ class BusinessTagCollection(Resource):
 
     @marshal_with(TagSchema, many=True)
     def get(self, id):
-        business = self.repository.get(id, description="Business doesnt exist")
+        business = self.repository.get(id, error_message="Business doesnt exist")
         return business.tags
 
     @parse_with(TagSchema(), many=True, arg_name="tags")
     @marshal_with(TagSchema, many=True, success_code=201)
     def post(self, id, tags, **kwargs):
-        business = self.repository.get(id, description='Business doesnt exist')
+        business = self.repository.get(id, error_message='Business doesnt exist')
 
         for tag in tags:
             tag.addBusinessTag(business)
@@ -91,7 +95,7 @@ class BusinessTagScalar(Resource):
         self.repository = repository_factory()
 
     def delete(self, id, tag_id, **kwargs):
-        business = self.repository.get(id, description='Business doesnt exist')
+        business = self.repository.get(id, error_message='Business doesnt exist')
         tag = Tag.query.get(tag_id)
         tag.removeBusinessTag(business)
 
