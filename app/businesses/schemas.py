@@ -1,5 +1,5 @@
 from marshmallow import Schema, fields, post_load, EXCLUDE, validates_schema, ValidationError
-from marshmallow.validate import OneOf
+from marshmallow.validate import OneOf, Email
 
 from .models import Category, Business, SocialLink, Address, BusinessHour, Phone, Tag, User
 
@@ -170,22 +170,22 @@ class BusinessSchema(BaseSchema):
 
 
 class PermissionSchema(Schema):
-    id = fields.String(required=True)
-    name = fields.Email(required=True)
-    action = fields.Email(required=True)
+    id = fields.Integer(allow_none=True)
+    name = fields.String(required=True)
+    action = fields.String(required=True)
 
 
 class RoleSchema(Schema):
-    id = fields.String(required=True)
-    name = fields.Email(required=True)
+    id = fields.Integer(allow_none=True)
+    name = fields.String(required=True)
     permissions = fields.List(fields.Nested(PermissionSchema))
 
 
 class UserSchema(Schema):
-    id = fields.String(required=True)
+    id = fields.Integer(allow_none=True)
     email = fields.Email(required=True)
-    first_name = fields.String(required=False)
-    last_name = fields.String(required=False)
+    first_name = fields.String(required=True,)
+    last_name = fields.String(required=True)
     active = fields.Boolean(required=False)
     role = fields.Nested(RoleSchema)
 

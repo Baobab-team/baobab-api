@@ -1,4 +1,4 @@
-from datetime import time, datetime, date
+from datetime import time, date
 
 import pytest
 
@@ -259,3 +259,66 @@ class TestRestaurantSchema(object):
             data["id"] = id
 
         assert RestaurantSchema().validate(data=data) != {}
+
+
+class TestUserSchema(object):
+
+    @pytest.mark.parametrize("id, email,first_name,last_name,active,role", [
+        (1, "john.doe@email.com", "john", "doe", True, 1),
+        (1, "john.doe@email.com", "john", "doe", True, 1),
+        (1, "john.doe@email.com", "john", "doe",True, 1),
+        (None, "john.doe@email.com", "john", "doe", True, 1),
+        (1, "john.doe@email.com", "john", "doe", False, 1),
+    ])
+    def test_valid_user(self, id, email, first_name, last_name, active, role):
+        data = {
+            "email": email,
+            "first_name": first_name,
+            "last_name": last_name,
+            "active": active,
+            "role": {
+                "name": "Admin",
+                "permissions": [],
+            },
+        }
+        if id:
+            data["id"] = id
+
+        assert UserSchema().validate(data=data) == {}
+
+    @pytest.mark.parametrize("id, email,first_name,last_name,active", [
+        (1, "email", "john", "doe", True),
+        (1, "john.doe@email", None, "doe", True),
+    ])
+    def test_invalid_user(self, id, email, first_name, last_name, active):
+        data = {
+            "email": email,
+            "first_name": first_name,
+            "last_name": last_name,
+            "active": active,
+            "role": {
+                "name": "Admin",
+                "permissions": [],
+            },
+        }
+        if id:
+            data["id"] = id
+
+        assert UserSchema().validate(data=data) != {}
+
+
+class TestRoleSchema(object):
+
+    @pytest.mark.parametrize("id, name,permissions", [
+        (1, "Admin",[]),
+        (None, "Admin",[]),
+    ])
+    def test_valid_role(self, id, name, permissions):
+        data = {
+            "name": name,
+            "permissions": permissions
+        }
+        if id:
+            data["id"] = id
+
+        assert RoleSchema().validate(data=data) == {}

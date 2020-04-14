@@ -67,6 +67,7 @@ class Permission(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), nullable=False)
     action = db.Column(db.String(), nullable=False)
+    role_id = db.Column(db.Integer, db.ForeignKey("role.id"), nullable=False)
 
 
 class RevokedTokenModel(db.Model):
