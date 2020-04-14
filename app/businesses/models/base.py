@@ -12,5 +12,10 @@ class TimestampMixin(object):
     updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
     deleted_at = db.Column(db.DateTime, nullable=True, default=None)
 
+    def is_deleted(self):
+        if self.deleted_at is None:
+            return True
+        return False
+
     def delete(self):
         self.deleted_at = datetime.utcnow()
