@@ -65,7 +65,7 @@ class Permission(BaseModel):
             return [e.value for e in Permission.ActionEnum]
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(), nullable=False)
+    model = db.Column(db.String(), nullable=False)
     action = db.Column(db.String(), nullable=False)
     role_id = db.Column(db.Integer, db.ForeignKey("role.id"), nullable=False)
 
