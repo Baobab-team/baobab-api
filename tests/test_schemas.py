@@ -46,52 +46,17 @@ class TestCategory(object):
 
 class TestBusiness(object):
 
-    def test_valid_business(self):
+    @pytest.mark.parametrize("id, name, description", [
+        (1,"gracia afrika", "gracia desc")
+    ])
+    def test_valid_business(self, id, name, description):
         data = {
-            "name": "Restaurant name",
-            "description": "Restaurant desc",
-            "website": "resto.com",
-            "email": "john.doe@gmail.com",
-            "notes": "notes",
-            "category": {
-                "id": "100",
-                "name": "resto"
-            },
-            "owner_id": 1,
-            "capacity": 120,
-            "business_hours": [
-                {
-                    "day": "thursday",
-                    "closing_time": time().isoformat(),
-                    "opening_time": time().isoformat(),
-                },
-                {
-                    "day": "monday",
-                    "closing_time": time(10, 30, 0).isoformat(),
-                    "opening_time": time(18, 30, 0).isoformat(),
-                }
-            ],
-            "addresses": [{
-                "street_number": "2700",
-                "street_name": "Kent",
-                "street_type": "Street",
-                "direction": "",
-                "city": "Montreal",
-                "zip_code": "H1h 0H0",
-                "region": "",
-                "country": "Canada",
-                "province": "QC",
-            }],
-            "social_links": [
-                {"link": "facebook.com", "type": "Twitter"}
-            ],
-            "payment_types": ["cash"],
-            "tags": [
-                {"name": "Tag1", },
-                {"name": "Tag2", }
-            ]
+            "name": name,
+            "description": description,
         }
-        assert BusinessCreateSchema().validate(data=data) == {}
+        if id:
+            data["id"] = id
+        assert BusinessSchema().validate(data=data) == {}
 
 
 class TestTags(object):
@@ -277,7 +242,7 @@ class TestUserSchema(object):
             "last_name": last_name,
             "active": active,
             "role": {
-                "name": "Admin",
+                "type": "admin",
                 "permissions": [],
             },
         }
@@ -297,7 +262,7 @@ class TestUserSchema(object):
             "last_name": last_name,
             "active": active,
             "role": {
-                "name": "Admin",
+                "type": "admin",
                 "permissions": [],
             },
         }
@@ -309,16 +274,58 @@ class TestUserSchema(object):
 
 class TestRoleSchema(object):
 
-    @pytest.mark.parametrize("id, name,permissions", [
-        (1, "Admin",[]),
-        (None, "Admin",[]),
+    @pytest.mark.parametrize("type,permissions", [
+        ("admin", []),
+        ("client", []),
+        ("staff", []),
+        ("owner", []),
     ])
-    def test_valid_role(self, id, name, permissions):
+    def test_valid_role(self, type, permissions):
         data = {
-            "name": name,
+            "type": type,
             "permissions": permissions
+        }
+
+        assert RoleSchema().validate(data=data) == {}
+
+    @pytest.mark.parametrize("type,permissions", [
+        ("bob", []),
+    ])
+    def test_invalid_role(self, type, permissions):
+        data = {
+            "type": type,
+            "permissions": permissions
+        }
+
+        assert RoleSchema().validate(data=data) != {}
+
+
+class TestPermissionSchema(object):
+
+    @pytest.mark.parametrize("model, action, role ", [
+        ("user", "edit", "admin")
+    ])
+    def test_valid_permissions(self, model, action, role):
+        data = {
+            "model": model,
+            "action": action,
+            "role": role,
+        }
+
+        assert PermissionSchema().validate(data=data) == {}
+
+    @pytest.mark.parametrize("id,model, action, role", [
+        (1, None, "edit", "admin"),
+        (2, "user", None, "admin"),
+        (3, "user", "edit", None),
+    ])
+    def test_invalid_permission(self, id, model, action, role):
+        data = {
+            "model": model,
+            "action": action,
+            "role": role,
         }
         if id:
             data["id"] = id
 
-        assert RoleSchema().validate(data=data) == {}
+        assert PermissionSchema().validate(data=data) != {}
