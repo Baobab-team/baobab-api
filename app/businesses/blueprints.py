@@ -44,3 +44,10 @@ api.add_resource(res.CategoryScalar, "/categories/<int:id>")
 api.add_resource(res.TagCollection, "/tags")
 api.add_resource(res.TagScalar, "/tags/<int:id>")
 
+api.add_resource(res.UserCollection, "/users")
+api.add_resource(res.UserScalar, "/users/<int:id>")
+api.add_resource(res.UserLogin, "/login")
+api.add_resource(res.UserLogoutAccess, "/logout")
+api.add_resource(res.UserRegistration, "/register")
+api.add_resource(res.TokenRefresh, "/token/refresh")
+
