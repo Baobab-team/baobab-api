@@ -15,7 +15,7 @@ class User(BaseModel):
     first_name = db.Column(db.String(), nullable=True)
     last_name = db.Column(db.String(), nullable=True)
     active = db.Column(db.Boolean, default=True)
-    role_id = db.Column(db.Integer, db.ForeignKey("role.id"), nullable=False)
+    role = db.Column(db.String(), db.ForeignKey("role.type"), nullable=True)
 
     def __repr__(self):
         return '<User {}>'.format(self.email)
@@ -48,9 +48,10 @@ class User(BaseModel):
 
 
 class Role(BaseModel):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(), unique=True, nullable=False)
-    permissions = db.relationship('Permission', backref='role', lazy=True)
+    types = ["admin","client","staff","owner"]
+
+    type = db.Column(db.String(), primary_key=True)
+    permissions = db.relationship('Permission', backref='role', lazy=True, cascade="all")
 
 
 class Permission(BaseModel):
@@ -67,7 +68,7 @@ class Permission(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     model = db.Column(db.String(), nullable=False)
     action = db.Column(db.String(), nullable=False)
-    role_id = db.Column(db.Integer, db.ForeignKey("role.id"), nullable=False)
+    role = db.Column(db.String(), db.ForeignKey("role.type"), nullable=False)
 
 
 class RevokedTokenModel(db.Model):
