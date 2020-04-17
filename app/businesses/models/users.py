@@ -12,8 +12,8 @@ class User(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), nullable=False, unique=True)
     _password = db.Column(db.String(255), nullable=False)
-    first_name = db.Column(db.String(), nullable=True)
-    last_name = db.Column(db.String(), nullable=True)
+    first_name = db.Column(db.String(), nullable=False)
+    last_name = db.Column(db.String(), nullable=False)
     active = db.Column(db.Boolean, default=True)
     role = db.Column(db.String(), db.ForeignKey("role.type"), nullable=True)
 
@@ -32,10 +32,10 @@ class User(BaseModel):
         return check_password_hash(self._password, pw)
 
     @staticmethod
-    def create_admin_user(email, password, firstname="", lastname=""):
-        user = User(email=email, first_name=firstname, last_name=lastname)
+    def create_admin_user(email, password, first_name, last_name):
+        user = User(email=email, first_name=first_name, last_name=last_name)
         user.password = password
-
+        user.role = Role.ADMIN
         return user
 
     @property
@@ -48,10 +48,14 @@ class User(BaseModel):
 
 
 class Role(BaseModel):
-    types = ["admin","client","staff","owner"]
+    TYPE_OWNER = "owner"
+    TYPE_STAFF = "staff"
+    TYPE_CLIENT = "client"
+    TYPE_ADMIN = "admin"
 
     type = db.Column(db.String(), primary_key=True)
     permissions = db.relationship('Permission', backref='role', lazy=True, cascade="all")
+    types = [TYPE_ADMIN, TYPE_CLIENT, TYPE_STAFF, TYPE_OWNER]
 
 
 class Permission(BaseModel):
@@ -68,7 +72,7 @@ class Permission(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     model = db.Column(db.String(), nullable=False)
     action = db.Column(db.String(), nullable=False)
-    role = db.Column(db.String(), db.ForeignKey("role.type"), nullable=False)
+    role_type = db.Column(db.String(), db.ForeignKey("role.type"), nullable=False)
 
 
 class RevokedTokenModel(db.Model):
