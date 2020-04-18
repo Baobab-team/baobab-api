@@ -2,7 +2,6 @@ from enum import Enum
 
 from flask_jwt_extended import create_access_token, create_refresh_token
 from sqlalchemy.ext.hybrid import hybrid_property
-from werkzeug.security import generate_password_hash, check_password_hash
 from passlib.hash import sha256_crypt
 
 from app import db
@@ -27,8 +26,7 @@ class User(BaseModel):
 
     @password.setter
     def password(self, pw):
-        self._password =  sha256_crypt.encrypt("password")
-
+        self._password = sha256_crypt.encrypt(pw)
 
     def check_password(self, pw):
         return sha256_crypt.verify(pw, self._password)
