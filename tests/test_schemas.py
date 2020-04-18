@@ -241,10 +241,7 @@ class TestUserSchema(object):
             "first_name": first_name,
             "last_name": last_name,
             "active": active,
-            "role": {
-                "type": "admin",
-                "permissions": [],
-            },
+            "role": "admin",
         }
         if id:
             data["id"] = id
@@ -261,10 +258,7 @@ class TestUserSchema(object):
             "first_name": first_name,
             "last_name": last_name,
             "active": active,
-            "role": {
-                "type": "admin",
-                "permissions": [],
-            },
+            "role": "admin",
         }
         if id:
             data["id"] = id
