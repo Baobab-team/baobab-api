@@ -3,6 +3,7 @@ from enum import Enum
 from flask_jwt_extended import create_access_token, create_refresh_token
 from sqlalchemy.ext.hybrid import hybrid_property
 from werkzeug.security import generate_password_hash, check_password_hash
+from passlib.hash import sha256_crypt
 
 from app import db
 from app.businesses.models import BaseModel
@@ -26,16 +27,16 @@ class User(BaseModel):
 
     @password.setter
     def password(self, pw):
-        self._password = generate_password_hash(pw)
+        self._password =  sha256_crypt.encrypt("password")
+
 
     def check_password(self, pw):
-        return check_password_hash(self._password, pw)
+        return sha256_crypt.verify(pw, self._password)
 
     @staticmethod
-    def create_admin_user(email, password, first_name, last_name):
-        user = User(email=email, first_name=first_name, last_name=last_name)
+    def create_user(email, password, first_name, last_name, role):
+        user = User(email=email, first_name=first_name, last_name=last_name, role=role)
         user.password = password
-        user.role = Role.ADMIN
         return user
 
     @property

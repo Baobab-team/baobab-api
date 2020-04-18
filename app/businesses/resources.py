@@ -5,10 +5,11 @@ from flask_restful import Resource, abort
 from flask_restful.reqparse import Argument
 
 from app.utils.decorators import parse_with, marshal_with, parse_request
-from .models import Tag, Business, RevokedTokenModel
+from .models import Tag, RevokedTokenModel, User
 from .repositories import BusinessRepository, CategoryRepository, TagRepository, UserRepository
 from .schemas import BusinessCreateSchema, CategorySchema, CategoryUpdateSchema, BusinessSchema, \
-    BusinessUpdateSchema, TagSchema, TagSchemaCreateOrUpdate, UserSchema, UserTokenSchema
+    BusinessUpdateSchema, TagSchema, TagSchemaCreateOrUpdate, UserSchema, UserSchemaUpdate, \
+    UserRegistrationSchema
 from ..consts import BUSINESS_PER_PAGE
 
 
@@ -199,7 +200,7 @@ class UserScalar(Resource):
         super(UserScalar, self).__init__()
         self.repository = repository_factory()
 
-    @parse_with(UserSchema(), arg_name="entity")
+    @parse_with(UserSchemaUpdate(), arg_name="entity")
     @marshal_with(UserSchema)
     def put(self, id, entity):
         return self.repository.update(id, **entity)
@@ -209,8 +210,7 @@ class UserScalar(Resource):
         return self.repository.get(id)
 
     def delete(self, id):
-        user = self.repository.get(id)
-        # user.delete() # TODO update when function is created
+        self.repository.delete(id)
         return None, 204
 
 
@@ -230,14 +230,22 @@ class UserRegistration(Resource):
         super(UserRegistration, self).__init__()
         self.repository = repository_factory()
 
-    @parse_with(UserSchema(), arg_name="entity")
-    @marshal_with(UserTokenSchema, success_code=200)
-    def post(self, entity, **kwargs):
-        if self.repository.exist(entity.email):
+    @parse_with(UserRegistrationSchema(), arg_name="user")
+    def post(self, user):
+        if self.repository.exist(user.id):
             abort(400, message="User already exist")
 
-        user = self.repository.save(entity)
-        return user
+        user = User.create_user(
+            first_name=user.first_name,
+            last_name=user.last_name,
+            email=user.last_name,
+            password=user.password,
+            role=user.role,
+        )
+        # user = self.repository.save(entity)
+        response = jsonify({'access_token': user.access_token, 'refresh_token': user.refresh_token})
+        response.status_code = 201
+        return response
 
 
 class UserLogin(Resource):
@@ -253,15 +261,21 @@ class UserLogin(Resource):
 
         if user:
             if user.active and user.check_password(password):
-                return {
-                    'message': 'User {} was created'.format(user.email),
-                    'access_token': user.access_token,
-                    'refresh_token': user.refresh_token
-                }
+                response = jsonify(
+                    {
+                        'message': 'User {} was created'.format(user.email),
+                        'access_token': user.access_token,
+                        'refresh_token': user.refresh_token
+                    }
+                )
+                response.status_code = 200
             else:
-                return {"message": "Email and password don't match"}, 401
-
-        return jsonify({"message": "Something wrong happen"}), 500
+                response = jsonify({"message": "Email and password don't match"})
+                response.status_code = 401
+        else:
+            response = jsonify({"message": "Something wrong happen"})
+            response.status_code = 500
+        return response
 
 
 class UserLogoutAccess(Resource):
@@ -279,7 +293,7 @@ class UserLogoutAccess(Resource):
 class UserLogoutRefresh(Resource):
     @jwt_refresh_token_required
     def post(self):
-        jti = get_raw_jwt()['jti']
+        jti = get_raw_jwt().get('jti')
         try:
             revoked_token = RevokedTokenModel(jti=jti)
             revoked_token.add()
@@ -288,7 +302,7 @@ class UserLogoutRefresh(Resource):
             return {'message': 'Something went wrong'}, 500
 
 
-class TokenRefresh(Resource):
+class UserTokenRefresh(Resource):
     @jwt_refresh_token_required
     def post(self):
         current_user = get_jwt_identity()

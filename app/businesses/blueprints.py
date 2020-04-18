@@ -1,4 +1,5 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restful import Api, abort
 
 from app.businesses import resources as res
@@ -46,8 +47,9 @@ api.add_resource(res.TagScalar, "/tags/<int:id>")
 
 api.add_resource(res.UserCollection, "/users")
 api.add_resource(res.UserScalar, "/users/<int:id>")
-api.add_resource(res.UserLogin, "/login")
-api.add_resource(res.UserLogoutAccess, "/logout")
-api.add_resource(res.UserRegistration, "/register")
-api.add_resource(res.TokenRefresh, "/token/refresh")
+api.add_resource(res.UserRegistration, "/auth/register")
+api.add_resource(res.UserLogin, "/auth/login")
+api.add_resource(res.UserLogoutAccess, "/auth/logout/access")
+api.add_resource(res.UserLogoutRefresh, "/auth/logout/refresh")
+api.add_resource(res.UserTokenRefresh, "/auth/token/refresh")
 

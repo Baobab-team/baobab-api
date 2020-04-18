@@ -186,12 +186,28 @@ class UserSchema(BaseSchema):
     email = fields.Email(required=True)
     first_name = fields.String(required=True)
     last_name = fields.String(required=True)
-    active = fields.Boolean(required=False)
-    role = fields.Nested(RoleSchema)
+    active = fields.Boolean(allow_none=True)
+    role = fields.String(required=True)
 
     @post_load
     def make_object(self, data, **kwargs):
         return User(**data)
+
+
+class UserRegistrationSchema(UserSchema):
+    password = fields.String(required=True)
+
+
+class UserSchemaUpdate(UserSchema):
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        return data
+
+class UserWithRoleSchema(UserSchema):
+    role = fields.Nested(RoleSchema)
+
+
 
 
 class UserTokenSchema(BaseSchema):
