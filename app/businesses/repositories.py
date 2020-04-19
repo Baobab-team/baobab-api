@@ -2,7 +2,7 @@ from flask import current_app
 from sqlalchemy import asc, desc
 
 from app import db
-from app.businesses.models import Business, Category, Tag, User
+from app.businesses.models import Business, Category, Tag, User, DeletableMixin
 
 CONTAINS = '%{}%'
 
@@ -61,8 +61,11 @@ class BaseRepository(object):
         db_entity = self.get(id_)
         if not db_entity:
             raise KeyError("DB Object not found.")
-        self.session.delete(db_entity)
-        self.session.commit()
+        if isinstance(db_entity, DeletableMixin):
+            db_entity.delete()
+        else:
+            self.session.delete(db_entity)
+            self.session.commit()
         return True
 
 

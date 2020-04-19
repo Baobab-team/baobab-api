@@ -3,7 +3,7 @@ from enum import Enum
 from sqlalchemy_utils import ScalarListType
 
 from app import db
-from app.businesses.models.base import TimestampMixin
+from app.businesses.models.base import TimestampMixin, DeletableMixin
 
 tags = db.Table('tags',
                 db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True),
@@ -11,7 +11,7 @@ tags = db.Table('tags',
                 )
 
 
-class Business(db.Model, TimestampMixin):
+class Business(db.Model, TimestampMixin, DeletableMixin):
     class StatusEnum(Enum):
         pending = "pending"
         accepted = "accepted"

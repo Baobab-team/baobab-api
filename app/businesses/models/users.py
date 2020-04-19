@@ -5,10 +5,10 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from passlib.hash import sha256_crypt
 
 from app import db
-from app.businesses.models import BaseModel
+from app.businesses.models import BaseModel, DeletableMixin
 
 
-class User(BaseModel):
+class User(BaseModel, DeletableMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), nullable=False, unique=True)
     _password = db.Column(db.String(255), nullable=False)

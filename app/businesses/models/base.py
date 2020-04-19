@@ -10,6 +10,9 @@ class BaseModel(db.Model):
 class TimestampMixin(object):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
+
+
+class DeletableMixin(object):
     deleted_at = db.Column(db.DateTime, nullable=True, default=None)
 
     def is_deleted(self):
