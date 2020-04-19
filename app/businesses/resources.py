@@ -242,11 +242,9 @@ class UserRegistration(Resource):
             password=user.password,
             role=user.role,
         )
-        # user = self.repository.save(entity)
         response = jsonify({'access_token': user.access_token, 'refresh_token': user.refresh_token})
         response.status_code = 201
         return response
-
 
 class UserLogin(Resource):
     def __init__(self, repository_factory=UserRepository):
@@ -263,7 +261,6 @@ class UserLogin(Resource):
             if user.active and user.check_password(password):
                 response = jsonify(
                     {
-                        'message': 'User {} was created'.format(user.email),
                         'access_token': user.access_token,
                         'refresh_token': user.refresh_token
                     }
@@ -308,3 +305,4 @@ class UserTokenRefresh(Resource):
         current_user = get_jwt_identity()
         access_token = create_access_token(identity=current_user)
         return {'access_token': access_token}
+
