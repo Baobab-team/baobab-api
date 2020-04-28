@@ -4,16 +4,15 @@ from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import import_string
 
-from .common.errors import page_not_found, page_error
 
 load_dotenv()
 
 db = SQLAlchemy()
-jwt = JWTManager()
+migrate = Migrate()
 
 
 def create_app(config=None):
@@ -29,22 +28,16 @@ def create_app(config=None):
 
     app.config.from_object(config)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['JWT_SECRET_KEY'] = os.getenv('SECRET_KEY')
-    app.config['JWT_BLACKLIST_ENABLED'] = True
-    app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
 
     db.init_app(app)
-    jwt.init_app(app)
+    migrate.init_app(app, db)
 
     # Initialize models
-    from .users.models import User, Customer, Owner, RevokedTokenModel
-    from .businesses.models import Business, BusinessHour, Category, Rating, Address
+    from .businesses.models import Business, BusinessHour, Category, Address
 
     # Initialize API
     from .businesses.blueprints import blueprint as business_blueprint
     app.register_blueprint(business_blueprint)
-    from .users.blueprints import blueprint as user_bp
-    app.register_blueprint(user_bp)
 
     if not app.debug:
         # Initliaze errors page
@@ -61,13 +54,7 @@ def create_app(config=None):
         app.logger.setLevel(logging.INFO)
         app.logger.info('Baobab startup')
 
-        app.register_error_handler(500, page_error)
-        app.register_error_handler(404, page_not_found)
 
-    @jwt.token_in_blacklist_loader
-    def check_if_token_in_blacklist(decrypted_token):
-        jti = decrypted_token['jti']
-        return RevokedTokenModel.is_jti_blacklisted(jti)
 
     # enable CORS
     CORS(app, resources={r'/*': {'origins': '*'}})
