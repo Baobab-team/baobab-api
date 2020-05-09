@@ -26,14 +26,15 @@ class BusinessCollection(Resource):
         Argument("order", type=str, choices=("ASC", "DESC"), default="ASC"),
         Argument("page", type=int, default=1),
         Argument("businessPerPage", type=int, default=BUSINESS_PER_PAGE),
+        Argument("exclude_deleted", type=bool, default=True),
     )
     @marshal_with(BusinessSchema, many=True, success_code=200)
-    def get(self, page, businessPerPage, status=None, querySearch=None, accepted_at=None,  order=None,
+    def get(self, page, exclude_deleted, businessPerPage, status=None, querySearch=None, accepted_at=None, order=None,
             order_by=None,
-             **kwargs):
+                     ** kwargs):
         return self.repository.filter(
             querySearch=querySearch, accepted_at=accepted_at, status=status, order=order,
-            order_by=order_by, **kwargs
+            order_by=order_by, exclude_deleted=exclude_deleted, **kwargs
         ).paginate(page, businessPerPage, False).items
 
     @parse_with(BusinessCreateSchema(), arg_name="entity")
@@ -56,9 +57,12 @@ class BusinessScalar(Resource):
     def put(self, id, entity):
         return self.repository.update(id, **entity)
 
+    @parse_request(
+        Argument("exclude_deleted", type=bool, default=True),
+    )
     @marshal_with(BusinessSchema)
-    def get(self, id):
-        return self.repository.query.filter_by(id=id).first_or_404(description='Business doesnt exist')
+    def get(self, id, exclude_deleted):
+        return self.repository.filter(id=id, exclude_deleted=exclude_deleted).first_or_404(description='Business doesnt exist')
 
     def delete(self, id):
         self.repository.delete(id=id, error_message="Business doesnt exists")
@@ -71,9 +75,12 @@ class BusinessTagCollection(Resource):
         super(BusinessTagCollection, self).__init__()
         self.repository = repository_factory()
 
+    @parse_request(
+        Argument("exclude_deleted", type=bool, default=True),
+    )
     @marshal_with(TagSchema, many=True)
-    def get(self, id):
-        business = self.repository.get(id, error_message="Business doesnt exist")
+    def get(self, id,exclude_deleted):
+        business = self.repository.filter(id=id, exclude_delete=exclude_deleted).first_or_404(description='Business doesnt exist')
         return business.tags
 
     @parse_with(TagSchema(), many=True, arg_name="tags")
