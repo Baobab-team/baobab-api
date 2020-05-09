@@ -74,11 +74,11 @@ class BusinessRepository(BaseRepository):
         return entity
 
     def filter(self, id=None, querySearch=None, accepted_at=None, status=None, order=None, order_by=None,
-               exclude_delete=None,
+               exclude_deleted=None,
                **kwargs):
         query = self.query
 
-        if exclude_delete:
+        if exclude_deleted:
             query = query.filter(Business.deleted_at.is_(None))
 
         if id:
