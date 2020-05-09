@@ -73,8 +73,16 @@ class BusinessRepository(BaseRepository):
         super(BusinessRepository, self).save(entity)
         return entity
 
-    def filter(self, querySearch=None, accepted_at=None, status=None, order=None, order_by=None, **kwargs):
+    def filter(self, id=None, querySearch=None, accepted_at=None, status=None, order=None, order_by=None,
+               exclude_delete=None,
+               **kwargs):
         query = self.query
+
+        if exclude_delete:
+            query = query.filter(Business.deleted_at.is_(None))
+
+        if id:
+            return query.filter(Business.id == id)
 
         if querySearch:
             querySearch = CONTAINS.format(querySearch)
