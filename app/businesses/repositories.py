@@ -86,7 +86,7 @@ class BusinessRepository(BaseRepository):
 
         if querySearch:
             querySearch = CONTAINS.format(querySearch)
-            query = query.filter(Business.name.ilike(querySearch) | Business.description.ilike(querySearch))
+            query = query.filter(Business.name.ilike(querySearch))
 
         if accepted_at:
             query = query.filter(Business.accepted_at == accepted_at)
