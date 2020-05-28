@@ -1,12 +1,8 @@
 #!/bin/bash
 
 ACTION=$1
-BASH_PROFILE=~/.bash_profile
 ORANGE='\033[0;33m'
 NOCOLOR='\033[0m'
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-WHITE='\033[1;37m'
 
 # Functions
 show_menu() {
@@ -23,7 +19,6 @@ show_menu() {
   4) restore_db   - Restore backed up database
   5) create_user  - Create user
   6) delete_user  - Delete user
-  7) env_setup    - Setup environment
   "
 }
 
@@ -59,17 +54,6 @@ restore_db() {
   psql --set ON_ERROR_STOP=on ${BAOBAB_DATABASE} < baobabdb_backup.sql
 }
 
-env_setup() {
-  echo "Setup environment..."
-  cp .baobab_profile ~
-
-  if !  grep -q 'source ~/.baobab_profile' ~/.bash_profile ; then
-    echo "Adding .baobab_profile to .bash_profile"
-    echo 'source ~/.baobab_profile' >> ~/.bash_profile
-  fi
-  source  ~/.bash_profile
-}
-
 case $ACTION in
     "create_db") create_db ;;
     "delete_db") delete_db ;;
@@ -77,6 +61,5 @@ case $ACTION in
     "delete_user") delete_user ;;
     "back_db") back_db ;;
     "restore_db") restore_db ;;
-    "env_setup") env_setup ;;
     *) show_menu ;;
 esac
