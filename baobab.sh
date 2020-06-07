@@ -19,6 +19,7 @@ show_menu() {
   4) restore_db   - Restore backed up database
   5) create_user  - Create user
   6) delete_user  - Delete user
+  &) list_backup  - List backup
   "
 }
 
@@ -26,7 +27,7 @@ delete_db() {
   echo "Deleting database..."
   dropdb -U ${BAOBAB_USER} -i -e ${BAOBAB_DATABASE}
   echo "Deleting migrations folder.."
-  rm -rf baobab-api/migrations
+  rm -rf migrations
 }
 
 create_user() {
@@ -46,20 +47,29 @@ create_db() {
 
 back_db() {
   echo "Dumping database..."
-  pg_dump ${BAOBAB_DATABASE}  > baobabdb_backup.sql
+  NOW=$(date +"%m-%d-%Y")
+  FILE="backup.$NOW.sql"
+  pg_dump ${BAOBAB_DATABASE} > ${FILE}
+  echo ${FILE}
+}
+
+list_backup() {
+  ls backup.*
 }
 
 restore_db() {
   echo "Restoring database..."
-  psql --set ON_ERROR_STOP=on ${BAOBAB_DATABASE} < baobabdb_backup.sql
+  local FILE="$2"
+  psql --set ON_ERROR_STOP=on ${BAOBAB_DATABASE} < ${FILE}
 }
 
 case $ACTION in
-    "create_db") create_db ;;
-    "delete_db") delete_db ;;
-    "create_user") create_user ;;
-    "delete_user") delete_user ;;
-    "back_db") back_db ;;
-    "restore_db") restore_db ;;
-    *) show_menu ;;
+"create_db") create_db ;;
+"delete_db") delete_db ;;
+"create_user") create_user ;;
+"delete_user") delete_user ;;
+"back_db") back_db ;;
+"restore_db") restore_db ;;
+"list_backup") list_backup ;;
+*) show_menu ;;
 esac

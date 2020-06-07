@@ -8,5 +8,5 @@ export BAOBAB_PORT=""
 export BAOBAB_DATABASE="baobab_dev"
 
 # Alias
-alias baobab="cd $BAOBAB_HOME"
-alias baobab_env="env | grep BAOBAB"
+alias baobab-api="cd $BAOBAB_HOME" # go to baobab-api
+alias baobab_env="env | grep BAOBAB" # list baobab environment variable
