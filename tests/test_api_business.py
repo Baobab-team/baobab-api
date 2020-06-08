@@ -208,7 +208,7 @@ class BusinessTestCase(unittest.TestCase):
         self.assertEqual([], json.loads(res.data))
 
     def test_autocomplete_search_business(self):
-        res = self.client().get('/api_v1/businesses/autocomplete?querySearch=business')
+        res = self.client().get('/api_v1/businesses/autocomplete?querySearch=buzines')
         self.assertEqual(200, res.status_code)
         self.assertEqual(sorted(["businessA","businessB","businessC"]), sorted(json.loads(res.data)))
 
