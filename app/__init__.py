@@ -23,7 +23,8 @@ def create_app(config=None):
         return "If you arent seing this, it means the setup went well !"
 
     if config is None:
-        cfg = import_string(os.getenv("APP_SETTINGS"))
+
+        cfg = import_string(os.getenv("APP_SETTINGS","app.config.DevelopmentConfig"))
         app.config.from_object(cfg())
 
     app.config.from_object(config)
