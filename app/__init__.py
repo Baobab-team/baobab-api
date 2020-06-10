@@ -8,23 +8,22 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import import_string
 
+DEVELOPMENT_CONFIG = "app.config.DevelopmentConfig"
 
 load_dotenv()
-
 db = SQLAlchemy()
 migrate = Migrate()
 
 
-def create_app(config=None):
+def create_app(config=os.getenv("APP_SETTINGS", DEVELOPMENT_CONFIG)):
     app = Flask(__name__)
 
     @app.route("/")
     def hello_world():
-        return "If you arent seing this, it means the setup went well !"
+        return "If you are seeing this, it means the setup went well !"
 
-    if config is None:
-
-        cfg = import_string(os.getenv("APP_SETTINGS","app.config.DevelopmentConfig"))
+    if isinstance(config, str):
+        cfg = import_string(config)
         app.config.from_object(cfg())
 
     app.config.from_object(config)
