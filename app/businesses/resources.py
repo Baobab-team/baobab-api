@@ -90,13 +90,17 @@ class BusinessSearchAutoCompleteCollection(Resource):
     )
     def get(self, limit, distance, exclude_deleted, status=None, querySearch=None, accepted_at=None, order=None,
             order_by=None, **kwargs):
-        businesses = self.repository.filter(
+        full_business_list = self.repository.filter(
             accepted_at=accepted_at, status=status, order=order,
             order_by=order_by, exclude_deleted=exclude_deleted, **kwargs
         ).all()
+        search_matching_business_list = self.repository.filter(
+            querySearch=querySearch, accepted_at=accepted_at, status=status, order=order,
+            order_by=order_by, exclude_deleted=exclude_deleted, **kwargs
+        )
 
         matching_words = set([])
-        for b in businesses:
+        for b in full_business_list:
             keyword = querySearch.lower()
             matching_name = textdistance.levenshtein.normalized_distance(b.name.lower(), keyword) < distance
 
@@ -107,6 +111,9 @@ class BusinessSearchAutoCompleteCollection(Resource):
                 matching_tag = textdistance.levenshtein.normalized_distance(tag.name.lower(), keyword) < distance
                 if matching_tag:
                     matching_words.add(tag.name)
+
+        for b in search_matching_business_list:
+            matching_words.add(b.name)
 
         matching_words = list(matching_words)[0:limit]
         response = jsonify(matching_words)
