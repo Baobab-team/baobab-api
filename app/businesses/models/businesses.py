@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+
 from sqlalchemy_utils import ScalarListType
 
 from app import db
@@ -53,6 +54,18 @@ class Business(db.Model, TimestampMixin):
 
     restaurant_id = db.Column(db.Integer, db.ForeignKey("restaurant.id"), nullable=True)
 
+    def __eq__(self, other):
+        if not isinstance(other, Business):
+            return False
+
+        return self.name == other.name and \
+               self.description == other.description and \
+               self.slogan == other.slogan and \
+               self.notes == other.notes and \
+               self.website == other.website and \
+               self.business_hours == other.business_hours and \
+               self.phones == other.phones
+
     def __repr__(self):
         return '<Business {}>'.format(self.name)
 
@@ -64,6 +77,16 @@ class Business(db.Model, TimestampMixin):
             self.accepted_at = datetime.utcnow()
         else:
             self.accepted_at = None
+
+    def add_business_hour(self, hour):
+        self.business_hours.append(hour)
+
+    def add_phone(self, phone):
+        self.phones.append(phone)
+
+    def add_phones(self, phones):
+        for phone in phones:
+            self.add_phone(phone)
 
 
 class Tag(db.Model):
@@ -168,6 +191,14 @@ class BusinessHour(db.Model):
     def __repr__(self):
         return '<BusinessHour {}: {} to {}>'.format(self.day, self.opening_time, self.closing_time)
 
+    def __eq__(self, other):
+        if not isinstance(other, BusinessHour):
+            return False
+
+        return self.day == other.day and \
+               self.closing_time == other.closing_time and \
+               self.opening_time == other.opening_time
+
 
 class Phone(db.Model):
     """
@@ -188,6 +219,14 @@ class Phone(db.Model):
     type = db.Column(db.String(), default=Type.tel.value)
     business_id = db.Column(db.Integer, db.ForeignKey('business.id'),
                             nullable=False)
+
+    def __eq__(self, other):
+        if not isinstance(other, Phone):
+            return False
+
+        return self.number == other.number and \
+               self.extension == other.extension and \
+               self.type == other.type
 
     def __repr__(self):
         return '<Phone: {}'.format(self.number)
