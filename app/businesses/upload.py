@@ -1,7 +1,7 @@
 import csv
 from datetime import time
 
-from app.businesses.models import Business, Phone, BusinessHour, Address
+from app.businesses.models import Business, Phone, BusinessHour, Address, SocialLink
 
 
 def extract_business_from_csv(file):
@@ -25,6 +25,8 @@ def extract_business_from_csv(file):
             business.add_phones(phones)
             addresses = extract_address(row["business_addresses"])
             business.add_addresses(addresses)
+            social_links = extract_social_links(row["business_social_links"])
+            business.add_social_links(social_links)
 
     return business
 
@@ -76,3 +78,20 @@ def extract_address(address_str):
             addresses.append(address)
 
     return addresses
+
+
+def extract_social_links(social_link_str):
+    social_links = []
+    if social_link_str:
+        social_lins_arr = split_multiple_line_item(social_link_str)
+        for social_link in social_lins_arr:
+            parts = social_link.split("-")
+            social_link = SocialLink()
+            social_link.link = parts[0]
+            social_link.type = parts[1]
+            social_links.append(social_link)
+    return social_links
+
+
+def split_multiple_line_item(str):
+    return [item for item in str.replace("\n", "").split(";") if item]
