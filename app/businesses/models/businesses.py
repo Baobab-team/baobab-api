@@ -64,10 +64,12 @@ class Business(db.Model, TimestampMixin):
                self.notes == other.notes and \
                self.website == other.website and \
                self.business_hours == other.business_hours and \
-               self.phones == other.phones
+               self.phones == other.phones and \
+               self.addresses == other.addresses
 
     def __repr__(self):
-        return '<Business {}>'.format(self.name)
+        key_values = ' , '.join('{}={}'.format(k, v) for (k, v) in self.__dict__.items() if k != '_sa_instance_state')
+        return '<{} {}>'.format(type(self).__name__, key_values)
 
     def process_status(self, status=StatusEnum.pending.value):
 
@@ -81,6 +83,10 @@ class Business(db.Model, TimestampMixin):
     def add_business_hour(self, hour):
         self.business_hours.append(hour)
 
+    def add_business_hours(self, hours):
+        for hour in hours:
+            self.add_business_hour(hour)
+
     def add_phone(self, phone):
         self.phones.append(phone)
 
@@ -88,6 +94,12 @@ class Business(db.Model, TimestampMixin):
         for phone in phones:
             self.add_phone(phone)
 
+    def add_address(self, address):
+        self.addresses.append(address)
+
+    def add_addresses(self, addresses):
+        for address in addresses:
+            self.add_address(address)
 
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -162,6 +174,21 @@ class Address(db.Model):
                                                  self.street_type,
                                                  self.city,
                                                  self.province)
+
+    def __eq__(self, other):
+        if not isinstance(other, Address):
+            return False
+
+        return self.region == other.region and \
+               self.country == other.country and \
+               self.street_name == other.street_name and \
+               self.street_number == other.street_number and \
+               self.street_type == other.street_type and \
+               self.city == other.city and \
+               self.province == other.province and \
+               self.country == other.country and \
+               self.zip_code == other.zip_code and \
+               self.direction == other.direction
 
 
 class BusinessHour(db.Model):
