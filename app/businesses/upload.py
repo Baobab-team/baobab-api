@@ -27,8 +27,8 @@ def extract_business_from_csv(file):
                     hour = BusinessHour(opening_time=time(start_time[0], start_time[1]),
                                         closing_time=time(end_time[0], end_time[1]),
                                         day=days_spec[0])
-
                     business.add_business_hour(hour)
+
             if row["business_phones"]:
                 phones_arr = [phone for phone in row["business_phones"].replace("\n", "").split(";") if phone]
                 for phone in phones_arr:
