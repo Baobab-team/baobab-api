@@ -1,7 +1,7 @@
 import os
 from datetime import time
 
-from app.businesses.models import Business, Phone, BusinessHour, Address, SocialLink
+from app.businesses.models import Business, Phone, BusinessHour, Address, SocialLink, Tag
 from app.businesses.upload import extract_business_from_csv
 
 BUSINESSES_CSV = os.path.join(os.path.dirname(__file__), 'businesses.csv')
@@ -21,4 +21,5 @@ def test_extract_business_from_csv():
         Address(street_number="123", street_type="street", street_name="Kent", zip_code="H0H0H0", country="Canada",
                 direction="Est", region="REGION", city="Montreal", province="Quebec"))
     expected_business.add_social_link(SocialLink(type="Instagram",link="www.nn.com"))
+    expected_business.add_tags([Tag(name="Haitian"),Tag(name="African")])
     assert business == expected_business

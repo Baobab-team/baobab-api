@@ -66,7 +66,8 @@ class Business(db.Model, TimestampMixin):
                self.business_hours == other.business_hours and \
                self.phones == other.phones and \
                self.addresses == other.addresses and \
-               self.social_links == other.social_links
+               self.social_links == other.social_links and \
+               self.tags == other.tags
 
     def __repr__(self):
         key_values = ' , '.join('{}={}'.format(k, v) for (k, v) in self.__dict__.items() if k != '_sa_instance_state')
@@ -109,6 +110,14 @@ class Business(db.Model, TimestampMixin):
         for social_link in social_links:
             self.add_social_link(social_link)
 
+    def add_tag(self, tag):
+        self.tags.append(tag)
+
+    def add_tags(self, tags):
+        for tag in tags:
+            self.tags.append(tag)
+
+
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=True)
@@ -129,6 +138,11 @@ class Tag(db.Model):
         index = self.businesses.index(business)
         self.businesses.pop(index)
 
+    def __eq__(self, other):
+        if not isinstance(other, Tag):
+            return False
+
+        return self.name == other.name
 
 class Address(db.Model):
     class ProvinceEnum(Enum):
