@@ -7,7 +7,6 @@ services:
   - postgresql
 before_script:
   - psql -c 'create database baobab_test;' -U postgres
-  - python manage.py db upgrade
 script:
   - pytest
 
