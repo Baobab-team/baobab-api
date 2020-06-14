@@ -83,8 +83,8 @@ def extract_address(address_str):
 def extract_social_links(social_link_str):
     social_links = []
     if social_link_str:
-        social_lins_arr = split_multiple_line_item(social_link_str)
-        for social_link in social_lins_arr:
+        social_links_arr = split_multiple_line_item(social_link_str)
+        for social_link in social_links_arr:
             parts = social_link.split("-")
             social_link = SocialLink()
             social_link.link = parts[0]

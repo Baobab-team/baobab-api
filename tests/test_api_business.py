@@ -51,8 +51,9 @@ class BusinessTestCase(unittest.TestCase):
 
         tag1 = Tag(name="Tag1")
         tag2 = Tag(name="Tag2")
-        tag1.addBusinessTags([businessA, businessB, businessC])
-        tag2.addBusinessTags([businessA])
+        businessA.tags = [tag2,tag1]
+        businessB.tags = [tag1]
+        businessC.tags = [tag1]
 
         # binds the app to the current context
         with self.app.app_context():
