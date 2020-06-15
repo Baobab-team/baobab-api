@@ -1,3 +1,5 @@
+import textdistance
+from flask import jsonify
 from flask_restful import Resource, abort
 from flask_restful.reqparse import Argument
 
@@ -62,11 +64,65 @@ class BusinessScalar(Resource):
     )
     @marshal_with(BusinessSchema)
     def get(self, id, exclude_deleted):
-        return self.repository.filter(id=id, exclude_deleted=exclude_deleted).first_or_404(description='Business doesnt exist')
+        return self.repository.filter(id=id, exclude_deleted=exclude_deleted).first_or_404(
+            description='Business doesnt exist')
 
     def delete(self, id):
         self.repository.delete(id=id, error_message="Business doesnt exists")
         return None, 204
+
+
+class BusinessSearchAutoCompleteCollection(Resource):
+
+    def __init__(self, repository_factory=BusinessRepository):
+        super(BusinessSearchAutoCompleteCollection, self).__init__()
+        self.repository = repository_factory()
+
+    @parse_request(
+        Argument("querySearch", type=str, store_missing=False),
+        Argument("limit", type=str, default=10),
+        Argument("distance", type=float, default=.35),
+        Argument("status", type=str, store_missing=False, action="append"),
+        Argument("accepted_at", type=str, store_missing=False),
+        Argument("order_by", type=str, choices=("name"), default='name'),
+        Argument("order", type=str, choices=("ASC", "DESC"), default="ASC"),
+        Argument("exclude_deleted", type=bool, default=True),
+    )
+    def get(self, limit, distance, exclude_deleted, status=None, querySearch=None, accepted_at=None, order=None,
+            order_by=None, **kwargs):
+        full_business_list = self.repository.filter(
+            accepted_at=accepted_at, status=status, order=order,
+            order_by=order_by, exclude_deleted=exclude_deleted, **kwargs
+        ).all()
+        search_matching_business_list = self.repository.filter(
+            querySearch=querySearch, accepted_at=accepted_at, status=status, order=order,
+            order_by=order_by, exclude_deleted=exclude_deleted, **kwargs
+        )
+        if querySearch is None:
+            response = jsonify({"message": "Missing query search parameter"})
+            response.status_code = 400
+            return  response
+
+        matching_words = set([])
+        for b in full_business_list:
+            keyword = querySearch.lower()
+            matching_name = textdistance.levenshtein.normalized_distance(b.name.lower(), keyword) < distance
+
+            if matching_name:
+                matching_words.add(b.name)
+
+            for tag in b.tags:
+                matching_tag = textdistance.levenshtein.normalized_distance(tag.name.lower(), keyword) < distance
+                if matching_tag:
+                    matching_words.add(tag.name)
+
+        for b in search_matching_business_list:
+            matching_words.add(b.name)
+
+        matching_words = list(matching_words)[0:limit]
+        response = jsonify(matching_words)
+        response.status_code = 200
+        return response
 
 
 class BusinessTagCollection(Resource):
@@ -79,8 +135,9 @@ class BusinessTagCollection(Resource):
         Argument("exclude_deleted", type=bool, default=True),
     )
     @marshal_with(TagSchema, many=True)
-    def get(self, id,exclude_deleted):
-        business = self.repository.filter(id=id, exclude_delete=exclude_deleted).first_or_404(description='Business doesnt exist')
+    def get(self, id, exclude_deleted):
+        business = self.repository.filter(id=id, exclude_delete=exclude_deleted).first_or_404(
+            description='Business doesnt exist')
         return business.tags
 
     @parse_with(TagSchema(), many=True, arg_name="tags")
@@ -108,7 +165,7 @@ class BusinessTagScalar(Resource):
 
         self.repository.save(business)
 
-        return None,204
+        return None, 204
 
 
 class CategoryScalar(Resource):

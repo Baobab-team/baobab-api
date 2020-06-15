@@ -207,3 +207,18 @@ class BusinessTestCase(unittest.TestCase):
         self.assertEqual(200, res.status_code)
         self.assertEqual([], json.loads(res.data))
 
+    def test_autocomplete_search_business(self):
+        res = self.client().get('/api_v1/businesses/autocomplete?querySearch=buzines')
+        self.assertEqual(200, res.status_code)
+        self.assertEqual(sorted(["businessA","businessB","businessC"]), sorted(json.loads(res.data)))
+
+    def test_autocomplete_search_tag(self):
+        res = self.client().get('/api_v1/businesses/autocomplete?querySearch=tag')
+        self.assertEqual(200, res.status_code)
+        self.assertEqual(sorted(["Tag1","Tag2"]), sorted(json.loads(res.data)))
+
+    def test_autocomplete_search_no_query_search(self):
+        res = self.client().get('/api_v1/businesses/autocomplete')
+        self.assertEqual(400, res.status_code)
+        self.assertEqual("Missing query search parameter", json.loads(res.data)["message"])
+
