@@ -1,13 +1,19 @@
 import csv
 import json
 import os
+import shutil
 import unittest
 from datetime import time
 from io import BytesIO
 
+from werkzeug.datastructures import FileStorage
+
 from app import create_app, db
 from app.businesses.models import Category, Tag, Business, BusinessHour, Phone, Address, SocialLink
+from app.businesses.schemas import BusinessSchema
 from app.config import TestingConfig
+
+BUSINESSES_FILE_UPLOADED_CSV = os.path.join(os.path.dirname(__file__), "businesses_file_upload.csv")
 
 
 class BusinessTestCase(unittest.TestCase):
@@ -73,6 +79,19 @@ class BusinessTestCase(unittest.TestCase):
         with self.app.app_context():
             db.session.remove()
             db.drop_all()
+        if os.path.exists(BUSINESSES_FILE_UPLOADED_CSV):
+            os.remove(BUSINESSES_FILE_UPLOADED_CSV)
+        folder = self.app.config["UPLOAD_FOLDER"]
+        for filename in os.listdir(folder):
+            file_path = os.path.join(folder, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e))
 
     def test_business_post(self):
         res = self.client().post('/api_v1/businesses',
@@ -252,17 +271,20 @@ class BusinessTestCase(unittest.TestCase):
              "+1--514-555-5555--telephone;", "123--street--Kent--Est--Montreal--H0H0H0--REGION--Quebec--Canada;",
              "www.nn.com-Instagram;", "Haitian;African"]
         ]
-        csv_file = os.path.join(os.path.dirname(__file__), "businesses_file_upload.csv")
-        with open(csv_file, 'w') as csvfile:
+        with open(BUSINESSES_FILE_UPLOADED_CSV, 'w') as csvfile:
             writer = csv.writer(csvfile, quotechar='"', quoting=csv.QUOTE_ALL)
             for line in rows:
                 writer.writerow(line)
-
+        my_file = FileStorage(
+            stream=open(BUSINESSES_FILE_UPLOADED_CSV, "rb"),
+            filename="businesses_file_upload.csv",
+            content_type="text/csv",
+        ),
         data = {
-            'file': (BytesIO(b"file"), csv_file)
+            'file': my_file
         }
         res = self.client().post(
             '/api_v1/businesses/upload', data=data, content_type='multipart/form-data',
         )
         self.assertEqual(200, res.status_code)
-        self.assertEqual([business], json.loads(res.data))
+        self.assertEqual([BusinessSchema().dump(business)], json.loads(res.data))

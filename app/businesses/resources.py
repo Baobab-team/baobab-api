@@ -1,11 +1,9 @@
 import os
-from datetime import time
 import time as ttime
 
 import textdistance
 import werkzeug
 from flask import current_app
-import textdistance
 from flask import jsonify
 from flask_restful import Resource, abort
 from flask_restful.reqparse import Argument
@@ -146,10 +144,11 @@ class UploadBusinessCSV(Resource):
     )
     @marshal_with(BusinessSchema, many=True, success_code=200)
     def post(self, file):
-        file_path_renamed = os.path.join(current_app.config["UPLOAD_FOLDER"], "business-{}.csv".format(ttime.strftime("%Y%m%d-%H%M%S")))
-        file.save(file_path_renamed)
+        filename = os.path.join(current_app.config["UPLOAD_FOLDER"],
+                                "business-{}.csv".format(ttime.strftime("%Y-%m-%d_%H-%M")))
+        file.save(filename)
         try:
-            businesses = extract_business_from_csv(file_path_renamed)
+            businesses = extract_business_from_csv(filename)
             return businesses
         except IntegrityError as e:
             abort(400, message=str(e))
