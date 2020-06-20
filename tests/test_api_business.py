@@ -1,8 +1,12 @@
+import csv
 import json
+import os
 import unittest
+from datetime import time
+from io import BytesIO
 
 from app import create_app, db
-from app.businesses.models import Category, Tag, Business
+from app.businesses.models import Category, Tag, Business, BusinessHour, Phone, Address, SocialLink
 from app.config import TestingConfig
 
 
@@ -12,6 +16,7 @@ class BusinessTestCase(unittest.TestCase):
     def setUp(self):
         """Define test variables and initialize app."""
         self.app = create_app(config=TestingConfig)
+        self.app.config["UPLOAD_FOLDER"] = os.path.abspath(os.path.join(os.path.dirname(__file__), 'uploads_for_test'))
         self.client = self.app.test_client
 
         self.category1 = {'name': 'Restaurant'}
@@ -51,7 +56,7 @@ class BusinessTestCase(unittest.TestCase):
 
         tag1 = Tag(name="Tag1")
         tag2 = Tag(name="Tag2")
-        businessA.add_tags([tag2,tag1])
+        businessA.add_tags([tag2, tag1])
         businessB.add_tag(tag1)
         businessC.add_tag(tag1)
 
@@ -223,3 +228,41 @@ class BusinessTestCase(unittest.TestCase):
         self.assertEqual(400, res.status_code)
         self.assertEqual("Missing query search parameter", json.loads(res.data)["message"])
 
+    def test_business_upload_csv(self):
+        business = Business(name="Gracia Afrika", website="www.website.com", slogan="Manger bien",
+                            description="Restaurant africain vraiment cool",
+                            notes="Super notes", capacity=14, email="business@email.com",
+                            payment_types=["credit", "debit"],
+                            )
+        business.add_business_hour(BusinessHour(opening_time=time(10, 0), closing_time=time(17, 0), day="monday"))
+        business.add_business_hour(BusinessHour(opening_time=time(10, 0), closing_time=time(17, 0), day="tuesday"))
+        business.add_phone(Phone(number="514-555-5555", extension="+1", type="telephone"))
+        business.add_address(
+            Address(street_number="123", street_type="street", street_name="Kent", zip_code="H0H0H0", country="Canada",
+                    direction="Est", region="REGION", city="Montreal", province="Quebec"))
+        business.add_social_link(SocialLink(type="Instagram", link="www.nn.com"))
+        business.add_tags([Tag(name="Haitian"), Tag(name="African")])
+
+        rows = [
+            ["business_name", "business_description", "business_slogan", "business_website", "business_email",
+             "business_status", "business_notes", "business_capacity", "business_payment_types", "business_hours",
+             "business_phones", "business_addresses", "business_social_links", "business_tags"],
+            ["Gracia Afrika", "Restaurant africain vraiment cool", "Manger bien", "www.website.com",
+             "business@email.com", "", "Super notes", "14", "credit,debit", "monday-10:00-17:00;tuesday-10:00-17:00;",
+             "+1--514-555-5555--telephone;", "123--street--Kent--Est--Montreal--H0H0H0--REGION--Quebec--Canada;",
+             "www.nn.com-Instagram;", "Haitian;African"]
+        ]
+        csv_file = os.path.join(os.path.dirname(__file__), "businesses_file_upload.csv")
+        with open(csv_file, 'w') as csvfile:
+            writer = csv.writer(csvfile, quotechar='"', quoting=csv.QUOTE_ALL)
+            for line in rows:
+                writer.writerow(line)
+
+        data = {
+            'file': (BytesIO(b"file"), csv_file)
+        }
+        res = self.client().post(
+            '/api_v1/businesses/upload', data=data, content_type='multipart/form-data',
+        )
+        self.assertEqual(200, res.status_code)
+        self.assertEqual([business], json.loads(res.data))

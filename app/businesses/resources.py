@@ -1,9 +1,19 @@
+import os
+from datetime import time
+import time as ttime
+
+import textdistance
+import werkzeug
+from flask import current_app
 import textdistance
 from flask import jsonify
 from flask_restful import Resource, abort
 from flask_restful.reqparse import Argument
+from sqlalchemy.exc import IntegrityError
+from werkzeug.datastructures import FileStorage
 
 from app.utils.decorators import parse_with, marshal_with, parse_request
+from .extract import extract_business_from_csv
 from .models import Tag
 from .repositories import BusinessRepository, CategoryRepository, TagRepository
 from .schemas import BusinessCreateSchema, CategorySchema, CategoryUpdateSchema, BusinessSchema, \
@@ -33,7 +43,7 @@ class BusinessCollection(Resource):
     @marshal_with(BusinessSchema, many=True, success_code=200)
     def get(self, page, exclude_deleted, businessPerPage, status=None, querySearch=None, accepted_at=None, order=None,
             order_by=None,
-                     ** kwargs):
+            **kwargs):
         return self.repository.filter(
             querySearch=querySearch, accepted_at=accepted_at, status=status, order=order,
             order_by=order_by, exclude_deleted=exclude_deleted, **kwargs
@@ -123,6 +133,26 @@ class BusinessSearchAutoCompleteCollection(Resource):
         response = jsonify(matching_words)
         response.status_code = 200
         return response
+
+
+class UploadBusinessCSV(Resource):
+
+    def __init__(self, repository_factory=BusinessRepository):
+        super(UploadBusinessCSV, self).__init__()
+        self.repository = repository_factory()
+
+    @parse_request(
+        Argument("file", type=werkzeug.datastructures.FileStorage, location='files'),
+    )
+    @marshal_with(BusinessSchema, many=True, success_code=200)
+    def post(self, file):
+        file_path_renamed = os.path.join(current_app.config["UPLOAD_FOLDER"], "business-{}.csv".format(ttime.strftime("%Y%m%d-%H%M%S")))
+        file.save(file_path_renamed)
+        try:
+            businesses = extract_business_from_csv(file_path_renamed)
+            return businesses
+        except IntegrityError as e:
+            abort(400, message=str(e))
 
 
 class BusinessTagCollection(Resource):

@@ -5,10 +5,15 @@ from app.businesses.models import Business, Phone, BusinessHour, Address, Social
 
 
 def extract_business_from_csv(file):
-    business = Business()
+    """
+    :param file
+    :return: array of business
+    """
+    businesses = []
     with open(file, mode='r') as csv_file:
         csv_reader = csv.DictReader(csv_file)
         for row in csv_reader:
+            business = Business()
 
             business.name = row["business_name"]
             business.description = row["business_description"]
@@ -18,7 +23,6 @@ def extract_business_from_csv(file):
             business.email = row["business_email"]
             business.capacity = row["business_capacity"]
             business.payment_types = row["business_payment_types"].split(",")
-
             hours = extract_business_hours(row["business_hours"])
             business.add_business_hours(hours)
             phones = extract_phones(row["business_phones"])
@@ -30,13 +34,14 @@ def extract_business_from_csv(file):
             tags = extract_tags(row["business_tags"])
             business.add_tags(tags)
 
-    return business
+            businesses.append(business)
+    return businesses
 
 
 def extract_business_hours(business_hours_str):
     hours = []
     if business_hours_str:
-        days = [day for day in business_hours_str.replace("\n", "").split(";") if day]
+        days = split_multiple_line_item(business_hours_str)
 
         for day in days:
             days_spec = day.split("-")
@@ -52,7 +57,7 @@ def extract_business_hours(business_hours_str):
 def extract_phones(phones_str):
     phones = []
     if phones_str:
-        phones_arr = [phone for phone in phones_str.replace("\n", "").split(";") if phone]
+        phones_arr = split_multiple_line_item(phones_str)
         for phone in phones_arr:
             parts = phone.split("--")
             phones.append(Phone(extension=parts[0], number=parts[1], type=parts[2]))
@@ -63,10 +68,9 @@ def extract_phones(phones_str):
 def extract_address(address_str):
     addresses = []
     if address_str:
-        addresses_arr = [phone for phone in address_str.replace("\n", "").split(";") if phone]
+        addresses_arr = split_multiple_line_item(address_str)
         for address in addresses_arr:
             parts = address.split("--")
-            # assert len(parts) == 9
             address = Address()
             address.street_number = parts[0]
             address.street_type = parts[1]

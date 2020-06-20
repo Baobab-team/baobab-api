@@ -38,6 +38,7 @@ api.add_resource(res.BusinessScalar, "/businesses/<int:id>")
 api.add_resource(res.BusinessTagCollection, "/businesses/<int:id>/tags")
 api.add_resource(res.BusinessTagScalar, "/businesses/<int:id>/tags/<int:tag_id>")
 api.add_resource(res.BusinessSearchAutoCompleteCollection, "/businesses/autocomplete")
+api.add_resource(res.UploadBusinessCSV, "/businesses/upload")
 
 api.add_resource(res.CategoriesCollection, "/categories")
 api.add_resource(res.CategoryScalar, "/categories/<int:id>")
