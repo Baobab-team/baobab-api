@@ -59,7 +59,7 @@ def extract_phones(phones_str):
     if phones_str:
         phones_arr = split_multiple_line_item(phones_str)
         for phone in phones_arr:
-            parts = phone.split("--")
+            parts = phone.split(",")
             phones.append(Phone(extension=parts[0], number=parts[1], type=parts[2]))
 
     return phones
@@ -70,7 +70,7 @@ def extract_address(address_str):
     if address_str:
         addresses_arr = split_multiple_line_item(address_str)
         for address in addresses_arr:
-            parts = address.split("--")
+            parts = address.split(",")
             address = Address()
             address.street_number = parts[0]
             address.street_type = parts[1]

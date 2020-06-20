@@ -4,7 +4,6 @@ import os
 import shutil
 import unittest
 from datetime import time
-from io import BytesIO
 
 from werkzeug.datastructures import FileStorage
 
@@ -79,8 +78,6 @@ class BusinessTestCase(unittest.TestCase):
         with self.app.app_context():
             db.session.remove()
             db.drop_all()
-        if os.path.exists(BUSINESSES_FILE_UPLOADED_CSV):
-            os.remove(BUSINESSES_FILE_UPLOADED_CSV)
         folder = self.app.config["UPLOAD_FOLDER"]
         for filename in os.listdir(folder):
             file_path = os.path.join(folder, filename)
@@ -92,6 +89,9 @@ class BusinessTestCase(unittest.TestCase):
 
             except Exception as e:
                 print('Failed to delete %s. Reason: %s' % (file_path, e))
+        if os.path.exists(BUSINESSES_FILE_UPLOADED_CSV):
+            os.remove(BUSINESSES_FILE_UPLOADED_CSV)
+
 
     def test_business_post(self):
         res = self.client().post('/api_v1/businesses',
@@ -268,7 +268,7 @@ class BusinessTestCase(unittest.TestCase):
              "business_phones", "business_addresses", "business_social_links", "business_tags"],
             ["Gracia Afrika", "Restaurant africain vraiment cool", "Manger bien", "www.website.com",
              "business@email.com", "", "Super notes", "14", "credit,debit", "monday-10:00-17:00;tuesday-10:00-17:00;",
-             "+1--514-555-5555--telephone;", "123--street--Kent--Est--Montreal--H0H0H0--REGION--Quebec--Canada;",
+             "+1,514-555-5555,telephone;", "123,street,Kent,Est,Montreal,H0H0H0,REGION,Quebec,Canada;",
              "www.nn.com-Instagram;", "Haitian;African"]
         ]
         with open(BUSINESSES_FILE_UPLOADED_CSV, 'w') as csvfile:

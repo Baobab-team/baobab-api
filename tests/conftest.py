@@ -33,7 +33,7 @@ def business_upload_file():
          "business_phones", "business_addresses", "business_social_links", "business_tags"],
         ["Gracia Afrika", "Restaurant africain vraiment cool", "Manger bien", "www.website.com",
          "business@email.com", "", "Super notes", "14", "credit,debit", "monday-10:00-17:00;tuesday-10:00-17:00;",
-         "+1--514-555-5555--telephone;", "123--street--Kent--Est--Montreal--H0H0H0--REGION--Quebec--Canada;",
+         "+1,514-555-5555,telephone;", "123,street,Kent,Est,Montreal,H0H0H0,REGION,Quebec,Canada;",
          "www.nn.com-Instagram;", "Haitian;African"]
     ]
     csv_file = os.path.join(os.path.dirname(__file__), "businesses_file_upload.csv")
