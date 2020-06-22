@@ -12,10 +12,10 @@ from werkzeug.datastructures import FileStorage
 
 from app.utils.decorators import parse_with, marshal_with, parse_request
 from .extract import extract_business_from_csv
-from .models import Tag
-from .repositories import BusinessRepository, CategoryRepository, TagRepository
+from .models import Tag, BusinessUploadLog
+from .repositories import BusinessRepository, CategoryRepository, TagRepository, BusinessUploadLogRepository
 from .schemas import BusinessCreateSchema, CategorySchema, CategoryUpdateSchema, BusinessSchema, \
-    BusinessUpdateSchema, TagSchema, TagSchemaCreateOrUpdate
+    BusinessUpdateSchema, TagSchema, TagSchemaCreateOrUpdate, BusinessUploadLogSchema
 from ..consts import BUSINESS_PER_PAGE
 
 
@@ -135,24 +135,32 @@ class BusinessSearchAutoCompleteCollection(Resource):
 
 class UploadBusinessCSV(Resource):
 
-    def __init__(self, repository_factory=BusinessRepository):
+    def __init__(self, business_repository_factory=BusinessRepository,business_upload_log_repository=BusinessUploadLogRepository):
         super(UploadBusinessCSV, self).__init__()
-        self.repository = repository_factory()
+        self.business_repository = business_repository_factory()
+        self.log_repository = business_upload_log_repository()
 
     @parse_request(
         Argument("file", type=werkzeug.datastructures.FileStorage, location='files'),
     )
-    @marshal_with(BusinessSchema, many=True, success_code=200)
+    @marshal_with(BusinessUploadLogSchema, success_code=200)
     def post(self, file):
         filename = os.path.join(current_app.config["UPLOAD_FOLDER"],
                                 "business-{}.csv".format(ttime.strftime("%Y-%m-%d_%H-%M")))
         file.save(filename)
+        log = BusinessUploadLog()
         try:
             businesses = extract_business_from_csv(filename)
-            return businesses
+            for b in businesses:
+                self.business_repository.save(b)
+            log.filename = filename
+            print(len(businesses))
+            log.addBusinesses(businesses)
+            log.completed = True
+            self.log_repository.save(log)
+            return log
         except IntegrityError as e:
             abort(400, message=str(e))
-
 
 class BusinessTagCollection(Resource):
 

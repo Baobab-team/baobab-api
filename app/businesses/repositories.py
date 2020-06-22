@@ -2,7 +2,7 @@ from flask import current_app
 from sqlalchemy import asc, desc
 
 from app import db
-from app.businesses.models import Business, Category, Tag
+from app.businesses.models import Business, Category, Tag, BusinessUploadLog
 
 CONTAINS = '%{}%'
 
@@ -102,7 +102,7 @@ class BusinessRepository(BaseRepository):
 
         return query
 
-    def delete(self,id,error_message):
+    def delete(self, id, error_message):
         business = self.get(id=id, error_message=error_message)
         business.delete()
         self.save(business)
@@ -121,7 +121,6 @@ class CategoryRepository(BaseRepository):
         return query
 
     def delete(self, id_):
-
         category = self.get(id_, error_message="Category doesnt exist")
 
         if category is None or len(category.businesses) > 0:
@@ -149,3 +148,7 @@ class TagRepository(BaseRepository):
             return False
 
         return self._delete(id_)
+
+
+class BusinessUploadLogRepository(BaseRepository):
+    model = BusinessUploadLog

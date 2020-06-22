@@ -53,6 +53,7 @@ class Business(db.Model, TimestampMixin):
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)
 
     restaurant_id = db.Column(db.Integer, db.ForeignKey("restaurant.id"), nullable=True)
+    business_upload_log_id = db.Column(db.Integer, db.ForeignKey("business_upload_log.id"), nullable=True)
 
     def __eq__(self, other):
         if not isinstance(other, Business):
@@ -117,6 +118,16 @@ class Business(db.Model, TimestampMixin):
         for tag in tags:
             self.tags.append(tag)
 
+
+class BusinessUploadLog(db.Model, TimestampMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(), unique=True)
+    completed = db.Column(db.Boolean(), default=False)
+    businesses = db.relationship('Business', backref='business_upload_log', lazy=True)
+
+    def addBusinesses(self,businesses):
+        for b in businesses:
+            self.businesses.append(b)
 
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)

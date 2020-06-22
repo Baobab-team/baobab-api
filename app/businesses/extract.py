@@ -16,6 +16,7 @@ def extract_business_from_csv(file):
             business = Business()
 
             business.name = row["business_name"]
+            business.category_id = row["business_category"]
             business.description = row["business_description"]
             business.slogan = row["business_slogan"]
             business.website = row["business_website"]
