@@ -22,7 +22,7 @@ def extract_business_from_csv(file):
             business.website = row["business_website"]
             business.notes = row["business_notes"]
             business.email = row["business_email"]
-            business.capacity = row["business_capacity"]
+            business.capacity = row["business_capacity"] if row["business_capacity"] else 0
             business.payment_types = row["business_payment_types"].split(",")
             hours = extract_business_hours(row["business_hours"])
             business.add_business_hours(hours)

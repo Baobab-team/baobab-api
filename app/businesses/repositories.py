@@ -1,5 +1,6 @@
 from flask import current_app
 from sqlalchemy import asc, desc
+from sqlalchemy.exc import SQLAlchemyError
 
 from app import db
 from app.businesses.models import Business, Category, Tag, BusinessUploadLog
@@ -35,7 +36,11 @@ class BaseRepository(object):
 
     def save(self, entity):
         self.session.add(entity)
-        self.session.commit()
+        try:
+            self.session.commit()
+        except SQLAlchemyError:
+            self.session.rollback()
+            raise
         return entity
 
     def save_many(self, entities):

@@ -1,13 +1,11 @@
 import os
 import time as ttime
-
 import textdistance
 import werkzeug
 from flask import current_app
 from flask import jsonify
 from flask_restful import Resource, abort
 from flask_restful.reqparse import Argument
-from sqlalchemy.exc import IntegrityError
 from werkzeug.datastructures import FileStorage
 
 from app.utils.decorators import parse_with, marshal_with, parse_request
@@ -155,9 +153,13 @@ class UploadBusinessCSV(Resource):
             log.success = True
             log.filename = filename
             self.log_repository.save(log)
+        except Exception as e:
+            log.error_message = str(e)
+            log.businesses = []
+            log.success = False
+        finally:
+            self.log_repository.save(log)
             return log
-        except IntegrityError as e:
-            abort(400, message=str(e))
 
 class BusinessTagCollection(Resource):
 

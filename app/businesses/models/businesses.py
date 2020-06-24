@@ -123,6 +123,7 @@ class BusinessUploadLog(db.Model, TimestampMixin):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(), unique=True)
     success = db.Column(db.Boolean(), default=False)
+    error_message = db.Column(db.String(), nullable=True)
     businesses = db.relationship('Business', backref='business_upload_log', lazy=True)
 
     def addBusinesses(self,businesses):

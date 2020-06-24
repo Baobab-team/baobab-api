@@ -172,7 +172,12 @@ class BusinessSchema(BaseSchema):
 class BusinessUploadLogSchema(BaseSchema):
     id = fields.String(required=True)
     filename = fields.String(required=True)
-    businesses = fields.List(fields.Nested(BusinessSchema))
-    completed = fields.Boolean()
+    error_message = fields.String()
+    success = fields.Boolean()
     created_at = fields.Date()
     deleted_at = fields.Date()
+    businesses_count = fields.Method("get_businesses_count")
+    businesses = fields.List(fields.Nested(BusinessSchema))
+
+    def get_businesses_count(self, obj):
+        return len(obj.businesses)

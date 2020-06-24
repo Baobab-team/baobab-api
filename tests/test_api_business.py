@@ -3,13 +3,11 @@ import json
 import os
 import shutil
 import unittest
-from datetime import time
 
 from werkzeug.datastructures import FileStorage
 
 from app import create_app, db
-from app.businesses.models import Category, Tag, Business, BusinessHour, Phone, Address, SocialLink
-from app.businesses.schemas import BusinessSchema
+from app.businesses.models import Category, Tag, Business
 from app.config import TestingConfig
 
 BUSINESSES_FILE_UPLOADED_CSV = os.path.join(os.path.dirname(__file__), "businesses_upload.csv")
@@ -248,28 +246,13 @@ class BusinessTestCase(unittest.TestCase):
         self.assertEqual("Missing query search parameter", json.loads(res.data)["message"])
 
     def test_business_upload_csv(self):
-        business = Business(name="Gracia Afrika", website="www.website.com", slogan="Manger bien",
-                            description="Restaurant africain vraiment cool",
-                            notes="Super notes", capacity=14, email="business@email.com",
-                            payment_types=["credit", "debit"],
-                            )
-        business.add_business_hour(BusinessHour(opening_time=time(10, 0), closing_time=time(17, 0), day="monday"))
-        business.add_business_hour(BusinessHour(opening_time=time(10, 0), closing_time=time(17, 0), day="tuesday"))
-        business.add_phone(Phone(number="514-555-5555", extension="+1", type="telephone"))
-        business.add_address(
-            Address(street_number="123", street_type="street", street_name="Kent", zip_code="H0H0H0", country="Canada",
-                    direction="Est", region="REGION", city="Montreal", province="Quebec"))
-        business.add_social_link(SocialLink(type="Instagram", link="www.nn.com"))
-        business.add_tags([Tag(name="Haitian"), Tag(name="African")])
-
         rows = [
-            ["business_category","business_name", "business_description", "business_slogan", "business_website", "business_email",
+            ["business_category", "business_name", "business_description", "business_slogan", "business_website",
+             "business_email",
              "business_status", "business_notes", "business_capacity", "business_payment_types", "business_hours",
              "business_phones", "business_addresses", "business_social_links", "business_tags"],
-            [1,"Gracia Afrika", "Restaurant africain vraiment cool", "Manger bien", "www.website.com",
-             "business@email.com", "", "Super notes", "14", "credit,debit", "monday-10:00-17:00;tuesday-10:00-17:00;",
-             "+1,514-555-5555,telephone;", "123,street,Kent,Est,Montreal,H0H0H0,REGION,Quebec,Canada;",
-             "www.nn.com-Instagram;", "Haitian;African"]
+            [1, "Gracia Afrika", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+            [1, "restaurant akwaba", "", "", "", "", "", "", "", "", "", "", "", "", ""]
         ]
         with open(BUSINESSES_FILE_UPLOADED_CSV, 'w') as csvfile:
             writer = csv.writer(csvfile, quotechar='"', quoting=csv.QUOTE_ALL)
@@ -280,10 +263,47 @@ class BusinessTestCase(unittest.TestCase):
             filename="businesses_file_upload.csv",
             content_type="text/csv",
         ),
-        data = {
-            'file': my_file
-        }
+        data = {'file': my_file}
         res = self.client().post(
             '/api_v1/businesses/upload', data=data, content_type='multipart/form-data',
         )
         self.assertEqual(200, res.status_code)
+        jsondata = json.loads(res.data)
+        self.assertEqual(True, jsondata.get("success"))
+        self.assertEqual(2, jsondata.get("businesses_count"))
+        self.assertIsNotNone(jsondata.get("filename"))
+        self.assertIsNotNone(jsondata.get("created_at"))
+        self.assertIsNone(jsondata.get("deleted_at"))
+        self.assertEqual("Gracia Afrika", jsondata.get("businesses")[0].get("name"))
+        self.assertEqual("restaurant akwaba", jsondata.get("businesses")[1].get("name"))
+
+    def test_business_upload_csv_duplicate_name(self):
+        rows = [
+            ["business_category", "business_name", "business_description", "business_slogan", "business_website",
+             "business_email",
+             "business_status", "business_notes", "business_capacity", "business_payment_types", "business_hours",
+             "business_phones", "business_addresses", "business_social_links", "business_tags"],
+            [1, "Gracia Afrika", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+            [1, "Gracia Afrika", "", "", "", "", "", "", "", "", "", "", "", "", ""]
+        ]
+        with open(BUSINESSES_FILE_UPLOADED_CSV, 'w') as csvfile:
+            writer = csv.writer(csvfile, quotechar='"', quoting=csv.QUOTE_ALL)
+            for line in rows:
+                writer.writerow(line)
+        my_file = FileStorage(
+            stream=open(BUSINESSES_FILE_UPLOADED_CSV, "rb"),
+            filename="businesses_file_upload.csv",
+            content_type="text/csv",
+        ),
+        data = {'file': my_file}
+        res = self.client().post(
+            '/api_v1/businesses/upload', data=data, content_type='multipart/form-data',
+        )
+        self.assertEqual(200, res.status_code)
+        jsondata = json.loads(res.data)
+        self.assertEqual(False, jsondata.get("success"))
+        self.assertEqual(0, jsondata.get("businesses_count"))
+        self.assertIsNotNone(jsondata.get("filename"))
+        self.assertIsNotNone(jsondata.get("error_message"))
+        self.assertIsNotNone(jsondata.get("created_at"))
+        self.assertIsNone(jsondata.get("deleted_at"))
