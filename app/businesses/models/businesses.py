@@ -116,18 +116,19 @@ class Business(db.Model, TimestampMixin):
 
     def add_tags(self, tags):
         for tag in tags:
-            self.tags.append(tag)
+            self.add_tag(tag)
 
 
 class BusinessUploadLog(db.Model, TimestampMixin):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(), unique=True)
-    completed = db.Column(db.Boolean(), default=False)
+    success = db.Column(db.Boolean(), default=False)
     businesses = db.relationship('Business', backref='business_upload_log', lazy=True)
 
     def addBusinesses(self,businesses):
         for b in businesses:
             self.businesses.append(b)
+
 
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -154,6 +155,10 @@ class Tag(db.Model):
             return False
 
         return self.name == other.name
+
+    def __repr__(self):
+        key_values = ' , '.join('{}={}'.format(k, v) for (k, v) in self.__dict__.items() if k != '_sa_instance_state')
+        return '<{} {}>'.format(type(self).__name__, key_values)
 
 class Address(db.Model):
     class ProvinceEnum(Enum):
@@ -190,7 +195,7 @@ class Address(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     street_number = db.Column(db.String())
-    street_type = db.Column(db.String(5))
+    street_type = db.Column(db.String())
     street_name = db.Column(db.String())
     direction = db.Column(db.String())
     city = db.Column(db.String(), default="Montreal")
