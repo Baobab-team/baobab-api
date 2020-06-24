@@ -146,17 +146,14 @@ class UploadBusinessCSV(Resource):
     @marshal_with(BusinessUploadLogSchema, success_code=200)
     def post(self, file):
         filename = os.path.join(current_app.config["UPLOAD_FOLDER"],
-                                "business-{}.csv".format(ttime.strftime("%Y-%m-%d_%H-%M")))
+                                "business-{}.csv".format(ttime.strftime("%Y-%m-%d_%H-%M-%S")))
         file.save(filename)
         log = BusinessUploadLog()
         try:
             businesses = extract_business_from_csv(filename)
-            for b in businesses:
-                self.business_repository.save(b)
-            log.filename = filename
-            print(len(businesses))
             log.addBusinesses(businesses)
-            log.completed = True
+            log.success = True
+            log.filename = filename
             self.log_repository.save(log)
             return log
         except IntegrityError as e:
