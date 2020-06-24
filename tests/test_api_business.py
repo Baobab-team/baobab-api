@@ -12,7 +12,7 @@ from app.businesses.models import Category, Tag, Business, BusinessHour, Phone, 
 from app.businesses.schemas import BusinessSchema
 from app.config import TestingConfig
 
-BUSINESSES_FILE_UPLOADED_CSV = os.path.join(os.path.dirname(__file__), "businesses_file_upload.csv")
+BUSINESSES_FILE_UPLOADED_CSV = os.path.join(os.path.dirname(__file__), "businesses_upload.csv")
 
 
 class BusinessTestCase(unittest.TestCase):
@@ -79,16 +79,16 @@ class BusinessTestCase(unittest.TestCase):
             db.session.remove()
             db.drop_all()
         folder = self.app.config["UPLOAD_FOLDER"]
-        # for filename in os.listdir(folder):
-        #     file_path = os.path.join(folder, filename)
-        #     try:
-        #         if os.path.isfile(file_path) or os.path.islink(file_path):
-        #             os.unlink(file_path)
-        #         elif os.path.isdir(file_path):
-        #             shutil.rmtree(file_path)
-        #
-        #     except Exception as e:
-        #         print('Failed to delete %s. Reason: %s' % (file_path, e))
+        for filename in os.listdir(folder):
+            file_path = os.path.join(folder, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e))
         if os.path.exists(BUSINESSES_FILE_UPLOADED_CSV):
             os.remove(BUSINESSES_FILE_UPLOADED_CSV)
 
@@ -263,10 +263,10 @@ class BusinessTestCase(unittest.TestCase):
         business.add_tags([Tag(name="Haitian"), Tag(name="African")])
 
         rows = [
-            ["business_name", "business_description", "business_slogan", "business_website", "business_email",
+            ["business_category","business_name", "business_description", "business_slogan", "business_website", "business_email",
              "business_status", "business_notes", "business_capacity", "business_payment_types", "business_hours",
              "business_phones", "business_addresses", "business_social_links", "business_tags"],
-            ["Gracia Afrika", "Restaurant africain vraiment cool", "Manger bien", "www.website.com",
+            [1,"Gracia Afrika", "Restaurant africain vraiment cool", "Manger bien", "www.website.com",
              "business@email.com", "", "Super notes", "14", "credit,debit", "monday-10:00-17:00;tuesday-10:00-17:00;",
              "+1,514-555-5555,telephone;", "123,street,Kent,Est,Montreal,H0H0H0,REGION,Quebec,Canada;",
              "www.nn.com-Instagram;", "Haitian;African"]
@@ -287,4 +287,3 @@ class BusinessTestCase(unittest.TestCase):
             '/api_v1/businesses/upload', data=data, content_type='multipart/form-data',
         )
         self.assertEqual(200, res.status_code)
-        self.assertEqual([BusinessSchema().dump(business)], json.loads(res.data))
