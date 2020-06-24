@@ -172,6 +172,7 @@ class BusinessSchema(BaseSchema):
 class BusinessUploadLogSchema(BaseSchema):
     id = fields.String(required=True)
     filename = fields.String(required=True)
-    businesses = fields.Nested(BusinessSchema)
+    businesses = fields.List(fields.Nested(BusinessSchema))
     completed = fields.Boolean()
     created_at = fields.Date()
+    deleted_at = fields.Date()
