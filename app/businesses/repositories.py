@@ -38,6 +38,12 @@ class BaseRepository(object):
         self.session.commit()
         return entity
 
+    def save_many(self, entities):
+        self.session.add_all(entities)
+        self.session.commit()
+        return entities
+
+
     def update(self, id_, **kwargs):
         db_entity = self.get(id_)
         if not db_entity:
@@ -70,7 +76,28 @@ class BusinessRepository(BaseRepository):
     model = Business
 
     def save(self, entity):
+        entity = self.save_tags(entity)
         super(BusinessRepository, self).save(entity)
+        return entity
+
+    def save_many(self, entities):
+        entities_updated = []
+        for e in entities:
+            entities_updated.append(self.save_tags(e))
+
+        super(BusinessRepository, self).save_many(entities_updated)
+        return entities_updated
+
+    def save_tags(self, entity):
+        tag_repository = TagRepository()
+        existing_tag = {t.name: t for t in tag_repository.query.all()}
+        tag_to_be_add = []
+        for t in entity.tags:
+            if t.name in existing_tag:
+                tag_to_be_add.append(existing_tag[t.name])
+            else:
+                tag_to_be_add.append(t)
+        entity.tags = tag_to_be_add
         return entity
 
     def filter(self, id=None, querySearch=None, accepted_at=None, status=None, order=None, order_by=None,
