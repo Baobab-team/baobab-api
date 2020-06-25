@@ -8,4 +8,4 @@ class Category(BaseModel):
     businesses = db.relationship("Business", backref="category", lazy=True)
 
     def __repr__(self):
-        return '<Category {}>'.format(self.name)
+        return f'<Category name=f{self.name}, id=f{self.id}>'
