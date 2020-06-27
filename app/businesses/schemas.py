@@ -169,7 +169,7 @@ class BusinessSchema(BaseSchema):
         return Business(**data)
 
 
-class BusinessUploadLogSchema(BaseSchema):
+class BusinessUploadSchema(BaseSchema):
     id = fields.String(required=True)
     filename = fields.String(required=True)
     error_message = fields.String()

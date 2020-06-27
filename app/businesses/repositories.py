@@ -3,7 +3,7 @@ from sqlalchemy import asc, desc
 from sqlalchemy.exc import SQLAlchemyError
 
 from app import db
-from app.businesses.models import Business, Category, Tag, BusinessUploadLog
+from app.businesses.models import Business, Category, Tag, BusinessUpload
 
 CONTAINS = '%{}%'
 
@@ -84,14 +84,6 @@ class BusinessRepository(BaseRepository):
         entity = self.save_tags(entity)
         super(BusinessRepository, self).save(entity)
         return entity
-
-    def save_many(self, entities):
-        entities_updated = []
-        for e in entities:
-            entities_updated.append(self.save_tags(e))
-
-        super(BusinessRepository, self).save_many(entities_updated)
-        return entities_updated
 
     def save_tags(self, entity):
         tag_repository = TagRepository()
@@ -183,4 +175,4 @@ class TagRepository(BaseRepository):
 
 
 class BusinessUploadLogRepository(BaseRepository):
-    model = BusinessUploadLog
+    model = BusinessUpload

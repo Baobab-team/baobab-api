@@ -7,10 +7,10 @@ import unittest
 from werkzeug.datastructures import FileStorage
 
 from app import create_app, db
-from app.businesses.models import Category, Tag, Business
+from app.businesses.models import Category, Tag, Business, BusinessUpload
 from app.config import TestingConfig
 
-BUSINESSES_FILE_UPLOADED_CSV = os.path.join(os.path.dirname(__file__), "businesses_upload.csv")
+BUSINESSES_FILE_UPLOADED_CSV = os.path.join(os.path.dirname(__file__), "businesses_file_upload.csv")
 
 
 class BusinessTestCase(unittest.TestCase):
@@ -56,6 +56,9 @@ class BusinessTestCase(unittest.TestCase):
         businessA.process_status(Business.StatusEnum.accepted.value)
         businessB.process_status(Business.StatusEnum.accepted.value)
         businessC.process_status(Business.StatusEnum.refused.value)
+        business_upload = BusinessUpload(success=True)
+        business_upload.addBusinesses([businessA])
+        business_upload.filename = os.path.join(os.path.dirname(__file__), "file-uploaded.csv")
 
         tag1 = Tag(name="Tag1")
         tag2 = Tag(name="Tag2")
@@ -67,7 +70,7 @@ class BusinessTestCase(unittest.TestCase):
         with self.app.app_context():
             db.drop_all()
             db.create_all()
-            for model in [category1, category2, tag1, tag2, businessA, businessB, businessC]:
+            for model in [category1, category2, tag1, tag2, businessA, businessB, businessC, business_upload]:
                 db.session.add(model)
             db.session.commit()
 
@@ -265,7 +268,7 @@ class BusinessTestCase(unittest.TestCase):
         ),
         data = {'file': my_file}
         res = self.client().post(
-            '/api_v1/businesses/upload', data=data, content_type='multipart/form-data',
+            '/api_v1/businesses/uploads', data=data, content_type='multipart/form-data',
         )
         self.assertEqual(200, res.status_code)
         jsondata = json.loads(res.data)
@@ -297,13 +300,30 @@ class BusinessTestCase(unittest.TestCase):
         ),
         data = {'file': my_file}
         res = self.client().post(
-            '/api_v1/businesses/upload', data=data, content_type='multipart/form-data',
+            '/api_v1/businesses/uploads', data=data, content_type='multipart/form-data',
         )
         self.assertEqual(200, res.status_code)
-        jsondata = json.loads(res.data)
-        self.assertEqual(False, jsondata.get("success"))
-        self.assertEqual(0, jsondata.get("businesses_count"))
-        self.assertIsNotNone(jsondata.get("filename"))
-        self.assertIsNotNone(jsondata.get("error_message"))
-        self.assertIsNotNone(jsondata.get("created_at"))
-        self.assertIsNone(jsondata.get("deleted_at"))
+        json_data = json.loads(res.data)
+        self.assertEqual(False, json_data.get("success"))
+        self.assertEqual(0, json_data.get("businesses_count"))
+        self.assertIsNotNone(json_data.get("filename"))
+        self.assertIsNotNone(json_data.get("error_message"))
+        self.assertIsNotNone(json_data.get("created_at"))
+        self.assertIsNone(json_data.get("deleted_at"))
+
+    def test_business_upload_get_all(self):
+        res = self.client().get('/api_v1/businesses/uploads')
+        json_data = json.loads(res.data)
+        self.assertEqual(200, res.status_code)
+        self.assertEqual(1, len(json_data))
+        self.assertEqual(1, json_data[0].get("businesses_count"))
+        self.assertEqual(True, json_data[0].get("success"))
+        self.assertEqual(os.path.join(os.path.dirname(__file__), "file-uploaded.csv"), json_data[0].get("filename"))
+
+    def test_business_upload_get(self):
+        res = self.client().get('/api_v1/businesses/uploads/1')
+        json_data = json.loads(res.data)
+        self.assertEqual(200, res.status_code)
+        self.assertEqual(1, json_data.get("businesses_count"))
+        self.assertEqual(True, json_data.get("success"))
+        self.assertEqual(os.path.join(os.path.dirname(__file__), "file-uploaded.csv"), json_data.get("filename"))
