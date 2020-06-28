@@ -470,6 +470,31 @@ paths:
           $ref: '#/components/responses/BusinessUploadResponse'
         '400':
           $ref: '#/components/responses/InvalidRequestResponse'
+    get:
+      tags:
+        - business
+      summary: List business upload details
+      description: List business upload details
+      responses:
+        '200':
+          $ref: '#/components/responses/ArrayOfBusinessUploadResponse'
+  /business/uploads/{id}:
+    get:
+      tags:
+        - business
+      summary: Get business upload by id
+      operationId: getBusinessUploadById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/BusinessUploadResponse'
+        '404':
+          $ref: '#/components/responses/InvalidRequestResponse'
   /tags:
     get:
       tags:
@@ -719,6 +744,10 @@ components:
           type: string
         created_at:
           type: string
+    ArrayOfBusinessUpload:
+      type: array
+      items:
+        $ref: '#/components/schemas/BusinessUpload'
     Category:
       type: object
       properties:
@@ -900,6 +929,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/BusinessUpload'
+    ArrayOfBusinessUploadResponse:
+      description: List business upload
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ArrayOfBusinessUpload'
     CategoryResponse:
       description: Category
       content:
