@@ -1,0 +1,970 @@
+openapi: 3.0.0
+info:
+  description: |
+    Baobab API
+    [http://swagger.io](http://swagger.io) or on
+    [irc.freenode.net, #swagger](http://swagger.io/irc/).
+  version: "1.0.0"
+  title: Baobab API
+  termsOfService: 'http://swagger.io/terms/'
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+servers:
+# Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/komlan55/baobab_api/1.0.0
+  - url: 'https://petstore.swagger.io/v2'
+tags:
+  - name: category
+    description: Everything about your Categories
+  - name: business
+    description: Everything about your Businesses
+  - name: tag
+    description: Everything about your Tag
+  - name: user
+    description: Everthing about your User
+paths:
+  /categories:
+    post:
+      tags:
+      - category
+      summary: Add a new category
+      operationId: addCategory
+      requestBody:
+         $ref: '#/components/requestBodies/CategoryBody'
+      responses:
+        '201':
+          $ref: '#/components/responses/CategoryResponse'
+        '400':
+          description: Invalid input
+        '409':
+          description: Category already exist
+    get:
+      tags:
+      - category
+      summary: List categories
+      operationId: getCategories
+      responses:
+        '200':
+          $ref: '#/components/responses/CategoryListResponse'
+        '400':
+          description: Error
+        
+  /categories/{id}:
+    get:
+      tags:
+      - category
+      summary: Get category by id
+      operationId: getCategoryById
+      parameters:
+      - in : path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200': 
+          $ref: '#/components/responses/CategoryResponse'
+        '404':
+          description: Category not found
+    
+    put:
+      tags:
+      - category
+      summary: Update a category
+      operationId: updateCategory
+      parameters:
+      - in: path
+        name: id
+        description: Category id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Category'
+      responses:
+        '200': 
+          $ref: '#/components/responses/CategoryResponse'
+        '404':
+          description: Invalid input
+        '409':
+          description: Category  already exist
+    delete:
+      tags:
+      - category
+      summary: Delete category by id
+      operationId: deleteCategoryById
+      parameters:
+      - in: path
+        name: id
+        description: Category id
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  
+      
+  /businesses:
+    post:
+      tags:
+      - business
+      summary: Add a new business to the directory
+      operationId: addBusiness
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Business'
+      responses:
+        '201':
+          $ref: '#/components/responses/BusinessResponse'
+        '400':
+          description: Invalid input
+        '409':
+          description: Similar business already exist
+    get:
+      tags:
+      - business
+      summary: Fetch businesses
+      description: Find business through multiple parameters
+      parameters:
+      - name: querySearch
+        in: query
+        schema:
+          type: string
+        required: false
+        description: Value used to filter through business name and description
+      - name: acceptedAt
+        schema:
+          type: string
+        in: query
+        description: Date at which the business got accepted
+        required: false
+      - name: status
+        schema:  
+          type: string
+          enum:
+          - accepted
+          - pending
+          - refused
+        in: query
+        explode: false
+        required: false
+        description: A comma-separated list of status.
+      - name: order
+        schema:  
+          type: string
+          enum:
+          - ASC
+          - DESC
+          default: ASC
+        in: query
+        description: Order of the field
+      - name: order_by
+        in: query
+        schema:  
+          type: string
+          enum:
+          - name
+          default: name
+        required: false
+        description: Order by value
+      - name: page
+        in: query
+        description: Page of the businesses results
+        required: false
+        schema:  
+          type: integer
+          format: int64
+          default: 1
+      - name: businessPerPage
+        in: query
+        description: Number of businesses per page results
+        required: false
+        schema:  
+          type: integer
+          format: int64
+          default: 25
+      - name: exclude_deleted
+        in: query
+        description: Exclude deleted business
+        required: false
+        schema:  
+          type: boolean
+          default: True
+      responses:
+        '201':
+          $ref: '#/components/responses/BusinessListResponse'
+        '400':
+          description: Invalid input
+
+
+  /businesses/{id}:
+    get:
+      tags:
+      - business
+      summary: Find business by ID
+      description: Returns a single business
+      operationId: getBusinessById
+      parameters:
+      - name: id
+        in: path
+        description: ID of business to return
+        required: true
+        schema:  
+          type: integer
+          format: int64
+      - name: exclude_deleted
+        in: query
+        description: Exclude deleted business
+        required: false
+        schema:  
+          type: boolean
+          default: True
+      responses:
+        '200':
+          $ref: '#/components/responses/BusinessResponse'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+        tags:
+        - business
+        summary: Delete business
+        operationId: deleteBusiness
+        parameters: 
+        - name: id
+          in: path
+          description: ID of business
+          required: true
+          schema:  
+            type: integer
+            format: int64      
+        responses: 
+          '204':
+            $ref: '#/components/responses/NoContent'
+          '404':
+            $ref: '#/components/responses/NotFound'
+          '400':
+            description: Invalid input     
+          
+  /businesses/{id}/tags:
+    post:
+      tags:
+        - business
+      summary: Add tags to business  
+      operationId: addTagsToBusiness
+      parameters:
+      - name: id
+        in: path
+        description: ID of business 
+        required: true
+        schema:  
+          type: integer
+          format: int64
+      requestBody:
+        $ref: '#/components/requestBodies/ArrayOfTagBody'
+      responses: 
+        '201':
+          $ref: '#/components/responses/TagListResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          description: Invalid input  
+    get:
+      tags:
+        - business
+      summary: Fetch tags from business  
+      operationId: getTagsFromBusiness
+      parameters:
+      - name: id
+        in: path
+        description: ID of business
+        required: true
+        schema:  
+          type: integer
+          format: int64
+      responses: 
+        '201':
+          $ref: '#/components/responses/TagListResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          description: Invalid input 
+    delete:
+      tags:
+      - business
+      summary: Delete business
+      operationId: deleteBusinessTags
+      parameters: 
+      - name: id
+        in: path
+        description: ID of business
+        required: true
+        schema:  
+          type: integer
+          format: int64      
+      responses: 
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          description: Invalid input  
+  /businesses/{id}/tags/{tag_id}:
+    delete:
+      tags:
+        - business
+      summary: Delete tags from business 
+      operationId: deleteTagsFromBusiness
+      parameters:
+      - name: id
+        in: path
+        description: ID of business
+        required: true
+        schema:  
+          type: integer
+          format: int64
+      - name: tag_id
+        in: path
+        description: ID of tag
+        required: true
+        schema:  
+          type: integer
+          format: int64
+      responses: 
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          description: Invalid input  
+  /businesses/{id}/processStatus:
+    put:
+      tags:
+      - business
+      summary: Process business status
+      description: Update status
+      operationId: updateBusinessStatus
+      parameters:
+      - name: status
+        in: path
+        description: New business status
+        required: true
+        schema:
+          type: string
+          enum:
+            - available
+            - pending
+            - sold
+      - name: id
+        in: path
+        description: ID of business to update
+        required: true
+        schema:
+          type: integer
+          format: int64  
+      responses:
+        400:
+          description: Bad request 
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /businesses/autocomplete:
+    get:
+      tags:
+        - business
+      summary: Autocomplete for business search
+      description: Return matching keywords
+      operationId: businessAutocomplete
+      parameters:
+        - name: querySearch
+          in: query
+          schema:
+            type: string
+          required: false
+          description: Value used to filter through business name and description
+        - name: acceptedAt
+          schema:
+            type: string
+          in: query
+          description: Date at which the business got accepted
+          required: false
+        - name: status
+          schema:
+            type: string
+            enum:
+              - accepted
+              - pending
+              - refused
+          in: query
+          explode: false
+          required: false
+          description: A comma-separated list of status.
+        - name: order
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+            default: ASC
+          in: query
+          description: Order of the field
+        - name: order_by
+          in: query
+          schema:
+            type: string
+            enum:
+              - name
+            default: name
+          required: false
+          description: Order by value
+        - name: page
+          in: query
+          description: Page of the businesses results
+          required: false
+          schema:
+            type: integer
+            format: int64
+            default: 1
+        - name: businessPerPage
+          in: query
+          description: Number of businesses per page results
+          required: false
+          schema:
+            type: integer
+            format: int64
+            default: 25
+        - name: exclude_deleted
+          in: query
+          description: Exclude deleted business
+          required: false
+          schema:
+            type: boolean
+            default: True
+      responses:
+        '400':
+          $ref: '#/components/responses/InvalidRequestResponse'
+        '200':
+          $ref: '#/components/responses/AutocompleteResponse'
+  /businesses/uploads:
+    post:
+      tags:
+        - business
+      summary: Upload csv file
+      description: Upload csv file of list of businesses
+      requestBody:
+        $ref: '#/components/requestBodies/BusinessUploadBody'
+      responses:
+        '201':
+          $ref: '#/components/responses/BusinessUploadResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequestResponse'
+  /tags:
+    get:
+      tags:
+      - tag
+      summary: Get list of business tags
+      operationId: getBusinessTags
+      responses:
+        '200':
+          $ref: '#/components/responses/TagListResponse'
+    post:
+      tags:
+      - tag
+      summary: Add new business tag
+      operationId: addBusinessTags
+      requestBody:
+        $ref: '#/components/requestBodies/TagBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/TagResponse'
+        400:
+          description: Validation exception
+        409:
+          description: Tag supplied already exist
+  /tags/{id}:
+    put: 
+      tags: 
+      - tag
+      summary: Update tag name
+      operationId: updateBusinessTag
+      requestBody:
+          $ref: '#/components/requestBodies/TagBody'
+      parameters:
+      - in: path
+        description: Tag id
+        required: true
+        name: id
+        schema:
+          type: string
+      responses:
+        '204':
+          $ref: '#/components/responses/TagResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          description: Invalid input
+    delete:
+      tags:
+      - tag
+      summary: Delete tag name 
+      operationId: deleteBusinessTag
+      parameters:
+      - in: path
+        name: id
+        description: Tag 
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          description: Validation exception
+        '409':
+          description: Tag is linked to existing business
+  /users:
+    get:
+      tags: 
+      - user
+      summary : Get list of users
+      operationId: getUsers
+      responses:
+        '200':
+          $ref: '#/components/responses/UserListResponse'
+  /users/{id}:
+    get:
+      tags: 
+      - user
+      summary : Get list of users
+      operationId: getUserById
+      parameters:
+      - name: id
+        in: path
+        description: ID of user to fetch
+        required: true
+        schema:
+          type: integer
+          format: int64  
+      responses:
+        '200':
+          $ref: '#/components/responses/UserResponse'
+    put:
+      tags: 
+      - user
+      summary : Update user
+      operationId: updateByUserById
+      parameters:
+      - name: id
+        in: path
+        description: ID of user to update
+        required: true
+        schema:
+          type: integer
+          format: int64  
+      responses:
+        '200':
+          $ref: '#/components/responses/UserResponse'
+  /auth/login :
+    post:
+      tags:
+      - auth
+      summary: User login
+      operationId: userLogin
+      responses:
+        '200':
+          $ref: '#/components/responses/UserTokensResponse'
+  /auth/register:
+    post:
+      tags:
+      - auth
+      summary: User register
+      operationId: userRegister
+      responses:
+        '200':
+          $ref: '#/components/responses/UserTokensResponse'
+  /auth/token/refresh:
+    post:
+      tags:
+      - auth
+      summary: Refresh user access token
+      operationId: userRefrehAccessToken
+      responses:
+        '200':
+          $ref: '#/components/responses/UserRefreshTokenResponse'
+  /auth/logout/access:
+    post:
+      tags:
+      - auth
+      summary: Logout (revoked token access)
+      operationId: logoutAccess
+      responses:
+        '200':
+          $ref: '#/components/responses/BaseResponse'
+  /auth/logout/refresh:
+    post:
+      tags:
+      - auth
+      summary: Logout (revoked token refresh)
+      operationId: logoutRefresh
+      responses:
+        '200':
+          $ref: '#/components/responses/BaseResponse'
+
+
+    
+externalDocs:
+  description: Find out more about Swagger
+  url: 'http://swagger.io'
+components:
+  securitySchemes:
+    bearerAuth:            
+      type: http
+      scheme: bearer
+      bearerFormat: JWT   
+
+  schemas:
+    Business:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        category:
+          $ref: '#/components/schemas/CategoryCreate'
+        addresses:
+          $ref: '#/components/schemas/ArrayOfAddress'
+        description:
+          type: string
+        slogan:
+          type: string
+        website:
+          type: string
+        email:
+          type: string
+        status:
+          description: business status
+          enum: [pending,accepted,refused]
+        notes:
+          type: string
+        capacity:
+          type: integer
+          format: int64
+    FileUpload:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+    Address:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        street_number:
+          type: string
+        street_name:
+          type: string
+        direction:
+          type: string
+        city:
+          type: string
+        zip_code:
+          type: string
+        province:
+          type: string
+        region:
+          type: string
+        country:
+          type: string
+    ArrayOfBusiness:
+      type: array
+      items:
+        $ref: '#/components/schemas/Business'
+    ArrayOfAddress:
+      type: array
+      items:
+        $ref: '#/components/schemas/Address'
+    BusinessUpload:
+      type: object
+      properties:
+        filename:
+          type: string
+        error_message:
+          type: string
+        success:
+          type: boolean
+        businesses:
+          $ref: '#/components/schemas/ArrayOfBusiness'
+        businesses_count:
+          type: integer
+          format: int64
+        deleted_at:
+          type: string
+        created_at:
+          type: string
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+    CategoryCreate:
+      type: object
+      properties:
+        name:
+          type: string
+    ArrayOfCategory:
+      type: array
+      items:
+        $ref: '#/components/schemas/Category'
+    Tag:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          default: 1
+        name:
+          type: string
+    ArrayOfTag:
+      type: array
+      items:
+        $ref: '#/components/schemas/Tag'
+    AutocompleteKeyword:
+      type: array
+      items:
+        type: string
+        example: afrique,africa
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          default: 1
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        active:
+          type: boolean
+        role:
+          type: string
+    ArrayOfUser:
+      type: array
+      items:
+        $ref: '#/components/schemas/User'
+    UserRegistration:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+        - required:
+            - password
+          properties:
+            password:
+              type: string
+    ApiResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - code
+        - message
+    UserTokens:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+    UserAccessToken:
+      type: object
+      properties:
+        access_token:
+          type: string
+    UserRefreshToken:
+      type: object
+      properties:
+        refresh_token:
+          type: string
+  requestBodies:
+    BusinessBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Business'
+      description: Business object that needs to be added
+      required: true
+    BusinessUploadBody:
+      content:
+        multipart/form-data:
+          schema:
+            $ref: '#/components/schemas/FileUpload'
+      description: Business upload that needs to be added
+      required: true
+    CategoryBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Category'
+      description: Category object that needs to be added
+      required: true
+    TagBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Tag'
+      description: Tag object that needs to be added
+      required: true
+    ArrayOfTagBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ArrayOfTag'
+      description: List of Tag object that needs to be added
+      required: true
+    UserBody:
+      content:
+        application/jsion:
+          schema:
+            $ref: '#/components/schemas/User'
+    ArrayOfUserBody:
+      content:
+        application/jsion:
+          schema:
+            $ref: '#/components/schemas/ArrayOfUser'
+    UserRegistrationBody:
+      content:
+        application/jsion:
+          schema:
+            $ref: '#/components/schemas/UserRegistration'
+      
+  responses:
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Object not found
+    InvalidRequestResponse:
+      description: Invalid request
+    NoContent:
+      description: No content
+    BaseResponse:
+      description: Basic response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse'
+    BusinessResponse:
+      description: Business
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Business'
+    BusinessUploadResponse:
+      description: Business upload
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BusinessUpload'
+    CategoryResponse:
+      description: Category
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Category'
+    TagResponse:
+      description: Tag
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Tag'
+    BusinessListResponse:
+      description: List of businesses
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ArrayOfBusiness'
+    TagListResponse:
+      description: List of tags
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ArrayOfTag'
+    CategoryListResponse:
+      description: List of categories
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ArrayOfCategory'
+    AutocompleteResponse:
+      description: Autocomplete keywords response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AutocompleteKeyword'
+    UserResponse:
+      description: User
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+    UserListResponse:
+      description: List of users
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ArrayOfUser'
+    UserTokensResponse:
+      description: User tokens
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserTokens'
+    UserRefreshTokenResponse:
+      description: User refresh token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserRefreshToken'
+    UserAccessTokenResponse:
+      description: User acces token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserAccessToken'
+    UnauthorizedError:
+      description: Access token is missing or invalid
