@@ -1,9 +1,16 @@
+import csv
 import json
+import os
+import shutil
 import unittest
 
+from werkzeug.datastructures import FileStorage
+
 from app import create_app, db
-from app.businesses.models import Category, Tag, Business
+from app.businesses.models import Category, Tag, Business, BusinessUpload
 from app.config import TestingConfig
+
+BUSINESSES_FILE_UPLOADED_CSV = os.path.join(os.path.dirname(__file__), "businesses_file_upload.csv")
 
 
 class BusinessTestCase(unittest.TestCase):
@@ -12,6 +19,7 @@ class BusinessTestCase(unittest.TestCase):
     def setUp(self):
         """Define test variables and initialize app."""
         self.app = create_app(config=TestingConfig)
+        self.app.config["UPLOAD_FOLDER"] = os.path.abspath(os.path.join(os.path.dirname(__file__), 'uploads_for_test'))
         self.client = self.app.test_client
 
         self.category1 = {'name': 'Restaurant'}
@@ -48,17 +56,21 @@ class BusinessTestCase(unittest.TestCase):
         businessA.process_status(Business.StatusEnum.accepted.value)
         businessB.process_status(Business.StatusEnum.accepted.value)
         businessC.process_status(Business.StatusEnum.refused.value)
+        business_upload = BusinessUpload(success=True)
+        business_upload.addBusinesses([businessA])
+        business_upload.filename = os.path.join(os.path.dirname(__file__), "file-uploaded.csv")
 
         tag1 = Tag(name="Tag1")
         tag2 = Tag(name="Tag2")
-        tag1.addBusinessTags([businessA, businessB, businessC])
-        tag2.addBusinessTags([businessA])
+        businessA.add_tags([tag2, tag1])
+        businessB.add_tag(tag1)
+        businessC.add_tag(tag1)
 
         # binds the app to the current context
         with self.app.app_context():
             db.drop_all()
             db.create_all()
-            for model in [category1, category2, tag1, tag2, businessA, businessB, businessC]:
+            for model in [category1, category2, tag1, tag2, businessA, businessB, businessC, business_upload]:
                 db.session.add(model)
             db.session.commit()
 
@@ -67,6 +79,20 @@ class BusinessTestCase(unittest.TestCase):
         with self.app.app_context():
             db.session.remove()
             db.drop_all()
+        folder = self.app.config["UPLOAD_FOLDER"]
+        for filename in os.listdir(folder):
+            file_path = os.path.join(folder, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e))
+        if os.path.exists(BUSINESSES_FILE_UPLOADED_CSV):
+            os.remove(BUSINESSES_FILE_UPLOADED_CSV)
+
 
     def test_business_post(self):
         res = self.client().post('/api_v1/businesses',
@@ -222,3 +248,82 @@ class BusinessTestCase(unittest.TestCase):
         self.assertEqual(400, res.status_code)
         self.assertEqual("Missing query search parameter", json.loads(res.data)["message"])
 
+    def test_business_upload_csv(self):
+        rows = [
+            ["business_category", "business_name", "business_description", "business_slogan", "business_website",
+             "business_email",
+             "business_status", "business_notes", "business_capacity", "business_payment_types", "business_hours",
+             "business_phones", "business_addresses", "business_social_links", "business_tags"],
+            [1, "Gracia Afrika", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+            [1, "restaurant akwaba", "", "", "", "", "", "", "", "", "", "", "", "", ""]
+        ]
+        with open(BUSINESSES_FILE_UPLOADED_CSV, 'w') as csvfile:
+            writer = csv.writer(csvfile, quotechar='"', quoting=csv.QUOTE_ALL)
+            for line in rows:
+                writer.writerow(line)
+        my_file = FileStorage(
+            stream=open(BUSINESSES_FILE_UPLOADED_CSV, "rb"),
+            filename="businesses_file_upload.csv",
+            content_type="text/csv",
+        ),
+        data = {'file': my_file}
+        res = self.client().post(
+            '/api_v1/businesses/uploads', data=data, content_type='multipart/form-data',
+        )
+        self.assertEqual(200, res.status_code)
+        jsondata = json.loads(res.data)
+        self.assertEqual(True, jsondata.get("success"))
+        self.assertEqual(2, jsondata.get("businesses_count"))
+        self.assertIsNotNone(jsondata.get("filename"))
+        self.assertIsNotNone(jsondata.get("created_at"))
+        self.assertIsNone(jsondata.get("deleted_at"))
+        self.assertEqual("Gracia Afrika", jsondata.get("businesses")[0].get("name"))
+        self.assertEqual("restaurant akwaba", jsondata.get("businesses")[1].get("name"))
+
+    def test_business_upload_csv_duplicate_name(self):
+        rows = [
+            ["business_category", "business_name", "business_description", "business_slogan", "business_website",
+             "business_email",
+             "business_status", "business_notes", "business_capacity", "business_payment_types", "business_hours",
+             "business_phones", "business_addresses", "business_social_links", "business_tags"],
+            [1, "Gracia Afrika", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+            [1, "Gracia Afrika", "", "", "", "", "", "", "", "", "", "", "", "", ""]
+        ]
+        with open(BUSINESSES_FILE_UPLOADED_CSV, 'w') as csvfile:
+            writer = csv.writer(csvfile, quotechar='"', quoting=csv.QUOTE_ALL)
+            for line in rows:
+                writer.writerow(line)
+        my_file = FileStorage(
+            stream=open(BUSINESSES_FILE_UPLOADED_CSV, "rb"),
+            filename="businesses_file_upload.csv",
+            content_type="text/csv",
+        ),
+        data = {'file': my_file}
+        res = self.client().post(
+            '/api_v1/businesses/uploads', data=data, content_type='multipart/form-data',
+        )
+        self.assertEqual(200, res.status_code)
+        json_data = json.loads(res.data)
+        self.assertEqual(False, json_data.get("success"))
+        self.assertEqual(0, json_data.get("businesses_count"))
+        self.assertIsNotNone(json_data.get("filename"))
+        self.assertIsNotNone(json_data.get("error_message"))
+        self.assertIsNotNone(json_data.get("created_at"))
+        self.assertIsNone(json_data.get("deleted_at"))
+
+    def test_business_upload_get_all(self):
+        res = self.client().get('/api_v1/businesses/uploads')
+        json_data = json.loads(res.data)
+        self.assertEqual(200, res.status_code)
+        self.assertEqual(1, len(json_data))
+        self.assertEqual(1, json_data[0].get("businesses_count"))
+        self.assertEqual(True, json_data[0].get("success"))
+        self.assertEqual(os.path.join(os.path.dirname(__file__), "file-uploaded.csv"), json_data[0].get("filename"))
+
+    def test_business_upload_get(self):
+        res = self.client().get('/api_v1/businesses/uploads/1')
+        json_data = json.loads(res.data)
+        self.assertEqual(200, res.status_code)
+        self.assertEqual(1, json_data.get("businesses_count"))
+        self.assertEqual(True, json_data.get("success"))
+        self.assertEqual(os.path.join(os.path.dirname(__file__), "file-uploaded.csv"), json_data.get("filename"))

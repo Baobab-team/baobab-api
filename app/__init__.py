@@ -17,6 +17,8 @@ load_dotenv()
 db = SQLAlchemy()
 migrate = Migrate()
 
+UPLOAD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'uploads'))
+ALLOWED_EXTENSIONS = {'csv'}
 
 def create_app(config=os.getenv("APP_SETTINGS", DEVELOPMENT_CONFIG)):
     app = Flask(__name__)
@@ -41,6 +43,7 @@ def create_app(config=os.getenv("APP_SETTINGS", DEVELOPMENT_CONFIG)):
 
     app.config.from_object(config)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
     db.init_app(app)
     migrate.init_app(app, db)
@@ -66,7 +69,6 @@ def create_app(config=os.getenv("APP_SETTINGS", DEVELOPMENT_CONFIG)):
 
         app.logger.setLevel(logging.INFO)
         app.logger.info('Baobab startup')
-
 
     # enable CORS
     CORS(app, resources={r'/*': {'origins': '*'}})

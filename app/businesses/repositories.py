@@ -1,8 +1,9 @@
 from flask import current_app
 from sqlalchemy import asc, desc
+from sqlalchemy.exc import SQLAlchemyError
 
 from app import db
-from app.businesses.models import Business, Category, Tag
+from app.businesses.models import Business, Category, Tag, BusinessUpload
 
 CONTAINS = '%{}%'
 
@@ -35,8 +36,18 @@ class BaseRepository(object):
 
     def save(self, entity):
         self.session.add(entity)
-        self.session.commit()
+        try:
+            self.session.commit()
+        except SQLAlchemyError:
+            self.session.rollback()
+            raise
         return entity
+
+    def save_many(self, entities):
+        self.session.add_all(entities)
+        self.session.commit()
+        return entities
+
 
     def update(self, id_, **kwargs):
         db_entity = self.get(id_)
@@ -70,7 +81,20 @@ class BusinessRepository(BaseRepository):
     model = Business
 
     def save(self, entity):
+        entity = self.save_tags(entity)
         super(BusinessRepository, self).save(entity)
+        return entity
+
+    def save_tags(self, entity):
+        tag_repository = TagRepository()
+        existing_tag = {t.name: t for t in tag_repository.query.all()}
+        tag_to_be_add = []
+        for t in entity.tags:
+            if t.name in existing_tag:
+                tag_to_be_add.append(existing_tag[t.name])
+            else:
+                tag_to_be_add.append(t)
+        entity.tags = tag_to_be_add
         return entity
 
     def filter(self, id=None, querySearch=None, accepted_at=None, status=None, order=None, order_by=None,
@@ -102,7 +126,7 @@ class BusinessRepository(BaseRepository):
 
         return query
 
-    def delete(self,id,error_message):
+    def delete(self, id, error_message):
         business = self.get(id=id, error_message=error_message)
         business.delete()
         self.save(business)
@@ -121,7 +145,6 @@ class CategoryRepository(BaseRepository):
         return query
 
     def delete(self, id_):
-
         category = self.get(id_, error_message="Category doesnt exist")
 
         if category is None or len(category.businesses) > 0:
@@ -149,3 +172,7 @@ class TagRepository(BaseRepository):
             return False
 
         return self._delete(id_)
+
+
+class BusinessUploadLogRepository(BaseRepository):
+    model = BusinessUpload
