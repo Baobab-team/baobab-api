@@ -49,7 +49,7 @@ class BusinessCollection(Resource):
     @marshal_with(BusinessSchema, success_code=201)
     def post(self, entity, **kwargs):
         if self.repository.exist(entity.id):
-            abort(400, message="Business already exist")
+            abort(409, message="Business already exist")
 
         return self.repository.save(entity)
 
@@ -267,7 +267,7 @@ class CategoriesCollection(Resource):
     @marshal_with(CategorySchema, success_code=201)
     def post(self, entity, **kwargs):
         if self.repository.exist(entity.id):
-            abort(400, message="Category already exist")
+            abort(409, message="Category already exist")
 
         return self.repository.save(entity)
 
