@@ -1,5 +1,5 @@
 import textdistance
-from flask import jsonify
+from flask import jsonify, current_app
 from flask_restful import Resource, abort
 from flask_restful.reqparse import Argument
 
