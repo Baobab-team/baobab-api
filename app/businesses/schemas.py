@@ -88,7 +88,6 @@ class MenuSchema(BaseSchema):
 
     @validates_schema
     def validate_dates(self, data, **kwargs):
-
         if data["end"] and data["start"] > data["end"]:
             raise ValidationError("End date must be greater then start date")
 
@@ -168,3 +167,17 @@ class BusinessSchema(BaseSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return Business(**data)
+
+
+class BusinessUploadSchema(BaseSchema):
+    id = fields.String(required=True)
+    filename = fields.String(required=True)
+    error_message = fields.String()
+    success = fields.Boolean()
+    created_at = fields.Date()
+    deleted_at = fields.Date()
+    businesses_count = fields.Method("get_businesses_count")
+    businesses = fields.List(fields.Nested(BusinessSchema))
+
+    def get_businesses_count(self, obj):
+        return len(obj.businesses)

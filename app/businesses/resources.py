@@ -1,13 +1,18 @@
+import os
+import time as ttime
 import textdistance
 from flask import jsonify, current_app
+import werkzeug
 from flask_restful import Resource, abort
 from flask_restful.reqparse import Argument
+from werkzeug.datastructures import FileStorage
 
 from app.utils.decorators import parse_with, marshal_with, parse_request
-from .models import Tag
-from .repositories import BusinessRepository, CategoryRepository, TagRepository
+from .extract import extract_business_from_csv
+from .models import Tag, BusinessUpload
+from .repositories import BusinessRepository, CategoryRepository, TagRepository, BusinessUploadLogRepository
 from .schemas import BusinessCreateSchema, CategorySchema, CategoryUpdateSchema, BusinessSchema, \
-    BusinessUpdateSchema, TagSchema, TagSchemaCreateOrUpdate
+    BusinessUpdateSchema, TagSchema, TagSchemaCreateOrUpdate, BusinessUploadSchema
 from ..consts import BUSINESS_PER_PAGE
 
 
@@ -33,7 +38,7 @@ class BusinessCollection(Resource):
     @marshal_with(BusinessSchema, many=True, success_code=200)
     def get(self, page, exclude_deleted, businessPerPage, status=None, querySearch=None, accepted_at=None, order=None,
             order_by=None,
-                     ** kwargs):
+            **kwargs):
         return self.repository.filter(
             querySearch=querySearch, accepted_at=accepted_at, status=status, order=order,
             order_by=order_by, exclude_deleted=exclude_deleted, **kwargs
@@ -123,6 +128,61 @@ class BusinessSearchAutoCompleteCollection(Resource):
         response = jsonify(matching_words)
         response.status_code = 200
         return response
+
+
+class BusinessUploadCollection(Resource):
+
+    def __init__(self, business_repository_factory=BusinessRepository,business_upload_log_repository=BusinessUploadLogRepository):
+        super(BusinessUploadCollection, self).__init__()
+        self.business_repository = business_repository_factory()
+        self.log_repository = business_upload_log_repository()
+
+    @marshal_with(BusinessUploadSchema, many=True)
+    def get(self):
+        return self.log_repository.query.all()
+
+    @parse_request(
+        Argument("file", type=werkzeug.datastructures.FileStorage, location='files'),
+    )
+    @marshal_with(BusinessUploadSchema, success_code=200)
+    def post(self, file):
+        filename = os.path.join(current_app.config["UPLOAD_FOLDER"],
+                                "business-{}.csv".format(ttime.strftime("%Y-%m-%d_%H-%M-%S")))
+        file.save(filename)
+        log = BusinessUpload()
+        try:
+            businesses = extract_business_from_csv(filename)
+            log.addBusinesses(businesses)
+            log.success = True
+            log.filename = filename
+            self.log_repository.save(log)
+        except Exception as e:
+            log.error_message = str(e)
+            log.businesses = []
+            log.success = False
+        finally:
+            self.log_repository.save(log)
+            return log
+
+
+class BusinessUploadScalar(Resource):
+
+    def __init__(self, repository=BusinessUploadLogRepository):
+        super(BusinessUploadScalar, self).__init__()
+        self.repository = repository()
+
+    # TBD
+    # def delete(self, id):
+    #
+    #     # return proper status code
+    #     if self.repository._delete(id):
+    #         return None, 204
+    #     else:
+    #         return {"message": "Upload doesnt exist"}, 404
+
+    @marshal_with(BusinessUploadSchema)
+    def get(self, id):
+        return self.repository.get(id)
 
 
 class BusinessTagCollection(Resource):
