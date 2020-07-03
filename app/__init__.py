@@ -26,6 +26,8 @@ def create_app(config=os.getenv("APP_SETTINGS", DEVELOPMENT_CONFIG)):
     app = Flask(__name__)
 
     fileConfig(LOGGING_CONFIG_PATH)  # Configure logging
+    if not os.path.exists(LOGGING_CONFIG_PATH):
+        os.mkdir(LOGGING_CONFIG_PATH)
 
     # Configure api documentation
     swagger_ui_blueprint = get_swaggerui_blueprint(
