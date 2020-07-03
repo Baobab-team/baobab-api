@@ -160,6 +160,7 @@ class BusinessUploadCollection(Resource):
             log.error_message = str(e)
             log.businesses = []
             log.success = False
+            current_app.logger.error(str(e))
         finally:
             self.log_repository.save(log)
             return log
