@@ -1,9 +1,8 @@
 import os
 import time as ttime
 import textdistance
+from flask import jsonify, current_app
 import werkzeug
-from flask import current_app
-from flask import jsonify
 from flask_restful import Resource, abort
 from flask_restful.reqparse import Argument
 from werkzeug.datastructures import FileStorage
@@ -161,6 +160,7 @@ class BusinessUploadCollection(Resource):
             log.error_message = str(e)
             log.businesses = []
             log.success = False
+            current_app.logger.error(str(e))
         finally:
             self.log_repository.save(log)
             return log
