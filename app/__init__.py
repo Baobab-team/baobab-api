@@ -21,20 +21,21 @@ migrate = Migrate()
 UPLOAD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'uploads'))
 ALLOWED_EXTENSIONS = {'csv'}
 
+
 def create_app(config=os.getenv("APP_SETTINGS", DEVELOPMENT_CONFIG)):
     app = Flask(__name__)
 
-    fileConfig(LOGGING_CONFIG_PATH) # Confugire logging
+    fileConfig(LOGGING_CONFIG_PATH)  # Configure logging
 
     # Configure api documentation
-    swaggerui_blueprint = get_swaggerui_blueprint(
+    swagger_ui_blueprint = get_swaggerui_blueprint(
         SWAGGER_URL,
         API_URL,
         config={
             'app_name': "Baobab API documentation"
         },
     )
-    app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
+    app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 
     @app.route("/")
     def hello_world():
