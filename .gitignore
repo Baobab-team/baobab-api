@@ -224,7 +224,7 @@ modules.xml
 # Django stuff:
 
 # Flask stuff:
-
+uploads/*
 # Scrapy stuff:
 
 # Sphinx documentation

@@ -1,6 +1,7 @@
 import logging
 import os
 from logging.handlers import RotatingFileHandler
+
 from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
@@ -18,7 +19,6 @@ db = SQLAlchemy()
 migrate = Migrate()
 
 UPLOAD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'uploads'))
-ALLOWED_EXTENSIONS = {'csv'}
 
 def create_app(config=os.getenv("APP_SETTINGS", DEVELOPMENT_CONFIG)):
     app = Flask(__name__)
@@ -69,7 +69,8 @@ def create_app(config=os.getenv("APP_SETTINGS", DEVELOPMENT_CONFIG)):
 
         app.logger.setLevel(logging.INFO)
         app.logger.info('Baobab startup')
-
+    if not os.path.exists(UPLOAD_FOLDER):
+        os.mkdir(UPLOAD_FOLDER)
     # enable CORS
     CORS(app, resources={r'/*': {'origins': '*'}})
 

@@ -37,7 +37,7 @@ class Business(db.Model, TimestampMixin):
     description = db.Column(db.String(), nullable=True)
     slogan = db.Column(db.String())
     website = db.Column(db.String(), nullable=True)
-    email = db.Column(db.String(), nullable=True)
+    email = db.Column(db.String(), nullable=True, unique=True)
     status = db.Column(db.String(), default=StatusEnum.pending.value)
     accepted_at = db.Column(db.DateTime, nullable=True, default=None)
     notes = db.Column(db.String(), nullable=True)
