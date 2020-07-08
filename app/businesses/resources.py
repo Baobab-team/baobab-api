@@ -1,5 +1,6 @@
 import os
 import time as ttime
+
 import textdistance
 from flask import jsonify, current_app
 import werkzeug
@@ -130,6 +131,11 @@ class BusinessSearchAutoCompleteCollection(Resource):
         return response
 
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in {'csv'}
+
+
 class BusinessUploadCollection(Resource):
 
     def __init__(self, business_repository_factory=BusinessRepository,business_upload_log_repository=BusinessUploadLogRepository):
@@ -148,6 +154,14 @@ class BusinessUploadCollection(Resource):
     def post(self, file):
         filename = os.path.join(current_app.config["UPLOAD_FOLDER"],
                                 "business-{}.csv".format(ttime.strftime("%Y-%m-%d_%H-%M-%S")))
+        current_app.logger.info(file.filename)
+        if file is None:
+            abort(400, message="No file uploaded")
+        if file.filename == '':
+            abort(400, message="No file uploaded")
+        if not allowed_file(file.filename):
+            abort(400, message="File extension is not allowed. Only csv")
+
         file.save(filename)
         log = BusinessUpload()
         try:
@@ -157,7 +171,7 @@ class BusinessUploadCollection(Resource):
             log.filename = filename
             self.log_repository.save(log)
         except Exception as e:
-            log.error_message = str(e)
+            log.error_message = str(e.args[0])
             log.businesses = []
             log.success = False
             current_app.logger.error(str(e))

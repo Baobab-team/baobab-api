@@ -1,6 +1,5 @@
 import os
 from logging.config import fileConfig
-
 from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
@@ -19,7 +18,6 @@ db = SQLAlchemy()
 migrate = Migrate()
 
 UPLOAD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'uploads'))
-ALLOWED_EXTENSIONS = {'csv'}
 
 if not os.path.isdir(LOGS_FOLDER_PATH):
     os.mkdir(LOGS_FOLDER_PATH)

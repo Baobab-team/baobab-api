@@ -21,7 +21,8 @@ def extract_business_from_csv(file):
             business.slogan = row["business_slogan"]
             business.website = row["business_website"]
             business.notes = row["business_notes"]
-            business.email = row["business_email"]
+            if row["business_email"]:
+                business.email = row["business_email"]
             business.capacity = row["business_capacity"] if row["business_capacity"] else 0
             business.payment_types = row["business_payment_types"].split(",")
             hours = extract_business_hours(row["business_hours"])
@@ -34,6 +35,7 @@ def extract_business_from_csv(file):
             business.add_social_links(social_links)
             tags = extract_tags(row["business_tags"])
             business.add_tags(tags)
+            business.status = Business.StatusEnum.accepted.value
 
             businesses.append(business)
     return businesses
