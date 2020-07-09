@@ -174,5 +174,5 @@ class TagRepository(BaseRepository):
         return self._delete(id_)
 
 
-class BusinessUploadLogRepository(BaseRepository):
+class BusinessUploadRepository(BaseRepository):
     model = BusinessUpload

@@ -4,9 +4,9 @@ from datetime import time
 from flask import current_app
 
 from app.businesses.models import Business, Phone, BusinessHour, Address, SocialLink, Tag, BusinessUpload
-from app.businesses.repositories import BusinessRepository
+from app.businesses.repositories import BusinessUploadRepository
 
-upload_repository = BusinessRepository()
+upload_repository = BusinessUploadRepository()
 
 
 def process_file(filename):
@@ -23,6 +23,7 @@ def process_file(filename):
         upload_repository.save(upload)
         upload.error_message = str(e.args[0])
         current_app.logger.error(str(e))
+
     return upload
 
 

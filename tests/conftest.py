@@ -26,7 +26,7 @@ def business():
 
 
 @pytest.fixture
-def business_upload_file():
+def business_upload_file(tmp_path):
     rows = [
         ["business_category","business_name", "business_description", "business_slogan", "business_website", "business_email",
          "business_status", "business_notes", "business_capacity", "business_payment_types", "business_hours",
@@ -36,10 +36,11 @@ def business_upload_file():
          "+1,514-555-5555,telephone;", "123,street,Kent,Est,Montreal,H0H0H0,REGION,Quebec,Canada;",
          "www.nn.com-Instagram;", "Haitian;African"]
     ]
-    csv_file = os.path.join(os.path.dirname(__file__), "businesses_file_upload.csv")
-    with open(csv_file, 'w') as csvfile:
+    upload_folder = tmp_path / "uploads"
+    upload_folder.mkdir()
+    file = upload_folder / "file.csv"
+    with open(file, 'w') as csvfile:
         writer = csv.writer(csvfile, quotechar='"', quoting=csv.QUOTE_ALL)
         for line in rows:
             writer.writerow(line)
-    yield csvfile
-    os.remove(csv_file)
+    return file
