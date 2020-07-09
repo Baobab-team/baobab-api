@@ -6,7 +6,6 @@ install:
 services:
   - postgresql
 before_script:
-  - psql -c 'create database baobab_test;' -U postgres
   - mkdir tests/uploads_for_test
 script:
   - pytest
