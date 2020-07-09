@@ -1,6 +1,6 @@
 import os
 
-from app.businesses.extract import extract_business_from_csv
+from app.businesses.uploads import extract_business_from_csv
 
 BUSINESSES_CSV = os.path.join(os.path.dirname(__file__), 'businesses_file_extract.csv')
 

@@ -2,18 +2,18 @@ import os
 import time as ttime
 
 import textdistance
-from flask import jsonify, current_app
 import werkzeug
+from flask import jsonify, current_app
 from flask_restful import Resource, abort
 from flask_restful.reqparse import Argument
 from werkzeug.datastructures import FileStorage
 
 from app.utils.decorators import parse_with, marshal_with, parse_request
-from .extract import extract_business_from_csv
 from .models import Tag, BusinessUpload
 from .repositories import BusinessRepository, CategoryRepository, TagRepository, BusinessUploadLogRepository
 from .schemas import BusinessCreateSchema, CategorySchema, CategoryUpdateSchema, BusinessSchema, \
     BusinessUpdateSchema, TagSchema, TagSchemaCreateOrUpdate, BusinessUploadSchema
+from .uploads import process_file
 from ..consts import BUSINESS_PER_PAGE
 
 
@@ -162,22 +162,14 @@ class BusinessUploadCollection(Resource):
         if not allowed_file(file.filename):
             abort(400, message="File extension is not allowed. Only csv")
 
-        file.save(filename)
-        log = BusinessUpload()
         try:
-            businesses = extract_business_from_csv(filename)
-            log.addBusinesses(businesses)
-            log.success = True
-            log.filename = filename
-            self.log_repository.save(log)
+            file.save(filename)
+            upload = process_file(filename)  # TODO move to a background job or something
+            return upload
         except Exception as e:
-            log.error_message = str(e.args[0])
-            log.businesses = []
-            log.success = False
             current_app.logger.error(str(e))
-        finally:
-            self.log_repository.save(log)
-            return log
+            abort(400, message="An error occured during the process. Please contact the admins", )
+
 
 
 class BusinessUploadScalar(Resource):
