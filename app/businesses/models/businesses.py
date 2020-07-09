@@ -1,18 +1,21 @@
 from datetime import datetime
 from enum import Enum
 
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy_utils import ScalarListType
-
-from app import db
+from sqlalchemy import Column, Integer, ForeignKey, String, Table, DateTime, Boolean, Time
+from app.database import Base
 from app.businesses.models.base import TimestampMixin
 
-tags = db.Table('tags',
-                db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True),
-                db.Column('business_id', db.Integer, db.ForeignKey('business.id'), primary_key=True)
+tags = Table('tbl_business_tags',Base.metadata,
+                Column('tag_id', Integer, ForeignKey('tbl_tags.id')),
+                Column('business_id', Integer, ForeignKey('tbl_businesses.id'))
                 )
 
 
-class Business(db.Model, TimestampMixin):
+class Business(Base, TimestampMixin):
+    __tablename__ = "tbl_businesses"
+
     class StatusEnum(Enum):
         pending = "pending"
         accepted = "accepted"
@@ -32,28 +35,28 @@ class Business(db.Model, TimestampMixin):
         def list():
             return [e.value for e in Business.TypeEnum]
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(), unique=True, nullable=False)
-    description = db.Column(db.String(), nullable=True)
-    slogan = db.Column(db.String())
-    website = db.Column(db.String(), nullable=True)
-    email = db.Column(db.String(), nullable=True, unique=True)
-    status = db.Column(db.String(), default=StatusEnum.pending.value)
-    accepted_at = db.Column(db.DateTime, nullable=True, default=None)
-    notes = db.Column(db.String(), nullable=True)
-    capacity = db.Column(db.Integer, nullable=True)
-    payment_types = db.Column(ScalarListType(), default=[PaymentTypeEnum.cash.value])
-    business_hours = db.relationship('BusinessHour', backref='business', lazy=True)
-    addresses = db.relationship('Address', backref='business', lazy=True)
-    phones = db.relationship('Phone', backref='business', lazy=True)
-    social_links = db.relationship('SocialLink', backref='business', lazy=True)
-    tags = db.relationship('Tag', secondary=tags, lazy='subquery',
-                           backref=db.backref('businesses', lazy=True))
+    id = Column(Integer, primary_key=True)
+    name = Column(String(), unique=True, nullable=False)
+    description = Column(String(), nullable=True)
+    slogan = Column(String())
+    website = Column(String(), nullable=True)
+    email = Column(String(), nullable=True, unique=True)
+    status = Column(String(), default=StatusEnum.pending.value)
+    accepted_at = Column(DateTime, nullable=True, default=None)
+    notes = Column(String(), nullable=True)
+    capacity = Column(Integer, nullable=True)
+    payment_types = Column(ScalarListType(), default=[PaymentTypeEnum.cash.value])
+    business_hours = relationship('BusinessHour', backref='tbl_businesses', lazy=True)
+    addresses = relationship('Address', backref='tbl_businesses', lazy=True)
+    phones = relationship('Phone', backref='tbl_businesses', lazy=True)
+    social_links = relationship('SocialLink', backref='tbl_businesses', lazy=True)
+    tags = relationship('Tag', secondary=tags, lazy='subquery',
+                           backref=backref('tbl_businesses', lazy=True))
 
-    category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)
+    category_id = Column(Integer, ForeignKey("category.id"), nullable=False)
 
-    restaurant_id = db.Column(db.Integer, db.ForeignKey("restaurant.id"), nullable=True)
-    business_upload_id = db.Column(db.Integer, db.ForeignKey("business_upload.id"), nullable=True)
+    restaurant_id = Column(Integer, ForeignKey("restaurant.id"), nullable=True)
+    business_upload_id = Column(Integer, ForeignKey("business_upload.id"), nullable=True)
 
     def __eq__(self, other):
         if not isinstance(other, Business):
@@ -118,22 +121,25 @@ class Business(db.Model, TimestampMixin):
         for tag in tags:
             self.add_tag(tag)
 
-
-class BusinessUpload(db.Model, TimestampMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    filename = db.Column(db.String(), unique=True)
-    success = db.Column(db.Boolean(), default=False)
-    error_message = db.Column(db.String(), nullable=True)
-    businesses = db.relationship('Business', backref='business_upload_log', lazy=True)
+#
+class BusinessUpload(Base, TimestampMixin):
+    __tablename__ ="tbl_business_uploads"
+    id = Column(Integer, primary_key=True)
+    filename = Column(String(), unique=True)
+    success = Column(Boolean(), default=False)
+    error_message = Column(String(), nullable=True)
+    businesses = relationship('Business', backref='business_upload_log', lazy=True)
 
     def addBusinesses(self,businesses):
         for b in businesses:
             self.businesses.append(b)
 
 
-class Tag(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(), unique=True)
+class Tag(Base):
+    __tablename__ = "tbl_tags"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(), unique=True)
 
     def addBusinessTag(self, business):
         """
@@ -161,7 +167,9 @@ class Tag(db.Model):
         key_values = ' , '.join('{}={}'.format(k, v) for (k, v) in self.__dict__.items() if k != '_sa_instance_state')
         return '<{} {}>'.format(type(self).__name__, key_values)
 
-class Address(db.Model):
+class Address(Base):
+    __tablename__ = "tbl_addresses"
+
     class ProvinceEnum(Enum):
         qc = "QC"
         on = "ON"
@@ -194,17 +202,17 @@ class Address(db.Model):
         def list():
             return [e.value for e in Address.DirectionEnum]
 
-    id = db.Column(db.Integer, primary_key=True)
-    street_number = db.Column(db.String())
-    street_type = db.Column(db.String())
-    street_name = db.Column(db.String())
-    direction = db.Column(db.String())
-    city = db.Column(db.String(), default="Montreal")
-    zip_code = db.Column(db.String())
-    province = db.Column(db.String())
-    region = db.Column(db.String())
-    country = db.Column(db.String())
-    business_id = db.Column(db.Integer, db.ForeignKey('business.id'),
+    id = Column(Integer, primary_key=True)
+    street_number = Column(String())
+    street_type = Column(String())
+    street_name = Column(String())
+    direction = Column(String())
+    city = Column(String(), default="Montreal")
+    zip_code = Column(String())
+    province = Column(String())
+    region = Column(String())
+    country = Column(String())
+    business_id = Column(Integer, ForeignKey('tbl_businesses.id'),
                             nullable=False)
 
     def __repr__(self):
@@ -230,7 +238,9 @@ class Address(db.Model):
                self.direction == other.direction
 
 
-class BusinessHour(db.Model):
+class BusinessHour(Base):
+    __tablename__ = "tbl_business_hours"
+
     """
     Business hour  for a single day
     """
@@ -248,11 +258,11 @@ class BusinessHour(db.Model):
         def list():
             return [e.value for e in BusinessHour.DaysEnum]
 
-    id = db.Column(db.Integer, primary_key=True)
-    day = db.Column(db.String(), nullable=False)
-    closing_time = db.Column(db.Time, nullable=False, default=datetime.utcnow())
-    opening_time = db.Column(db.Time, nullable=False, default=datetime.utcnow())
-    business_id = db.Column(db.Integer, db.ForeignKey("business.id"))
+    id = Column(Integer, primary_key=True)
+    day = Column(String(), nullable=False)
+    closing_time = Column(Time, nullable=False, default=datetime.utcnow())
+    opening_time = Column(Time, nullable=False, default=datetime.utcnow())
+    business_id = Column(Integer, ForeignKey("tbl_businesses.id"))
 
     def __repr__(self):
         return '<BusinessHour {}: {} to {}>'.format(self.day, self.opening_time, self.closing_time)
@@ -266,7 +276,9 @@ class BusinessHour(db.Model):
                self.opening_time == other.opening_time
 
 
-class Phone(db.Model):
+class Phone(Base):
+    __tablename__ = "tbl_phones"
+
     """
         Phone model
     """
@@ -279,11 +291,11 @@ class Phone(db.Model):
         def list():
             return [e.value for e in Phone.Type]
 
-    id = db.Column(db.Integer, primary_key=True)
-    number = db.Column(db.String(), nullable=False)
-    extension = db.Column(db.String(), nullable=False)
-    type = db.Column(db.String(), default=Type.tel.value)
-    business_id = db.Column(db.Integer, db.ForeignKey('business.id'),
+    id = Column(Integer, primary_key=True)
+    number = Column(String(), nullable=False)
+    extension = Column(String(), nullable=False)
+    type = Column(String(), default=Type.tel.value)
+    business_id = Column(Integer, ForeignKey('tbl_businesses.id'),
                             nullable=False)
 
     def __eq__(self, other):
@@ -298,7 +310,9 @@ class Phone(db.Model):
         return '<Phone: {}'.format(self.number)
 
 
-class SocialLink(db.Model):
+class SocialLink(Base):
+    __tablename__ = "tbl_social_links"
+
     class TypeEnum(Enum):
         instragram = "Instagram"
         facebook = "Facebook"
@@ -310,10 +324,10 @@ class SocialLink(db.Model):
         def list():
             return [e.value for e in SocialLink.TypeEnum]
 
-    id = db.Column(db.Integer, primary_key=True)
-    link = db.Column(db.String(), nullable=False)
-    type = db.Column(db.String())
-    business_id = db.Column(db.Integer, db.ForeignKey('business.id'), nullable=False)
+    id = Column(Integer, primary_key=True)
+    link = Column(String(), nullable=False)
+    type = Column(String())
+    business_id = Column(Integer, ForeignKey('tbl_businesses.id'), nullable=False)
 
     def __eq__(self, other):
         if not isinstance(other, SocialLink):

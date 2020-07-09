@@ -1,16 +1,15 @@
 from datetime import datetime
+from sqlalchemy import Column,DateTime
+from app.database import Base
 
-from app import db
-
-
-class BaseModel(db.Model):
+class BaseModel(Base):
     __abstract__ = True
 
 
 class TimestampMixin(object):
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
-    deleted_at = db.Column(db.DateTime, nullable=True, default=None)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, onupdate=datetime.utcnow)
+    deleted_at = Column(DateTime, nullable=True, default=None)
 
     def is_deleted(self):
         if self.deleted_at is None:

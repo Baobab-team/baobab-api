@@ -6,6 +6,7 @@ from flask import jsonify, current_app
 import werkzeug
 from flask_restful import Resource, abort
 from flask_restful.reqparse import Argument
+from sqlalchemy.exc import IntegrityError
 from werkzeug.datastructures import FileStorage
 
 from app.utils.decorators import parse_with, marshal_with, parse_request
@@ -170,7 +171,7 @@ class BusinessUploadCollection(Resource):
             log.success = True
             log.filename = filename
             self.log_repository.save(log)
-        except Exception as e:
+        except IntegrityError as e:
             log.error_message = str(e.args[0])
             log.businesses = []
             log.success = False

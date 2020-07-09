@@ -2,7 +2,7 @@ from flask import current_app
 from sqlalchemy import asc, desc
 from sqlalchemy.exc import SQLAlchemyError
 
-from app import db
+from app.database import db_session
 from app.businesses.models import Business, Category, Tag, BusinessUpload
 
 CONTAINS = '%{}%'
@@ -13,7 +13,7 @@ class BaseRepository(object):
     _session = None
 
     def __init__(self):
-        self._session = db.session
+        self._session = db_session
 
     @property
     def session(self):

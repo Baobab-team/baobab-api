@@ -1,31 +1,38 @@
 from datetime import datetime
 
-from .base import BaseModel
-from app import db
+from sqlalchemy import Integer, Column, String, Time, Float, ForeignKey
+from sqlalchemy.orm import relationship
+
+from app.database import Base
 
 
-class Restaurant(BaseModel):
-    id = db.Column(db.Integer, primary_key=True)
+class Restaurant(Base):
+    __tablename__ = "tbl_restaurants"
+    id = Column(Integer, primary_key=True)
 
-    menus = db.relationship('Menu', backref='restaurant', lazy=True)
-
-
-class Menu(BaseModel):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(), nullable=False)
-    start = db.Column(db.Time, nullable=False, default=datetime.utcnow())
-    end = db.Column(db.Time, nullable=True)
-
-    plates = db.relationship('Plate', backref='menu', lazy=True)
-
-    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
+    menus = relationship('Menu', backref='restaurant', lazy=True)
 
 
-class Plate(BaseModel):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    description = db.Column(db.String(), nullable=False)
+class Menu(Base):
+    __tablename__ = "tbl_menus"
 
-    menu_id = db.Column(db.Integer, db.ForeignKey('menu.id'), nullable=False)
+    id = Column(Integer, primary_key=True)
+    name = Column(String(), nullable=False)
+    start = Column(Time, nullable=False, default=datetime.utcnow())
+    end = Column(Time, nullable=True)
+
+    plates = relationship('Plate', backref='menu', lazy=True)
+
+    restaurant_id = Column(Integer, ForeignKey('restaurant.id'), nullable=False)
+
+
+class Plate(Base):
+    __tablename__ = "tbl_plates"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    price = Column(Float, nullable=False)
+    description = Column(String(), nullable=False)
+
+    menu_id = Column(Integer, ForeignKey('menu.id'), nullable=False)
 

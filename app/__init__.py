@@ -1,12 +1,14 @@
 import os
 from logging.config import fileConfig
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, _app_ctx_stack
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_swagger_ui import get_swaggerui_blueprint
+from sqlalchemy.orm import scoped_session
 from werkzeug.utils import import_string
+from .database import Base, engine, db_session, init_db
 
 DEVELOPMENT_CONFIG = "app.config.DevelopmentConfig"
 SWAGGER_URL = '/api/docs'
@@ -14,8 +16,7 @@ API_URL = '/static/swagger.yml'
 LOGGING_CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config", "logging.cfg")
 LOGS_FOLDER_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logs'))
 load_dotenv()
-db = SQLAlchemy()
-migrate = Migrate()
+
 
 UPLOAD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'uploads'))
 
@@ -49,17 +50,19 @@ def create_app(config=os.getenv("APP_SETTINGS", DEVELOPMENT_CONFIG)):
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-    db.init_app(app)
-    migrate.init_app(app, db)
 
     # Initialize models
     from .businesses.models import Business, BusinessHour, Category, Address
-
     # Initialize API
     from .businesses.blueprints import blueprint as business_blueprint
     app.register_blueprint(business_blueprint)
 
     # enable CORS
     CORS(app, resources={r'/*': {'origins': '*'}})
+    init_db()
+    app.session = db_session
 
+    @app.teardown_appcontext
+    def shutdown_session(exception=None):
+        db_session.remove()
     return app
