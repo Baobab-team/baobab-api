@@ -2,11 +2,13 @@ import csv
 from datetime import time
 
 from flask import current_app
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.businesses.models import Business, Phone, BusinessHour, Address, SocialLink, Tag, BusinessUpload
-from app.businesses.repositories import BusinessUploadRepository
+from app.businesses.repositories import BusinessUploadRepository, TagRepository
 
 upload_repository = BusinessUploadRepository()
+tag_repository = TagRepository()
 
 
 def process_file(filename):
@@ -17,12 +19,12 @@ def process_file(filename):
         upload.success = True
         upload.filename = filename
         upload_repository.save(upload)
-    except Exception as e:
+    except (Exception,SQLAlchemyError) as e:
         upload.businesses = []
         upload.success = False
         upload_repository.save(upload)
         upload.error_message = str(e.args[0])
-        current_app.logger.error(str(e))
+        current_app.logger.error(str(e.args[0]))
 
     return upload
 
@@ -148,6 +150,7 @@ def extract_tags(tags_str):
         tags_arr = split_multiple_line_item(tags_str)
         for tag in tags_arr:
             tags.append(Tag(name=tag))
+    tags = tag_repository.get_tags_with_id(tags)
     return tags
 
 

@@ -9,7 +9,7 @@ from flask_restful.reqparse import Argument
 from werkzeug.datastructures import FileStorage
 
 from app.utils.decorators import parse_with, marshal_with, parse_request
-from .models import Tag, BusinessUpload
+from .models import Tag
 from .repositories import BusinessRepository, CategoryRepository, TagRepository, BusinessUploadRepository
 from .schemas import BusinessCreateSchema, CategorySchema, CategoryUpdateSchema, BusinessSchema, \
     BusinessUpdateSchema, TagSchema, TagSchemaCreateOrUpdate, BusinessUploadSchema
@@ -168,7 +168,7 @@ class BusinessUploadCollection(Resource):
             return upload
         except Exception as e:
             current_app.logger.error(str(e))
-            abort(400, message=f"An error occured during the process: {str(e)}" )
+            abort(400, message=f"An error occurred during the process: {str(e.args[0])}")
 
 
 class BusinessUploadScalar(Resource):
