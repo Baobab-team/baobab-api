@@ -1,6 +1,5 @@
 import csv
 from datetime import time
-
 from flask import current_app
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -13,13 +12,12 @@ tag_repository = TagRepository()
 
 def process_file(filename):
     upload = BusinessUpload()
+    upload.filename = filename
     try:
-        businesses = extract_business_from_csv(filename)
-        upload.addBusinesses(businesses)
+        upload.businesses = extract_business_from_csv(filename)
         upload.success = True
-        upload.filename = filename
         upload_repository.save(upload)
-    except (Exception,SQLAlchemyError) as e:
+    except (Exception, SQLAlchemyError) as e:
         upload.businesses = []
         upload.success = False
         upload_repository.save(upload)
@@ -39,35 +37,34 @@ def extract_business_from_csv(file):
         try:
             csv_reader = csv.DictReader(csv_file)
             for row in csv_reader:
-                business = Business()
-
-                business.name = row["business_name"]
-                business.category_id = row["business_category"]
-                business.description = row["business_description"]
-                business.slogan = row["business_slogan"]
-                business.website = row["business_website"]
-                business.notes = row["business_notes"]
-                if row["business_email"]:
-                    business.email = row["business_email"]
-                business.capacity = row["business_capacity"] if row["business_capacity"] else 0
-                business.payment_types = row["business_payment_types"].split(",")
-                hours = extract_business_hours(row["business_hours"])
-                business.add_business_hours(hours)
-                phones = extract_phones(row["business_phones"])
-                business.add_phones(phones)
-                addresses = extract_address(row["business_addresses"])
-                business.add_addresses(addresses)
-                social_links = extract_social_links(row["business_social_links"])
-                business.add_social_links(social_links)
-                tags = extract_tags(row["business_tags"])
-                business.add_tags(tags)
-                business.status = Business.StatusEnum.accepted.value
-
-                businesses.append(business)
+                data = get_business_data(row)
+                businesses.append(Business(**data))
             return businesses
         except Exception as e:
             current_app.logger.error(str(e))
             raise
+
+
+def get_business_data(row):
+    data = {
+        "name": row["business_name"],
+        "category_id": row["business_category"],
+        "description": row["business_description"],
+        "addresses": extract_address(row["business_addresses"]),
+        "business_hours": extract_business_hours(row["business_hours"]),
+        "phones": extract_phones(row["business_phones"]),
+        "slogan": row["business_slogan"],
+        "website": row["business_website"],
+        "tags": extract_tags(row["business_tags"]),
+        "payment_types": row["business_payment_types"].split(","),
+        "social_links": extract_social_links(row["business_social_links"]),
+        "status": Business.StatusEnum.accepted.value,
+        "capacity": row["business_capacity"] if row["business_capacity"] else 0,
+        "notes": row["business_notes"]
+    }
+    if row["business_email"]:
+        data["email"] = row["business_email"]
+    return data
 
 
 def extract_business_hours(business_hours_str):
@@ -99,7 +96,7 @@ def extract_phones(phones_str):
         for phone in phones_arr:
             parts = phone.split(",")
             if len(parts) != 3:
-                raise Exception("Invalid phone: {}".format(' '.join(parts)))
+                raise Exception(F"Invalid phone: {' '.join(parts)}")
             phones.append(Phone(extension=parts[0], number=parts[1], type=parts[2]))
 
     return phones
@@ -110,22 +107,27 @@ def extract_address(address_str):
     if address_str:
         addresses_arr = split_multiple_line_item(address_str)
         for address in addresses_arr:
-            parts = address.split(",")
-            if len(parts) != 9:
-                raise Exception("Invalid address: {}", ' '.join(parts))
-            address = Address()
-            address.street_number = parts[0]
-            address.street_type = parts[1]
-            address.street_name = parts[2]
-            address.direction = parts[3]
-            address.city = parts[4]
-            address.zip_code = parts[5]
-            address.region = parts[6]
-            address.province = parts[7]
-            address.country = parts[8]
-            addresses.append(address)
+            arr = address.split(",")
+            if len(arr) != 9:
+                raise Exception("Invalid address: {}", ' '.join(arr))
+            data = get_address_data(arr)
+            addresses.append(Address(**data))
 
     return addresses
+
+
+def get_address_data(arr):
+    return {
+        "street_number": arr[0],
+        "street_type": arr[1],
+        "street_name": arr[2],
+        "direction": arr[3],
+        "city": arr[4],
+        "zip_code": arr[5],
+        "region": arr[6],
+        "province": arr[7],
+        "country": arr[8]
+    }
 
 
 def extract_social_links(social_link_str):
