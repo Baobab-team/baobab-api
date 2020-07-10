@@ -1,9 +1,31 @@
 import csv
-import os
 from datetime import time
+
 import pytest
 
-from app.businesses.models import Business, Phone, BusinessHour, Address, SocialLink, Tag
+from app import create_app, TestingConfig
+from app.businesses.models import *
+
+
+@pytest.fixture(scope="module")
+def test_client():
+    app = create_app(config=TestingConfig)
+    test_client = app.test_client()
+
+    ctx = app.app_context()
+    ctx.push()
+
+    yield test_client
+    ctx.pop()
+
+
+@pytest.fixture(scope="module")
+def init_db():
+    db.create_all()
+
+    yield db
+
+    db.drop_all()
 
 
 @pytest.fixture
@@ -11,7 +33,7 @@ def business():
     business = Business(name="Business1", website="www.website.com", slogan="Manger bien",
                         description="Restaurant africain vraiment cool",
                         notes="Super notes", capacity=14, email="business@email.com",
-                        payment_types=["credit", "debit"],category_id=1
+                        payment_types=["credit", "debit"], category_id=1
                         )
     business.add_business_hour(BusinessHour(opening_time=time(10, 0), closing_time=time(17, 0), day="monday"))
     business.add_business_hour(BusinessHour(opening_time=time(10, 0), closing_time=time(17, 0), day="tuesday"))
@@ -44,3 +66,4 @@ def business_upload_file(tmp_path):
         for line in rows:
             writer.writerow(line)
     return file
+
