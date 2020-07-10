@@ -41,11 +41,11 @@ class BusinessCollection(Resource):
     def get(self, page, exclude_deleted, businessPerPage, status=None, querySearch=None, accepted_at=None, order=None,
             order_by=None,
             **kwargs):
-        return self.repository.filter(
-            querySearch=querySearch, accepted_at=accepted_at, status=status, order=order,
-            order_by=order_by, exclude_deleted=exclude_deleted, **kwargs
-        ).paginate(page, businessPerPage, False).items
-
+        # return self.repository.filter(
+        #     querySearch=querySearch, accepted_at=accepted_at, status=status, order=order,
+        #     order_by=order_by, exclude_deleted=exclude_deleted, **kwargs
+        # ).paginate(page, businessPerPage, False).items
+        return self.repository.query
     @parse_with(BusinessCreateSchema(), arg_name="entity")
     @marshal_with(BusinessSchema, success_code=201)
     def post(self, entity, **kwargs):

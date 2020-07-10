@@ -1,11 +1,12 @@
 from datetime import datetime
 from enum import Enum
 
+from sqlalchemy import Column, Integer, ForeignKey, String, Table, DateTime, Boolean, Time
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy_utils import ScalarListType
-from sqlalchemy import Column, Integer, ForeignKey, String, Table, DateTime, Boolean, Time
-from app.database import Base
+
 from app.businesses.models.base import TimestampMixin
+from app.database import Base
 
 tags = Table('tbl_business_tags',Base.metadata,
                 Column('tag_id', Integer, ForeignKey('tbl_tags.id')),
@@ -53,10 +54,10 @@ class Business(Base, TimestampMixin):
     tags = relationship('Tag', secondary=tags, lazy='subquery',
                            backref=backref('tbl_businesses', lazy=True))
 
-    category_id = Column(Integer, ForeignKey("category.id"), nullable=False)
+    category_id = Column(Integer, ForeignKey("tbl_categories.id"), nullable=False)
 
-    restaurant_id = Column(Integer, ForeignKey("restaurant.id"), nullable=True)
-    business_upload_id = Column(Integer, ForeignKey("business_upload.id"), nullable=True)
+    restaurant_id = Column(Integer, ForeignKey("tbl_restaurants.id"), nullable=True)
+    business_upload_id = Column(Integer, ForeignKey("tbl_business_uploads.id"), nullable=True)
 
     def __eq__(self, other):
         if not isinstance(other, Business):
@@ -121,16 +122,17 @@ class Business(Base, TimestampMixin):
         for tag in tags:
             self.add_tag(tag)
 
-#
+
 class BusinessUpload(Base, TimestampMixin):
-    __tablename__ ="tbl_business_uploads"
+    __tablename__ = "tbl_business_uploads"
+
     id = Column(Integer, primary_key=True)
     filename = Column(String(), unique=True)
     success = Column(Boolean(), default=False)
     error_message = Column(String(), nullable=True)
-    businesses = relationship('Business', backref='business_upload_log', lazy=True)
+    businesses = relationship('Business', backref='tbl_business_uploads', lazy=True)
 
-    def addBusinesses(self,businesses):
+    def addBusinesses(self, businesses):
         for b in businesses:
             self.businesses.append(b)
 

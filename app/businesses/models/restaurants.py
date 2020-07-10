@@ -10,7 +10,7 @@ class Restaurant(Base):
     __tablename__ = "tbl_restaurants"
     id = Column(Integer, primary_key=True)
 
-    menus = relationship('Menu', backref='restaurant', lazy=True)
+    menus = relationship('Menu', backref='tbl_restaurants', lazy=True)
 
 
 class Menu(Base):
@@ -21,9 +21,9 @@ class Menu(Base):
     start = Column(Time, nullable=False, default=datetime.utcnow())
     end = Column(Time, nullable=True)
 
-    plates = relationship('Plate', backref='menu', lazy=True)
+    plates = relationship('Plate', backref='tbl_menus', lazy=True)
 
-    restaurant_id = Column(Integer, ForeignKey('restaurant.id'), nullable=False)
+    restaurant_id = Column(Integer, ForeignKey('tbl_restaurants.id'), nullable=False)
 
 
 class Plate(Base):
@@ -34,5 +34,5 @@ class Plate(Base):
     price = Column(Float, nullable=False)
     description = Column(String(), nullable=False)
 
-    menu_id = Column(Integer, ForeignKey('menu.id'), nullable=False)
+    menu_id = Column(Integer, ForeignKey('tbl_menus.id'), nullable=False)
 
