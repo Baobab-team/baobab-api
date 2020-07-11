@@ -265,7 +265,7 @@ class CategoryScalar(Resource):
 
     @marshal_with(CategorySchema)
     def get(self, id):
-        return self.repository.query.filter_by(id=id).first_or_404(description='Category doesnt exist')
+        return self.repository.get(id)
 
 
 class CategoriesCollection(Resource):

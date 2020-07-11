@@ -1,10 +1,59 @@
 import csv
 import os
 from datetime import time
+from functools import partial
+
 import pytest
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
 
-from app.businesses.models import Business, Phone, BusinessHour, Address, SocialLink, Tag
+from app import create_app
+from app.businesses.models import *
+from app.config import TestingConfig
 
+
+@pytest.fixture(scope="module")
+def test_app(db_session):
+    app = create_app(config=TestingConfig)
+    setattr(app, 'session',  db_session)
+    return app
+
+@pytest.fixture(scope="module")
+def test_client(test_app):
+    with test_app.test_client() as client:
+        yield client
+
+
+@pytest.yield_fixture
+def app_context(test_app):
+    with test_app.app_context() as context:
+        yield context
+
+
+@pytest.fixture(scope="module")
+def db_engine():
+    engine = create_engine('sqlite://')
+    Base.metadata.create_all(bind=engine)
+    return engine
+
+
+@pytest.fixture
+def factory(db_session):
+    return partial(make_obj, db_session)
+
+
+def make_obj(session, entity, **kwargs):
+    obj = entity(**kwargs)
+    session.add(obj)
+    session.flush()
+    return obj
+
+
+@pytest.fixture(scope="module")
+def db_session(db_engine):
+    return scoped_session(
+        sessionmaker(bind=db_engine, autocommit=False, autoflush=True)
+    )
 
 @pytest.fixture
 def business():

@@ -26,4 +26,4 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = "postgresql://localhost/baobab_test"
+    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"

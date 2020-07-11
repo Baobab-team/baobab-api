@@ -2,8 +2,8 @@ from flask import current_app
 from sqlalchemy import asc, desc
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.database import db_session
 from app.businesses.models import Business, Category, Tag, BusinessUpload
+from app.database import db_session
 
 CONTAINS = '%{}%'
 
@@ -13,7 +13,7 @@ class BaseRepository(object):
     _session = None
 
     def __init__(self):
-        self._session = db_session
+        self._session = db_session or current_app.session
 
     @property
     def session(self):
@@ -25,7 +25,7 @@ class BaseRepository(object):
         return self.session.query(self.model)
 
     def get(self, id, error_message="Object doesnt exist", strict=False):
-        entity = self.query.get_or_404(id, description=error_message)
+        entity = self.query.get(id)
         if strict and not entity:
             raise KeyError("DB Object not found.")
         return entity

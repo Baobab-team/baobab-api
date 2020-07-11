@@ -1,6 +1,8 @@
 from datetime import datetime
 from sqlalchemy import Column,DateTime
+
 from app.database import Base
+
 
 class BaseModel(Base):
     __abstract__ = True

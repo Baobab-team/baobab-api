@@ -1,6 +1,5 @@
 docopt==0.6.2
 flask==1.1.2
-flask-sqlalchemy==2.4.1
 flask-migrate==2.5.3
 Flask-RESTful==0.3.8
 Flask-Script==2.0.6

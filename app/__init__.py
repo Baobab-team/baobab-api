@@ -1,14 +1,15 @@
 import os
-from logging.config import fileConfig
 from dotenv import load_dotenv
-from flask import Flask, _app_ctx_stack
+from flask import Flask,_app_ctx_stack
 from flask_cors import CORS
-from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
 from flask_swagger_ui import get_swaggerui_blueprint
 from sqlalchemy.orm import scoped_session
 from werkzeug.utils import import_string
-from .database import Base, engine, db_session, init_db
+
+from logging.config import fileConfig
+
+from .config import TestingConfig
+from .database import  engine, db_session
 
 DEVELOPMENT_CONFIG = "app.config.DevelopmentConfig"
 SWAGGER_URL = '/api/docs'
@@ -26,7 +27,8 @@ if not os.path.isdir(LOGS_FOLDER_PATH):
 def create_app(config=os.getenv("APP_SETTINGS", DEVELOPMENT_CONFIG)):
     app = Flask(__name__)
 
-    fileConfig(LOGGING_CONFIG_PATH)  # Configure logging
+    if config != TestingConfig:
+        fileConfig(LOGGING_CONFIG_PATH)  # Configure logging
 
     # Configure api documentation
     swagger_ui_blueprint = get_swaggerui_blueprint(
@@ -59,10 +61,10 @@ def create_app(config=os.getenv("APP_SETTINGS", DEVELOPMENT_CONFIG)):
 
     # enable CORS
     CORS(app, resources={r'/*': {'origins': '*'}})
-    init_db()
-    app.session = db_session
+
+    app.session = scoped_session(db_session,scopefunc=_app_ctx_stack.__ident_func__)
 
     @app.teardown_appcontext
     def shutdown_session(exception=None):
-        db_session.remove()
+        app.session.remove()
     return app
