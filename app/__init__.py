@@ -8,6 +8,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_swagger_ui import get_swaggerui_blueprint
 from werkzeug.utils import import_string
 
+from app.config import TestingConfig
+
 DEVELOPMENT_CONFIG = "app.config.DevelopmentConfig"
 SWAGGER_URL = '/api/docs'
 API_URL = '/static/swagger.yml'
@@ -25,7 +27,8 @@ if not os.path.isdir(LOGS_FOLDER_PATH):
 def create_app(config=os.getenv("APP_SETTINGS", DEVELOPMENT_CONFIG)):
     app = Flask(__name__)
 
-    fileConfig(LOGGING_CONFIG_PATH)  # Configure logging
+    if config != TestingConfig:
+        fileConfig(LOGGING_CONFIG_PATH)  # Configure logging
 
     # Configure api documentation
     swagger_ui_blueprint = get_swaggerui_blueprint(
