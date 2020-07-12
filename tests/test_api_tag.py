@@ -1,61 +1,37 @@
-import unittest
-
-from app.businesses.models import Tag
-from app import create_app, db
-from app.config import TestingConfig
+import json
 
 
-class MyTestCase(unittest.TestCase):
+def test_post(test_client, db_session):
+    res = test_client.post('/api_v1/tags', json={"name": "haiti"})
+    json_data = json.loads(res.data)
+    assert 201 == res.status_code
+    assert "haiti" == json_data.get("name")
 
-    def setUp(self):
-        """Define test variables and initialize app."""
-        self.app = create_app(config=TestingConfig)
-        self.client = self.app.test_client
 
-        self.tags = [Tag(**{"name": "Tag{}".format(i)}) for i in range(1,10)]
+def test_put(test_client, tag1):
+    res = test_client.put('/api_v1/tags/1', json={"name": "perle des caraibes"})
+    json_data = json.loads(res.data)
+    assert 200 == res.status_code
+    assert "perle des caraibes" == json_data.get("name")
 
-        # binds the app to the current context
-        with self.app.app_context():
-            # create all tables
-            db.drop_all()
 
-            db.create_all()
-            [db.session.add(tag) for tag in self.tags]
-            db.session.commit()
+def test_get_collection(test_client, tag1, tag2):
+    res = test_client.get('/api_v1/tags')
+    json_data = json.loads(res.data)
+    assert 200 == res.status_code
+    assert 2 == len(json_data)
+    assert "tag1" == json_data[0].get("name")
+    assert "tag2" == json_data[1].get("name")
 
-    def tearDown(self):
-        """teardown all initialized variables."""
-        with self.app.app_context():
-            # drop all tables
-            db.session.remove()
-            db.drop_all()
 
-    def test_post(self):
-        res = self.client().post('/api_v1/tags', json={"name": "LOL"})
-        self.assertEqual(201, res.status_code)
-        self.assertIn('LOL', str(res.data))
+def test_get_scalar(test_client, tag2):
+    res = test_client.get('/api_v1/tags/2')
+    json_data = json.loads(res.data)
+    assert 200 == res.status_code
+    assert "tag2" == json_data.get("name")
 
-    def test_put(self):
-        res = self.client().put('/api_v1/tags/1', json={"name": "Another tag"})
-        self.assertEqual(200, res.status_code)
-        self.assertIn('Another tag', str(res.data))
 
-    def test_get(self):
-        res = self.client().get('/api_v1/tags')
-        self.assertEqual(200, res.status_code)
-        self.assertIn('Tag1', str(res.data))
-        self.assertIn('Tag3', str(res.data))
-        self.assertIn('Tag9', str(res.data))
-
-    def test_get_one(self):
-        res = self.client().get('/api_v1/tags/1')
-        self.assertEqual(200, res.status_code)
-        self.assertIn('Tag1', str(res.data))
-
-    def test_delete(self):
-        res = self.client().delete('/api_v1/tags/1')
-        self.assertEqual(204, res.status_code)
-        self.assertEqual("", res.data.decode("utf-8"))
-
-if __name__ == '__main__':
-    unittest.main()
+def test_delete(test_client,tag1):
+    res = test_client.delete('/api_v1/tags/1')
+    assert 204 == res.status_code
+    assert "" == res.data.decode("utf-8")

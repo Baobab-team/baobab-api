@@ -3,7 +3,6 @@ from sqlalchemy import asc, desc
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.businesses.models import Business, Category, Tag, BusinessUpload
-from app.database import db_session
 
 CONTAINS = '%{}%'
 
@@ -12,8 +11,8 @@ class BaseRepository(object):
     model = None
     _session = None
 
-    def __init__(self):
-        self._session = db_session or current_app.session
+    def __init__(self, session=None):
+        self._session = session
 
     @property
     def session(self):
@@ -37,7 +36,7 @@ class BaseRepository(object):
     def save(self, entity):
         self.session.add(entity)
         try:
-            self.session.commit()
+            self.session.flush()
         except SQLAlchemyError:
             self.session.rollback()
             raise
@@ -45,7 +44,7 @@ class BaseRepository(object):
 
     def save_many(self, entities):
         self.session.add_all(entities)
-        self.session.commit()
+        self.session.flush()
         return entities
 
 
@@ -54,7 +53,7 @@ class BaseRepository(object):
         if not db_entity:
             raise KeyError("DB Object not found.")
         self._update_fields(db_entity, **kwargs)
-        self.session.commit()
+        self.session.flush()
         return db_entity
 
     def exist(self, id=None):
@@ -73,7 +72,7 @@ class BaseRepository(object):
         if not db_entity:
             raise KeyError("DB Object not found.")
         self.session.delete(db_entity)
-        self.session.commit()
+        self.session.flush()
         return True
 
 

@@ -12,13 +12,14 @@ from app.businesses.models import *
 from app.config import TestingConfig
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def test_app(db_session):
     app = create_app(config=TestingConfig)
     setattr(app, 'session',  db_session)
     return app
 
-@pytest.fixture(scope="module")
+
+@pytest.fixture
 def test_client(test_app):
     with test_app.test_client() as client:
         yield client
@@ -30,7 +31,7 @@ def app_context(test_app):
         yield context
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def db_engine():
     engine = create_engine('sqlite://')
     Base.metadata.create_all(bind=engine)
@@ -49,11 +50,46 @@ def make_obj(session, entity, **kwargs):
     return obj
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def db_session(db_engine):
     return scoped_session(
         sessionmaker(bind=db_engine, autocommit=False, autoflush=True)
     )
+
+
+@pytest.fixture
+def category1(factory):
+    return factory(
+        Category,
+        name="category1",
+        id=1
+    )
+
+
+@pytest.fixture
+def category2(factory):
+    return factory(
+        Category,
+        name="category2",
+        id=2
+    )
+
+@pytest.fixture
+def tag1(factory):
+    return factory(
+        Tag,
+        name="tag1",
+        id=1
+    )
+
+@pytest.fixture
+def tag2(factory):
+    return factory(
+        Tag,
+        name="tag2",
+        id=2
+    )
+
 
 @pytest.fixture
 def business():
@@ -75,7 +111,7 @@ def business():
 
 
 @pytest.fixture
-def business_upload_file():
+def business_upload_file(tmp_path):
     rows = [
         ["business_category","business_name", "business_description", "business_slogan", "business_website", "business_email",
          "business_status", "business_notes", "business_capacity", "business_payment_types", "business_hours",
@@ -85,10 +121,11 @@ def business_upload_file():
          "+1,514-555-5555,telephone;", "123,street,Kent,Est,Montreal,H0H0H0,REGION,Quebec,Canada;",
          "www.nn.com-Instagram;", "Haitian;African"]
     ]
-    csv_file = os.path.join(os.path.dirname(__file__), "businesses_file_upload.csv")
-    with open(csv_file, 'w') as csvfile:
+    d = tmp_path / "dir"
+    d.mkdir()
+    business_upload_file = d / "businesses_file_upload.csv"
+    with open(business_upload_file, 'w') as csvfile:
         writer = csv.writer(csvfile, quotechar='"', quoting=csv.QUOTE_ALL)
         for line in rows:
             writer.writerow(line)
-    yield csvfile
-    os.remove(csv_file)
+    return  business_upload_file

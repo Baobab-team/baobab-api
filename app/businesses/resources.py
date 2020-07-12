@@ -308,7 +308,7 @@ class TagScalar(Resource):
 
     @marshal_with(TagSchema)
     def get(self, id):
-        return self.repository.query.filter_by(id=id).first_or_404(description='Tag doesnt exist')
+        return self.repository.get(id)
 
 
 class TagCollection(Resource):
