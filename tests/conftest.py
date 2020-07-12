@@ -97,6 +97,15 @@ def tag2(factory):
         id=2
     )
 
+@pytest.fixture
+def business1(factory,category1):
+    return factory(
+        Business,
+        name="business1",
+        category_id=1,
+        id=1
+    )
+
 
 @pytest.fixture
 def business_upload1(factory, category1):

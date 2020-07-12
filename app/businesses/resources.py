@@ -7,6 +7,7 @@ import werkzeug
 from flask_restful import Resource, abort
 from flask_restful.reqparse import Argument
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.datastructures import FileStorage
 
 from app.utils.decorators import parse_with, marshal_with, parse_request
@@ -71,8 +72,11 @@ class BusinessScalar(Resource):
     )
     @marshal_with(BusinessSchema)
     def get(self, id, exclude_deleted):
-        return self.repository.filter(id=id, exclude_deleted=exclude_deleted).first_or_404(
-            description='Business doesnt exist')
+        try:
+            business = self.repository.filter(id=id, exclude_deleted=exclude_deleted).one()
+            return  business
+        except NoResultFound:
+            abort(404,message="Business not found")
 
     def delete(self, id):
         self.repository.delete(id=id, error_message="Business doesnt exists")

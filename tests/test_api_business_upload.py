@@ -23,7 +23,6 @@ def test_business_upload_csv(test_client, business_upload_file):
     assert jsondata.get("businesses")[0].get("name") == "Business1"
 
 
-
 def test_business_upload_csv_duplicate_name(test_client, business_upload_file_with_duplicate):
     my_file = FileStorage(
         stream=open(business_upload_file_with_duplicate, "rb"),

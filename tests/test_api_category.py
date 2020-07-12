@@ -1,9 +1,5 @@
 import json
 
-import pytest
-
-from app.businesses.models import Category
-
 
 def test_get_scalar(test_client, db_session, category1):
     res = test_client.get('/api_v1/categories/1')
