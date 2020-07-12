@@ -1,5 +1,4 @@
 import csv
-import os
 from datetime import time
 from functools import partial
 
@@ -13,9 +12,17 @@ from app.config import TestingConfig
 
 
 @pytest.fixture
-def test_app(db_session):
+def test_config(tmpdir):
+    return {
+        "UPLOAD_FOLDER": tmpdir.mkdir("uploads")
+    }
+
+
+@pytest.fixture
+def test_app(db_session, test_config):
     app = create_app(config=TestingConfig)
-    setattr(app, 'session',  db_session)
+    setattr(app, 'session', db_session)
+    app.config.update(test_config)
     return app
 
 
@@ -92,6 +99,16 @@ def tag2(factory):
 
 
 @pytest.fixture
+def business_upload1(factory, category1):
+    return factory(
+        BusinessUpload,
+        error_message="",
+        filename="file1.csv",
+        success=True,
+        businesses=[Business(category_id=1, name="business1")]
+    )
+
+@pytest.fixture
 def business():
     business = Business(name="Business1", website="www.website.com", slogan="Manger bien",
                         description="Restaurant africain vraiment cool",
@@ -128,4 +145,24 @@ def business_upload_file(tmp_path):
         writer = csv.writer(csvfile, quotechar='"', quoting=csv.QUOTE_ALL)
         for line in rows:
             writer.writerow(line)
-    return  business_upload_file
+    return business_upload_file
+
+
+@pytest.fixture
+def business_upload_file_with_duplicate(tmp_path):
+    rows = [
+        ["business_category", "business_name", "business_description", "business_slogan", "business_website",
+         "business_email",
+         "business_status", "business_notes", "business_capacity", "business_payment_types", "business_hours",
+         "business_phones", "business_addresses", "business_social_links", "business_tags"],
+        [1, "Gracia Afrika", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+        [1, "Gracia Afrika", "", "", "", "", "", "", "", "", "", "", "", "", ""]
+    ]
+    d = tmp_path / "dir"
+    d.mkdir()
+    business_upload_file = d / "businesses_file_upload.csv"
+    with open(business_upload_file, 'w') as csvfile:
+        writer = csv.writer(csvfile, quotechar='"', quoting=csv.QUOTE_ALL)
+        for line in rows:
+            writer.writerow(line)
+    return business_upload_file
