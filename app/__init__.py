@@ -24,9 +24,6 @@ UPLOAD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'u
 if not os.path.isdir(LOGS_FOLDER_PATH):
     os.mkdir(LOGS_FOLDER_PATH)
 
-if not os.path.isdir(UPLOAD_FOLDER):
-    os.mkdir(UPLOAD_FOLDER)
-
 def create_app(config=os.getenv("APP_SETTINGS", DEVELOPMENT_CONFIG)):
     app = Flask(__name__)
 
@@ -67,5 +64,8 @@ def create_app(config=os.getenv("APP_SETTINGS", DEVELOPMENT_CONFIG)):
 
     # enable CORS
     CORS(app, resources={r'/*': {'origins': '*'}})
+
+    if not os.path.isdir(UPLOAD_FOLDER):
+        os.mkdir(UPLOAD_FOLDER)
 
     return app
