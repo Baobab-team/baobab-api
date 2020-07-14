@@ -18,11 +18,11 @@ def process_file(filename):
         upload.success = True
         upload_repository.save(upload)
     except (Exception, SQLAlchemyError) as e:
+        current_app.logger.error(str(e.args[0]))
         upload.businesses = []
         upload.success = False
-        upload_repository.save(upload)
         upload.error_message = str(e.args[0])
-        current_app.logger.error(str(e.args[0]))
+        upload_repository.save(upload)
 
     return upload
 
