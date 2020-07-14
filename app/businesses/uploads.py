@@ -39,6 +39,8 @@ def extract_business_from_csv(file):
             for row in csv_reader:
                 data = get_business_data(row)
                 businesses.append(Business(**data))
+            if len(businesses) == 0:
+                raise Exception("No businesses in the file")
             return businesses
         except Exception as e:
             current_app.logger.error(str(e))
