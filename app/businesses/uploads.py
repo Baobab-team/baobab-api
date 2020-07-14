@@ -1,4 +1,5 @@
 import csv
+import os
 from datetime import time
 from flask import current_app
 from sqlalchemy.exc import SQLAlchemyError
@@ -14,6 +15,8 @@ def process_file(filename):
     upload = BusinessUpload()
     upload.filename = filename
     try:
+        if os.stat(filename).st_size == 0:
+            raise Exception("File is empty")
         upload.businesses = extract_business_from_csv(filename)
         upload.success = True
         upload_repository.save(upload)
