@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, post_load, EXCLUDE, validates_schema, ValidationError
 from marshmallow.validate import OneOf
-from datetime import date
+
 from .models import Category, Business, SocialLink, Address, BusinessHour, Phone, Tag
 
 

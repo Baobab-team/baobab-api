@@ -107,7 +107,7 @@ class BusinessSearchAutoCompleteCollection(Resource):
         if querySearch is None:
             response = jsonify({"message": "Missing query search parameter"})
             response.status_code = 400
-            return  response
+            return response
 
         matching_words = set([])
         for b in full_business_list:
