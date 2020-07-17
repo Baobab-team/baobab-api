@@ -11,14 +11,14 @@ from app.businesses.models import *
 from app.config import TestingConfig
 
 
-@pytest.fixture
-def test_config(tmpdir):
+@pytest.fixture(scope="session")
+def test_config(tmpdir_factory):
     return {
-        "UPLOAD_FOLDER": tmpdir.mkdir("uploads")
+        "UPLOAD_FOLDER": tmpdir_factory.mktemp("uploads")
     }
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def test_app(db_session, test_config):
     app = create_app(config=TestingConfig)
     setattr(app, 'session', db_session)
@@ -38,7 +38,7 @@ def app_context(test_app):
         yield context
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def db_engine():
     engine = create_engine('sqlite://')
     Base.metadata.create_all(bind=engine)
@@ -57,7 +57,7 @@ def make_obj(session, entity, **kwargs):
     return obj
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def db_session(db_engine):
     return scoped_session(
         sessionmaker(bind=db_engine, autocommit=False, autoflush=True)
