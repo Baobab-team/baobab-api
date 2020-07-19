@@ -41,8 +41,8 @@ def business():
     business.add_address(
         Address(street_number="123", street_type="street", street_name="Kent", zip_code="H0H0H0", country="Canada",
                 direction="Est", region="REGION", city="Montreal", province="Quebec"))
-    business.add_social_link(SocialLink(type="Instagram", link="www.nn.com"))
-    business.add_tags([Tag(name="Haitian"), Tag(name="African")])
+    business.add_social_link(SocialLink(type="instagram", link="www.nn.com"))
+    business.add_tags([Tag(name="haitian"), Tag(name="african")])
 
     return business
 

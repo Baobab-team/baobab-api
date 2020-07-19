@@ -89,7 +89,7 @@ def extract_business_hours(business_hours_str):
                 raise Exception(f"Invalid business hours: f{end_time}")
             hour = BusinessHour(opening_time=time(start_time[0], start_time[1]),
                                 closing_time=time(end_time[0], end_time[1]),
-                                day=days_spec[0])
+                                day=days_spec[0].lower())
             hours.append(hour)
     return hours
 
@@ -145,8 +145,8 @@ def extract_social_links(social_link_str):
             if len(parts) != 2:
                 raise Exception("Invalid Social link: {}".format(' '.join(parts)))
             social_link = SocialLink()
-            social_link.link = parts[0]
-            social_link.type = parts[1]
+            social_link.link = parts[0].lower()
+            social_link.type = parts[1].lower()
             social_links.append(social_link)
     return social_links
 
@@ -156,7 +156,7 @@ def extract_tags(tags_str):
     if tags_str:
         tags_arr = split_multiple_line_item(tags_str)
         for tag in tags_arr:
-            tags.append(Tag(name=tag))
+            tags.append(Tag(name=tag.lower()))
     tags = tag_repository.get_tags_with_id(tags)
     return tags
 

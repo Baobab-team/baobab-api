@@ -83,7 +83,7 @@ class TestBusiness(object):
                 "province": "QC",
             }],
             "social_links": [
-                {"link": "facebook.com", "type": "Twitter"}
+                {"link": "facebook.com", "type": "twitter"}
             ],
             "payment_types": ["cash"],
             "tags": [
