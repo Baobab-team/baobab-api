@@ -67,4 +67,7 @@ def create_app(config=os.getenv("APP_SETTINGS", DEVELOPMENT_CONFIG)):
     @app.teardown_appcontext
     def shutdown_session(exception=None):
         app.session.remove()
+    if not os.path.isdir(UPLOAD_FOLDER):
+        os.mkdir(UPLOAD_FOLDER)
+
     return app

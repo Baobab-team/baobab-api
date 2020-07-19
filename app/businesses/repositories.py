@@ -47,7 +47,6 @@ class BaseRepository(object):
         self.session.flush()
         return entities
 
-
     def update(self, id_, **kwargs):
         db_entity = self.get(id_)
         if not db_entity:
@@ -172,6 +171,16 @@ class TagRepository(BaseRepository):
 
         return self._delete(id_)
 
+    def get_tags_with_id(self, new_tags):
+        existing_tag_names = {t.name: t for t in self.query.all()}
+        tags_to_be_add = []
+        for t in new_tags:
+            if t.name in existing_tag_names:
+                tags_to_be_add.append(existing_tag_names[t.name])
+            else:
+                tags_to_be_add.append(t)
+        return tags_to_be_add
 
-class BusinessUploadLogRepository(BaseRepository):
+
+class BusinessUploadRepository(BaseRepository):
     model = BusinessUpload

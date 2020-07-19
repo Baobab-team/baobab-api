@@ -2,8 +2,8 @@ import os
 import time as ttime
 
 import textdistance
-from flask import jsonify, current_app
 import werkzeug
+from flask import jsonify, current_app
 from flask_restful import Resource, abort
 from flask_restful.reqparse import Argument
 from sqlalchemy.exc import IntegrityError
@@ -11,11 +11,11 @@ from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.datastructures import FileStorage
 
 from app.utils.decorators import parse_with, marshal_with, parse_request
-from .extract import extract_business_from_csv
-from .models import Tag, BusinessUpload
-from .repositories import BusinessRepository, CategoryRepository, TagRepository, BusinessUploadLogRepository
+from .models import Tag
+from .repositories import BusinessRepository, CategoryRepository, TagRepository, BusinessUploadRepository
 from .schemas import BusinessCreateSchema, CategorySchema, CategoryUpdateSchema, BusinessSchema, \
     BusinessUpdateSchema, TagSchema, TagSchemaCreateOrUpdate, BusinessUploadSchema
+from .uploads import process_file
 from ..consts import BUSINESS_PER_PAGE
 
 
@@ -112,7 +112,7 @@ class BusinessSearchAutoCompleteCollection(Resource):
         if querySearch is None:
             response = jsonify({"message": "Missing query search parameter"})
             response.status_code = 400
-            return  response
+            return response
 
         matching_words = set([])
         for b in full_business_list:
@@ -143,14 +143,14 @@ def allowed_file(filename):
 
 class BusinessUploadCollection(Resource):
 
-    def __init__(self, business_repository_factory=BusinessRepository,business_upload_log_repository=BusinessUploadLogRepository):
+    def __init__(self, business_repository_factory=BusinessRepository, business_upload_repository=BusinessUploadRepository):
         super(BusinessUploadCollection, self).__init__()
         self.business_repository = business_repository_factory()
-        self.log_repository = business_upload_log_repository()
+        self.business_upload_repository = business_upload_repository()
 
     @marshal_with(BusinessUploadSchema, many=True)
     def get(self):
-        return self.log_repository.query.all()
+        return self.business_upload_repository.query.all()
 
     @parse_request(
         Argument("file", type=werkzeug.datastructures.FileStorage, location='files'),
@@ -167,27 +167,18 @@ class BusinessUploadCollection(Resource):
         if not allowed_file(file.filename):
             abort(400, message="File extension is not allowed. Only csv")
 
-        file.save(filename)
-        log = BusinessUpload()
         try:
-            businesses = extract_business_from_csv(filename)
-            log.addBusinesses(businesses)
-            log.success = True
-            log.filename = filename
-            self.log_repository.save(log)
-        except IntegrityError as e:
-            log.error_message = str(e.args[0])
-            log.businesses = []
-            log.success = False
+            file.save(filename)
+            upload = process_file(filename)  # TODO move to a background job or something
+            return upload
+        except Exception as e:
             current_app.logger.error(str(e))
-        finally:
-            self.log_repository.save(log)
-            return log
+            abort(400, message=f"An error occurred during the process: {str(e.args[0])}")
 
 
 class BusinessUploadScalar(Resource):
 
-    def __init__(self, repository=BusinessUploadLogRepository):
+    def __init__(self, repository=BusinessUploadRepository):
         super(BusinessUploadScalar, self).__init__()
         self.repository = repository()
 
