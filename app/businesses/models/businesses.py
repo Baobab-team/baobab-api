@@ -180,14 +180,14 @@ class Address(db.Model):
             return [e.value for e in Address.ProvinceEnum]
 
     class DirectionEnum(Enum):
-        e = "East"
-        n = "North"
-        ne = "North East"
-        nw = "North West"
-        s = "South"
-        se = "South East"
-        sw = "South West"
-        w = "West"
+        e = "east"
+        n = "north"
+        ne = "north east"
+        nw = "north west"
+        s = "south"
+        se = "south east"
+        sw = "south West"
+        w = "west"
         none = ""
 
         @staticmethod
@@ -300,11 +300,11 @@ class Phone(db.Model):
 
 class SocialLink(db.Model):
     class TypeEnum(Enum):
-        instragram = "Instagram"
-        facebook = "Facebook"
-        linkedin = "LinkedIn"
-        snapchat = "Snapchat"
-        twitter = "Twitter"
+        instragram = "instagram"
+        facebook = "facebook"
+        linkedin = "linkedin"
+        snapchat = "snapchat"
+        twitter = "twitter"
 
         @staticmethod
         def list():
