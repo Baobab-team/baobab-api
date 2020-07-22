@@ -54,6 +54,7 @@ class BusinessHourSchema(BaseSchema):
 
 class PhoneSchema(BaseSchema):
     id = fields.Integer()
+    prefix = fields.String(required=False)
     number = fields.String(required=True)
     extension = fields.String(required=False)
     type = fields.String(required=True, validate=OneOf(Phone.Type.list()))

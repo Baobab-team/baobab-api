@@ -280,6 +280,7 @@ class Phone(db.Model):
             return [e.value for e in Phone.Type]
 
     id = db.Column(db.Integer, primary_key=True)
+    prefix = db.Column(db.String(5), nullable=True)
     number = db.Column(db.String(), nullable=False)
     extension = db.Column(db.String(), nullable=False)
     type = db.Column(db.String(), default=Type.tel.value)

@@ -153,12 +153,12 @@ def seed_db():
                             phones=[
                                 Phone(
                                     number="514-555-5555",
-                                    extension="+1",
+                                    prefix="+1",
                                     type="telephone",
                                 ),
                                 Phone(
                                     number="514-232-3456",
-                                    extension="+1",
+                                    prefix="+1",
                                     type="telephone",
                                 ),
                             ]
