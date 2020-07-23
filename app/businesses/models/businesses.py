@@ -282,7 +282,7 @@ class Phone(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     prefix = db.Column(db.String(5), nullable=True)
     number = db.Column(db.String(), nullable=False)
-    extension = db.Column(db.String(), nullable=False)
+    extension = db.Column(db.String(), nullable=True)
     type = db.Column(db.String(), default=Type.tel.value)
     business_id = db.Column(db.Integer, db.ForeignKey('business.id'),
                             nullable=False)
