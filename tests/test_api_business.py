@@ -22,7 +22,7 @@ class BusinessTestCase(unittest.TestCase):
         self.app.config["UPLOAD_FOLDER"] = os.path.abspath(os.path.join(os.path.dirname(__file__), 'uploads_for_test'))
         self.client = self.app.test_client
 
-        self.category1 = {'name': 'Restaurant'}
+        self.category1 = {'name': 'restaurant'}
         self.phone1 = {
             'id': 1,
             'number': '514-222-3333',
