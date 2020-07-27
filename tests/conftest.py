@@ -33,7 +33,7 @@ def business():
     business = Business(name="Business1", website="www.website.com", slogan="Manger bien",
                         description="Restaurant africain vraiment cool",
                         notes="Super notes", capacity=14, email="business@email.com",
-                        payment_types=["credit", "debit"], category_id=1
+                        payment_types=["credit", "debit"], category=Category(name="restaurant")
                         )
     business.add_business_hour(BusinessHour(opening_time=time(10, 0), closing_time=time(17, 0), day="monday"))
     business.add_business_hour(BusinessHour(opening_time=time(10, 0), closing_time=time(17, 0), day="tuesday"))
@@ -53,7 +53,7 @@ def business_upload_file(tmp_path):
         ["business_category","business_name", "business_description", "business_slogan", "business_website", "business_email",
          "business_status", "business_notes", "business_capacity", "business_payment_types", "business_hours",
          "business_phones", "business_addresses", "business_social_links", "business_tags"],
-        [1,"Business1", "Restaurant africain vraiment cool", "Manger bien", "www.website.com",
+        ["restaurant", "Business1", "Restaurant africain vraiment cool", "Manger bien", "www.website.com",
          "business@email.com", "", "Super notes", "14", "credit,debit", "monday-10:00-17:00;tuesday-10:00-17:00;",
          "+1,514-555-5555,telephone;", "123,street,Kent,Est,Montreal,H0H0H0,REGION,Quebec,Canada;",
          "www.nn.com-Instagram;", "Haitian;African"]
