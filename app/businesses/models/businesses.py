@@ -1,6 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy_utils import ScalarListType
 
 from app import db
@@ -54,6 +55,10 @@ class Business(db.Model, TimestampMixin):
 
     restaurant_id = db.Column(db.Integer, db.ForeignKey("restaurant.id"), nullable=True)
     business_upload_id = db.Column(db.Integer, db.ForeignKey("business_upload.id"), nullable=True)
+
+    @hybrid_property
+    def is_tag_list_full(self):
+        return self.tags == 10
 
     def __eq__(self, other):
         if not isinstance(other, Business):
