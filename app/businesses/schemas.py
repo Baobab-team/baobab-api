@@ -63,10 +63,20 @@ class PhoneSchema(BaseSchema):
 class CategoryUpdateSchema(BaseSchema):
     name = fields.String()
 
+    @post_load()
+    def lower_name(self, item, many, **kwargs):
+        item['name'] = item['name'].lower()
+        return item
+
 
 class CategorySchema(BaseSchema):
     id = fields.Integer(allow_none=True)
     name = fields.String(required=True)
+
+    @post_load()
+    def lower_name(self, item, many, **kwargs):
+        item['name'] = item['name'].lower()
+        return item
 
     @post_load
     def make_object(self, data, **kwargs):

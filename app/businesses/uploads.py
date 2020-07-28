@@ -1,15 +1,17 @@
 import csv
 import os
 from datetime import time
+
 from flask import current_app
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.businesses.models import Business, Phone, BusinessHour, Address, SocialLink, Tag, BusinessUpload
-from app.businesses.repositories import BusinessUploadRepository, TagRepository
+from app.businesses.models import Business, Phone, BusinessHour, Address, SocialLink, Tag, BusinessUpload, Category
+from app.businesses.repositories import BusinessUploadRepository, TagRepository, CategoryRepository
 from app.consts import BUSINESS_TAG_LIMIT
 
 upload_repository = BusinessUploadRepository()
 tag_repository = TagRepository()
+category_repository = CategoryRepository()
 
 
 def process_file(filename):
@@ -53,6 +55,7 @@ def extract_business_from_csv(file):
 
 def get_business_data(row):
     data = {
+        "category": extract_category(row["business_category"]),
         "name": row["business_name"],
         "category_id": row["business_category"],
         "description": row["business_description"],
@@ -71,6 +74,14 @@ def get_business_data(row):
     if row["business_email"]:
         data["email"] = row["business_email"]
     return data
+
+
+def extract_category(category_name):
+    category = category_repository.filter(**{"name": category_name}).one_or_none()
+    if category is None:
+        category = Category(name=category_name.lower())
+        category_repository.save(category)
+    return category
 
 
 def extract_business_hours(business_hours_str):
