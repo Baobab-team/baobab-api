@@ -174,6 +174,7 @@ class BusinessSchema(BaseSchema):
     social_links = fields.List(fields.Nested(SocialLinkSchema))
     tags = fields.List(fields.Nested(TagSchema))
     payment_types = fields.List(fields.String())
+    is_tag_list_full = fields.Boolean()
 
     @post_load
     def make_object(self, data, **kwargs):

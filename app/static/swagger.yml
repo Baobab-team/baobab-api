@@ -744,6 +744,8 @@ components:
           type: string
         created_at:
           type: string
+        is_tag_list_full:
+          type: boolean
     ArrayOfBusinessUpload:
       type: array
       items:
