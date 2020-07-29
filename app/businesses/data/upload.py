@@ -1,7 +1,6 @@
 import csv
 import os
 from datetime import time
-
 from flask import current_app
 from sqlalchemy.exc import SQLAlchemyError
 
