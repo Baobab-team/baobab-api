@@ -6,6 +6,7 @@ from sqlalchemy_utils import ScalarListType
 
 from app import db
 from app.businesses.models.base import TimestampMixin
+from app.consts import BUSINESS_TAG_LIMIT
 
 tags = db.Table('tags',
                 db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True),
@@ -58,7 +59,7 @@ class Business(db.Model, TimestampMixin):
 
     @hybrid_property
     def is_tag_list_full(self):
-        return self.tags == 10
+        return self.tags == BUSINESS_TAG_LIMIT
 
     def __eq__(self, other):
         if not isinstance(other, Business):

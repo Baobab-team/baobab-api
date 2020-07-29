@@ -7,6 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.businesses.models import Business, Phone, BusinessHour, Address, SocialLink, Tag, BusinessUpload, Category
 from app.businesses.repositories import BusinessUploadRepository, TagRepository, CategoryRepository
+from app.consts import BUSINESS_TAG_LIMIT
 
 upload_repository = BusinessUploadRepository()
 tag_repository = TagRepository()
@@ -166,6 +167,10 @@ def extract_tags(tags_str):
     tags = []
     if tags_str:
         tags_arr = split_multiple_line_item(tags_str)
+
+        if len(tags_arr) > BUSINESS_TAG_LIMIT:
+            raise Exception("Tags limit exceeded. Maximum: 10")
+
         for tag in tags_arr:
             tags.append(Tag(name=tag.lower()))
     tags = tag_repository.get_tags_with_id(tags)
