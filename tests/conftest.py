@@ -1,6 +1,5 @@
 import csv
 from datetime import time
-
 import pytest
 
 from app import create_app, TestingConfig

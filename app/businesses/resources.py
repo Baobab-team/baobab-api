@@ -1,6 +1,5 @@
 import os
 import time as ttime
-
 import textdistance
 import werkzeug
 from flask import jsonify, current_app
@@ -13,7 +12,7 @@ from .models import Tag
 from .repositories import BusinessRepository, CategoryRepository, TagRepository, BusinessUploadRepository
 from .schemas import BusinessCreateSchema, CategorySchema, CategoryUpdateSchema, BusinessSchema, \
     BusinessUpdateSchema, TagSchema, TagSchemaCreateOrUpdate, BusinessUploadSchema
-from .uploads import process_file
+from .data import process_file
 from ..consts import BUSINESS_PER_PAGE
 
 

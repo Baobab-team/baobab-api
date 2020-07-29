@@ -3,7 +3,6 @@ import json
 import os
 import shutil
 import unittest
-
 from werkzeug.datastructures import FileStorage
 
 from app import create_app, db
