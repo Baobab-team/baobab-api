@@ -58,7 +58,7 @@ def create_app(config=os.getenv("APP_SETTINGS", DEVELOPMENT_CONFIG)):
     app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 
     # enable CORS
-    CORS(app, resources={r'/*': {'origins': '*'}})
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     if not os.path.isdir(UPLOAD_FOLDER):
         os.mkdir(UPLOAD_FOLDER)
