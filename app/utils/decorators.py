@@ -3,7 +3,7 @@ import logging
 
 from flask import request, jsonify
 from flask_restful import reqparse, abort
-from marshmallow import ValidationError, RAISE
+from marshmallow import ValidationError
 
 logger = logging.getLogger(__name__)
 

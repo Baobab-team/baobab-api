@@ -1,7 +1,7 @@
 import os
 from logging.config import fileConfig
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -9,7 +9,7 @@ from flask_swagger_ui import get_swaggerui_blueprint
 from werkzeug.utils import import_string
 
 from app.config import TestingConfig
-
+from app.businesses.exceptions import BaseException
 DEVELOPMENT_CONFIG = "app.config.DevelopmentConfig"
 SWAGGER_URL = '/api/docs'
 API_URL = '/static/swagger.yml'
@@ -65,6 +65,12 @@ def create_app(config=os.getenv("APP_SETTINGS", DEVELOPMENT_CONFIG)):
 
     if not os.path.isdir(LOGS_FOLDER_PATH):
         os.mkdir(LOGS_FOLDER_PATH)
+
+    @app.errorhandler(BaseException)
+    def handle_bad_request(error):
+        response = jsonify(error.to_dict())
+        response.status_code = error.status_code
+        return response
 
     return app
 
