@@ -3,6 +3,7 @@ from sqlalchemy import asc, desc
 from sqlalchemy.exc import SQLAlchemyError
 
 from app import db
+from app.businesses.exceptions import EntityNotFoundException
 from app.businesses.models import Business, Category, Tag, BusinessUpload
 
 CONTAINS = '%{}%'
@@ -24,11 +25,8 @@ class BaseRepository(object):
         assert self.model, "A model is required to use the query property."
         return self.session.query(self.model)
 
-    def get(self, id, error_message="Object doesnt exist", strict=False):
-        entity = self.query.get_or_404(id, description=error_message)
-        if strict and not entity:
-            raise KeyError("DB Object not found.")
-        return entity
+    def get(self, id):
+        return self.query.get(id)
 
     def filter(self, **kwargs):
         query = self.query.filter_by(**kwargs)
@@ -51,16 +49,10 @@ class BaseRepository(object):
     def update(self, id_, **kwargs):
         db_entity = self.get(id_)
         if not db_entity:
-            raise KeyError("DB Object not found.")
+            raise EntityNotFoundException
         self._update_fields(db_entity, **kwargs)
         self.session.commit()
         return db_entity
-
-    def exist(self, id=None):
-        if id:
-            return self.get(id)
-        else:
-            False
 
     @classmethod
     def _update_fields(cls, db_entity, **kwargs):
@@ -70,10 +62,9 @@ class BaseRepository(object):
     def _delete(self, id_):
         db_entity = self.get(id_)
         if not db_entity:
-            raise KeyError("DB Object not found.")
+            raise EntityNotFoundException
         self.session.delete(db_entity)
         self.session.commit()
-        return True
 
 
 class BusinessRepository(BaseRepository):
@@ -125,8 +116,8 @@ class BusinessRepository(BaseRepository):
 
         return query
 
-    def delete(self, id, error_message):
-        business = self.get(id=id, error_message=error_message)
+    def delete(self, id):
+        business = self.get(id=id)
         business.delete()
         self.save(business)
 
@@ -144,12 +135,7 @@ class CategoryRepository(BaseRepository):
         return query
 
     def delete(self, id_):
-        category = self.get(id_, error_message="Category doesnt exist")
-
-        if category is None or len(category.businesses) > 0:
-            return False
-
-        return self._delete(id_)
+        self._delete(id_)
 
 
 class TagRepository(BaseRepository):
@@ -165,12 +151,7 @@ class TagRepository(BaseRepository):
         return query
 
     def delete(self, id_):
-        category = self.get(id_, error_message="Tag doesnt exist")
-
-        if category is None:
-            return False
-
-        return self._delete(id_)
+        self._delete(id_)
 
     def get_tags_with_id(self, new_tags):
         existing_tag_names = {t.name: t for t in self.query.all()}

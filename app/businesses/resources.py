@@ -1,5 +1,6 @@
 import os
 import time as ttime
+
 import textdistance
 import werkzeug
 from flask import jsonify, current_app
@@ -8,11 +9,12 @@ from flask_restful.reqparse import Argument
 from werkzeug.datastructures import FileStorage
 
 from app.utils.decorators import parse_with, marshal_with, parse_request
+from .data import process_file
+from .exceptions import EntityNotFoundException, BaseException
 from .models import Tag
 from .repositories import BusinessRepository, CategoryRepository, TagRepository, BusinessUploadRepository
 from .schemas import BusinessCreateSchema, CategorySchema, CategoryUpdateSchema, BusinessSchema, \
     BusinessUpdateSchema, TagSchema, TagSchemaCreateOrUpdate, BusinessUploadSchema
-from .data import process_file
 from ..consts import BUSINESS_PER_PAGE
 
 
@@ -47,10 +49,11 @@ class BusinessCollection(Resource):
     @parse_with(BusinessCreateSchema(), arg_name="entity")
     @marshal_with(BusinessSchema, success_code=201)
     def post(self, entity, **kwargs):
-        if self.repository.exist(entity.id):
-            abort(409, message="Business already exist")
-
-        return self.repository.save(entity)
+        try:
+            self.repository.get(entity.id)
+            return self.repository.save(entity)
+        except (EntityNotFoundException, Exception):
+            raise
 
 
 class BusinessScalar(Resource):
@@ -73,7 +76,7 @@ class BusinessScalar(Resource):
             description='Business doesnt exist')
 
     def delete(self, id):
-        self.repository.delete(id=id, error_message="Business doesnt exists")
+        self.repository.delete(id=id)
         return None, 204
 
 
@@ -176,15 +179,6 @@ class BusinessUploadScalar(Resource):
         super(BusinessUploadScalar, self).__init__()
         self.repository = repository()
 
-    # TBD
-    # def delete(self, id):
-    #
-    #     # return proper status code
-    #     if self.repository._delete(id):
-    #         return None, 204
-    #     else:
-    #         return {"message": "Upload doesnt exist"}, 404
-
     @marshal_with(BusinessUploadSchema)
     def get(self, id):
         return self.repository.get(id)
@@ -208,7 +202,7 @@ class BusinessTagCollection(Resource):
     @parse_with(TagSchema(), many=True, arg_name="tags")
     @marshal_with(TagSchema, many=True, success_code=201)
     def post(self, id, tags, **kwargs):
-        business = self.repository.get(id, error_message='Business doesnt exist')
+        business = self.repository.get(id)
 
         for tag in tags:
             tag.addBusinessTag(business)
@@ -224,7 +218,7 @@ class BusinessTagScalar(Resource):
         self.repository = repository_factory()
 
     def delete(self, id, tag_id, **kwargs):
-        business = self.repository.get(id, error_message='Business doesnt exist')
+        business = self.repository.get(id)
         tag = Tag.query.get(tag_id)
         tag.removeBusinessTag(business)
 
@@ -245,12 +239,11 @@ class CategoryScalar(Resource):
         return self.repository.update(id, **entity)
 
     def delete(self, id):
-
-        # return proper status code
-        if self.repository.delete(id):
+        try:
+            self.repository.delete(id)
             return None, 204
-        else:
-            return {"message": "Category doesnt exist"}, 404
+        except EntityNotFoundException:
+            raise
 
     @marshal_with(CategorySchema)
     def get(self, id):
@@ -270,11 +263,12 @@ class CategoriesCollection(Resource):
     @parse_with(CategorySchema(), arg_name="entity")
     @marshal_with(CategorySchema, success_code=201)
     def post(self, entity, **kwargs):
-        if self.repository.exist(entity.id):
-            abort(409, message="Category already exist")
-
-        return self.repository.save(entity)
-
+        try:
+            if self.repository.get(entity.id):
+                raise EntityNotFoundException
+            return self.repository.save(entity)
+        except (EntityNotFoundException,BaseException):
+            raise
 
 class TagScalar(Resource):
 
@@ -289,11 +283,11 @@ class TagScalar(Resource):
 
     def delete(self, id):
 
-        # return proper status code
-        if self.repository.delete(id):
+        try:
+            self.repository.delete(id)
             return None, 204
-        else:
-            return {"message": "Tag doesnt exist"}, 404
+        except EntityNotFoundException:
+            raise
 
     @marshal_with(TagSchema)
     def get(self, id):
@@ -313,7 +307,7 @@ class TagCollection(Resource):
     @parse_with(TagSchema(), arg_name="entity")
     @marshal_with(TagSchema, success_code=201)
     def post(self, entity, **kwargs):
-        if self.repository.exist(entity.id):
+        if self.repository.get(entity.id):
             abort(400, message="Tag already exist")
 
         return self.repository.save(entity)
