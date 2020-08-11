@@ -25,8 +25,11 @@ class BaseRepository(object):
         assert self.model, "A model is required to use the query property."
         return self.session.query(self.model)
 
-    def get(self, id):
-        return self.query.get(id)
+    def get(self, id, strict=False):
+        entity = self.query.get(id)
+        if strict and not entity:
+            raise EntityNotFoundException
+        return entity
 
     def filter(self, **kwargs):
         query = self.query.filter_by(**kwargs)
@@ -47,9 +50,7 @@ class BaseRepository(object):
         return entities
 
     def update(self, id_, **kwargs):
-        db_entity = self.get(id_)
-        if not db_entity:
-            raise EntityNotFoundException
+        db_entity = self.get(id_, strict=True)
         self._update_fields(db_entity, **kwargs)
         self.session.commit()
         return db_entity
@@ -60,11 +61,12 @@ class BaseRepository(object):
             setattr(db_entity, key, value)
 
     def _delete(self, id_):
-        db_entity = self.get(id_)
-        if not db_entity:
-            raise EntityNotFoundException
-        self.session.delete(db_entity)
-        self.session.commit()
+        try:
+            db_entity = self.get(id_, strict=True)
+            self.session.delete(db_entity)
+            self.session.commit()
+        except EntityNotFoundException:
+            raise
 
 
 class BusinessRepository(BaseRepository):

@@ -10,7 +10,7 @@ from werkzeug.datastructures import FileStorage
 
 from app.utils.decorators import parse_with, marshal_with, parse_request
 from .data import process_file
-from .exceptions import EntityNotFoundException, BaseException
+from .exceptions import EntityNotFoundException, BaseException, ConflictException
 from .models import Tag
 from .repositories import BusinessRepository, CategoryRepository, TagRepository, BusinessUploadRepository
 from .schemas import BusinessCreateSchema, CategorySchema, CategoryUpdateSchema, BusinessSchema, \
@@ -50,7 +50,6 @@ class BusinessCollection(Resource):
     @marshal_with(BusinessSchema, success_code=201)
     def post(self, entity, **kwargs):
         try:
-            self.repository.get(entity.id)
             return self.repository.save(entity)
         except (EntityNotFoundException, Exception):
             raise
@@ -264,10 +263,8 @@ class CategoriesCollection(Resource):
     @marshal_with(CategorySchema, success_code=201)
     def post(self, entity, **kwargs):
         try:
-            if self.repository.get(entity.id):
-                raise EntityNotFoundException
             return self.repository.save(entity)
-        except (EntityNotFoundException,BaseException):
+        except (ConflictException, BaseException):
             raise
 
 class TagScalar(Resource):
@@ -307,7 +304,7 @@ class TagCollection(Resource):
     @parse_with(TagSchema(), arg_name="entity")
     @marshal_with(TagSchema, success_code=201)
     def post(self, entity, **kwargs):
-        if self.repository.get(entity.id):
-            abort(400, message="Tag already exist")
-
-        return self.repository.save(entity)
+        try:
+            return self.repository.save(entity)
+        except ConflictException:
+            raise
