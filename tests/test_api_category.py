@@ -3,6 +3,7 @@ import unittest
 from app import create_app, db
 from app.businesses.models import Category
 from app.config import TestingConfig
+from app.consts import MESSAGE_ENTITY_NOT_FOUND
 
 
 class CategoryTestCase(unittest.TestCase):
@@ -61,4 +62,4 @@ class CategoryTestCase(unittest.TestCase):
     def test_invalid_delete(self):
         res = self.client().delete('/api_v1/categories/4')
         self.assertEqual(res.status_code, 404)
-        self.assertIn('Category doesnt exist', str(res.data))
+        self.assertIn(MESSAGE_ENTITY_NOT_FOUND, res.get_json().get("message"))

@@ -96,7 +96,7 @@ class BusinessTestCase(unittest.TestCase):
     def test_business_post(self):
         res = self.client().post('/api_v1/businesses',
                                  json={"name": "BusinessA", "category": {"id": 1, "name": "category1"}})
-        self.assertIn('BusinessA', str(res.data))
+        self.assertIn('BusinessA', str(res.get_json().get("name")))
         self.assertEqual(201, res.status_code)
 
     def test_business_post_add_business_with_existing_category(self):
