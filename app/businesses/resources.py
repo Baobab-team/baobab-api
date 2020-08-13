@@ -6,6 +6,7 @@ import werkzeug
 from flask import jsonify, current_app
 from flask_restful import Resource, abort
 from flask_restful.reqparse import Argument
+from sqlalchemy.exc import IntegrityError
 from werkzeug.datastructures import FileStorage
 
 from app.utils.decorators import parse_with, marshal_with, parse_request

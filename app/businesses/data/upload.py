@@ -2,7 +2,7 @@ import csv
 import os
 from datetime import time
 from flask import current_app
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 from app.businesses.models import Business, Phone, BusinessHour, Address, SocialLink, Tag, BusinessUpload, Category
 from app.businesses.repositories import BusinessUploadRepository, TagRepository, CategoryRepository
@@ -21,6 +21,12 @@ def process_file(filename):
             raise Exception("File is empty")
         upload.businesses = extract_business_from_csv(filename)
         upload.success = True
+        upload_repository.save(upload)
+    except IntegrityError as e:
+        current_app.logger.error(str(e.args[0]))
+        upload.businesses = []
+        upload.success = False
+        upload.error_message = f"Conflict: {str(e.args[0])}"
         upload_repository.save(upload)
     except (Exception, SQLAlchemyError) as e:
         current_app.logger.error(str(e.args[0]))
@@ -54,7 +60,6 @@ def extract_business_from_csv(file):
 
 def get_business_data(row):
     data = {
-        "category": extract_category(row["business_category"]),
         "name": row["business_name"],
         "category_id": row["business_category"],
         "description": row["business_description"],
@@ -73,14 +78,6 @@ def get_business_data(row):
     if row["business_email"]:
         data["email"] = row["business_email"]
     return data
-
-
-def extract_category(category_name):
-    category = category_repository.filter(**{"name": category_name}).one_or_none()
-    if category is None:
-        category = Category(name=category_name.lower())
-        category_repository.save(category)
-    return category
 
 
 def extract_business_hours(business_hours_str):
