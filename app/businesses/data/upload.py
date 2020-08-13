@@ -4,7 +4,7 @@ from datetime import time
 from flask import current_app
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
-from app.businesses.models import Business, Phone, BusinessHour, Address, SocialLink, Tag, BusinessUpload, Category
+from app.businesses.models import Business, Phone, BusinessHour, Address, SocialLink, Tag, BusinessUpload
 from app.businesses.repositories import BusinessUploadRepository, TagRepository, CategoryRepository
 from app.consts import BUSINESS_TAG_LIMIT
 

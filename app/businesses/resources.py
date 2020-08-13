@@ -167,6 +167,8 @@ class BusinessUploadCollection(Resource):
         try:
             file.save(filename)
             upload = process_file(filename)  # TODO move to a background job or something
+            current_app.logger.info("File uploaded!")
+
             return upload
         except Exception as e:
             current_app.logger.error(str(e))
