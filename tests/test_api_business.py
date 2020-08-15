@@ -253,8 +253,8 @@ class BusinessTestCase(unittest.TestCase):
              "business_email",
              "business_status", "business_notes", "business_capacity", "business_payment_types", "business_hours",
              "business_phones", "business_addresses", "business_social_links", "business_tags"],
-            ["restaurant", "Gracia Afrika", "", "", "", "", "", "", "", "", "", "", "", "", ""],
-            ["restaurant", "restaurant akwaba", "", "", "", "", "", "", "", "", "", "", "", "", ""]
+            [1, "Gracia Afrika", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+            [1, "restaurant akwaba", "", "", "", "", "", "", "", "", "", "", "", "", ""]
         ]
         with open(BUSINESSES_FILE_UPLOADED_CSV, 'w') as csvfile:
             writer = csv.writer(csvfile, quotechar='"', quoting=csv.QUOTE_ALL)
@@ -285,8 +285,8 @@ class BusinessTestCase(unittest.TestCase):
              "business_email",
              "business_status", "business_notes", "business_capacity", "business_payment_types", "business_hours",
              "business_phones", "business_addresses", "business_social_links", "business_tags"],
-            ["restaurant", "Gracia Afrika", "", "", "", "", "", "", "", "", "", "", "", "", ""],
-            ["restaurant", "Gracia Afrika", "", "", "", "", "", "", "", "", "", "", "", "", ""]
+            [1, "Gracia Afrika", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+            [1, "Gracia Afrika", "", "", "", "", "", "", "", "", "", "", "", "", ""]
         ]
         with open(BUSINESSES_FILE_UPLOADED_CSV, 'w') as csvfile:
             writer = csv.writer(csvfile, quotechar='"', quoting=csv.QUOTE_ALL)
@@ -309,6 +309,26 @@ class BusinessTestCase(unittest.TestCase):
         self.assertIsNotNone(json_data.get("error_message"))
         self.assertIsNotNone(json_data.get("created_at"))
         self.assertIsNone(json_data.get("deleted_at"))
+
+    def test_business_upload_csv_no_file(self):
+
+        data = {'file': None}
+        res = self.client().post(
+            '/api_v1/businesses/uploads', data=data, content_type='multipart/form-data',
+        )
+        self.assertEqual(400, res.status_code)
+        json_data = res.get_json()
+        self.assertEqual("An error occurred during the process: No file uploaded", json_data.get("message"))
+
+    def test_business_upload_not_csv_file(self):
+
+        data = {'file': None}
+        res = self.client().post(
+            '/api_v1/businesses/uploads', data=data, content_type='multipart/form-data',
+        )
+        self.assertEqual(400, res.status_code)
+        json_data = res.get_json()
+        self.assertEqual("An error occurred during the process: No file uploaded", json_data.get("message"))
 
     def test_business_upload_get_all(self):
         res = self.client().get('/api_v1/businesses/uploads')
