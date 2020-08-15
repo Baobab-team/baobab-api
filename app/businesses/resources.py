@@ -133,10 +133,6 @@ class BusinessSearchAutoCompleteCollection(Resource):
         return response
 
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in {'csv'}
-
 
 class BusinessUploadCollection(Resource):
 
@@ -156,15 +152,12 @@ class BusinessUploadCollection(Resource):
     def post(self, file):
         filename = os.path.join(current_app.config["UPLOAD_FOLDER"],
                                 "business-{}.csv".format(ttime.strftime("%Y-%m-%d_%H-%M-%S")))
-        current_app.logger.info(file.filename)
-        if file is None:
-            abort(400, message="No file uploaded")
-        if file.filename == '':
-            abort(400, message="No file uploaded")
-        if not allowed_file(file.filename):
-            abort(400, message="File extension is not allowed. Only csv")
 
         try:
+            if file is None or file.filename == '' :
+                raise BaseException(message="No file uploaded")
+
+            current_app.logger.info(file.filename)
             file.save(filename)
             upload = process_file(filename)  # TODO move to a background job or something
             current_app.logger.info("File uploaded!")

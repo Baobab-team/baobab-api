@@ -310,6 +310,26 @@ class BusinessTestCase(unittest.TestCase):
         self.assertIsNotNone(json_data.get("created_at"))
         self.assertIsNone(json_data.get("deleted_at"))
 
+    def test_business_upload_csv_no_file(self):
+
+        data = {'file': None}
+        res = self.client().post(
+            '/api_v1/businesses/uploads', data=data, content_type='multipart/form-data',
+        )
+        self.assertEqual(400, res.status_code)
+        json_data = res.get_json()
+        self.assertEqual("An error occurred during the process: No file uploaded", json_data.get("message"))
+
+    def test_business_upload_not_csv_file(self):
+
+        data = {'file': None}
+        res = self.client().post(
+            '/api_v1/businesses/uploads', data=data, content_type='multipart/form-data',
+        )
+        self.assertEqual(400, res.status_code)
+        json_data = res.get_json()
+        self.assertEqual("An error occurred during the process: No file uploaded", json_data.get("message"))
+
     def test_business_upload_get_all(self):
         res = self.client().get('/api_v1/businesses/uploads')
         json_data = json.loads(res.data)

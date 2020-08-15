@@ -7,13 +7,20 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from app.businesses.models import Business, Phone, BusinessHour, Address, SocialLink, Tag, BusinessUpload
 from app.businesses.repositories import BusinessUploadRepository, TagRepository, CategoryRepository
 from app.consts import BUSINESS_TAG_LIMIT
-
+from app.businesses.exceptions import BaseException
 upload_repository = BusinessUploadRepository()
 tag_repository = TagRepository()
 category_repository = CategoryRepository()
 
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in {'csv'}
+
+
 def process_file(filename):
+    if not allowed_file(filename):
+        raise BaseException(message="File extension is not allowed. Only csv")
     upload = BusinessUpload()
     upload.filename = filename
     try:
@@ -22,6 +29,7 @@ def process_file(filename):
         upload.businesses = extract_business_from_csv(filename)
         upload.success = True
         upload_repository.save(upload)
+
     except IntegrityError as e:
         current_app.logger.error(str(e.args[0]))
         upload.businesses = []
