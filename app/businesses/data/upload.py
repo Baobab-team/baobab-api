@@ -53,17 +53,15 @@ def extract_business_from_csv(file):
     """
     businesses = []
     with open(file, mode='r') as csv_file:
-        try:
-            csv_reader = csv.DictReader(csv_file)
-            for row in csv_reader:
-                data = get_business_data(row)
-                businesses.append(Business(**data))
-            if len(businesses) == 0:
-                raise Exception("No businesses in the file")
-            return businesses
-        except Exception as e:
-            current_app.logger.error(str(e))
-            raise
+        csv_reader = csv.DictReader(csv_file)
+        for row in csv_reader:
+            business_name = row['business_name']
+            try:
+                business = get_business_data(row)
+                businesses.append(business)
+            except Exception as e:
+                current_app.logger.error(f"Name: {business_name}. Error: {str(e)}")
+    return businesses
 
 
 def get_business_data(row):
@@ -71,21 +69,20 @@ def get_business_data(row):
         "name": row["business_name"],
         "category_id": row["business_category"],
         "description": row["business_description"],
-        "addresses": extract_address(row["business_addresses"]),
+        "address_raw": row["business_addresses"],
         "business_hours": extract_business_hours(row["business_hours"]),
         "phones": extract_phones(row["business_phones"]),
         "slogan": row["business_slogan"],
         "website": row["business_website"],
-        "tags": extract_tags(row["business_tags"]),
         "payment_types": row["business_payment_types"].split(","),
         "social_links": extract_social_links(row["business_social_links"]),
         "status": Business.StatusEnum.accepted.value,
         "capacity": row["business_capacity"] if row["business_capacity"] else 0,
-        "notes": row["business_notes"]
+        "notes": row["business_notes"],
     }
     if row["business_email"]:
         data["email"] = row["business_email"]
-    return data
+    return Business(**data)
 
 
 def extract_business_hours(business_hours_str):
