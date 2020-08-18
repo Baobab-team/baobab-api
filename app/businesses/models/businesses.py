@@ -47,6 +47,7 @@ class Business(db.Model, TimestampMixin):
     payment_types = db.Column(ScalarListType(), default=[PaymentTypeEnum.cash.value])
     business_hours = db.relationship('BusinessHour', backref='business', lazy=True)
     addresses = db.relationship('Address', backref='business', lazy=True)
+    address_raw = db.Column(db.String(), nullable=True)
     phones = db.relationship('Phone', backref='business', lazy=True)
     social_links = db.relationship('SocialLink', backref='business', lazy=True)
     tags = db.relationship('Tag', secondary=tags, lazy='subquery',

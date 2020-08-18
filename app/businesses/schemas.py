@@ -171,6 +171,7 @@ class BusinessSchema(BaseSchema):
     restaurant = fields.Nested(BusinessHourSchema)
     business_hours = fields.List(fields.Nested(BusinessHourSchema))
     addresses = fields.List(fields.Nested(AddressSchema))
+    address_raw = fields.String()
     social_links = fields.List(fields.Nested(SocialLinkSchema))
     tags = fields.List(fields.Nested(TagSchema))
     payment_types = fields.List(fields.String())
