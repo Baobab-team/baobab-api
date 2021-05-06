@@ -4,7 +4,7 @@ flask-sqlalchemy==2.4.4
 flask-migrate==2.5.3
 Flask-RESTful==0.3.8
 Flask-Script==2.0.6
-Flask-Cors==3.0.8
+Flask-Cors==3.0.9
 python-dotenv==0.14.0
 sqlalchemy-json==0.4.0
 gunicorn==20.0.4
